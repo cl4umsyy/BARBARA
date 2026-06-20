@@ -11,7 +11,7 @@ import { Search, ShoppingBag, User, X, LogOut, Menu } from "lucide-react";
 export const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const cartCount = useCartStore((state) => state.getCartCount());
   const openModal = useAuthModalStore((s) => s.openModal);
 
@@ -23,6 +23,10 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  console.log(
+    `[Navbar Render] path: ${pathname}, status: ${status}, hasMounted: ${hasMounted}, hasUser: ${!!session?.user}, email: ${session?.user?.email ?? "none"}`
+  );
 
   // Hide Navbar for admin routes
   if (pathname?.startsWith("/admin")) {

@@ -9,6 +9,10 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
 
+  console.log(
+    `[Middleware] Path: ${nextUrl.pathname}, isLoggedIn: ${isLoggedIn}, role: ${userRole}`
+  );
+
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isAccountRoute = nextUrl.pathname.startsWith("/account");
   const isCheckoutRoute = nextUrl.pathname.startsWith("/checkout");
@@ -20,6 +24,7 @@ export default auth((req) => {
   // ── Admin: must be logged in as ADMIN ────────────────────────────────
   if (isAdminRoute) {
     if (!isLoggedIn) {
+      console.log(`[Middleware Redirect] Admin route ${nextUrl.pathname} protected: Not logged in. Redirecting to auth modal.`);
       const callbackUrl = nextUrl.pathname + nextUrl.search;
       const redirectUrl = new URL("/", nextUrl);
       redirectUrl.searchParams.set("openAuth", "login");
@@ -27,6 +32,7 @@ export default auth((req) => {
       return NextResponse.redirect(redirectUrl);
     }
     if (userRole !== "ADMIN") {
+      console.log(`[Middleware Redirect] Admin route ${nextUrl.pathname} protected: User role ${userRole} is not ADMIN. Redirecting to home.`);
       return NextResponse.redirect(new URL("/", nextUrl));
     }
   }
@@ -43,6 +49,7 @@ export default auth((req) => {
 
   if (isProtectedRoute && !isLoggedIn) {
     const callbackUrl = nextUrl.pathname + nextUrl.search;
+    console.log(`[Middleware Redirect] Protected route ${nextUrl.pathname}: Not logged in. Redirecting with callbackUrl: ${callbackUrl}`);
     const redirectUrl = new URL("/", nextUrl);
     redirectUrl.searchParams.set("openAuth", "login");
     redirectUrl.searchParams.set("callbackUrl", callbackUrl);
@@ -52,8 +59,10 @@ export default auth((req) => {
   // ── Auth pages: redirect logged-in users away ─────────────────────────
   if (isAuthRoute && isLoggedIn) {
     if (userRole === "ADMIN") {
+      console.log(`[Middleware Redirect] Auth page ${nextUrl.pathname}: Already logged in as ADMIN. Redirecting to /admin.`);
       return NextResponse.redirect(new URL("/admin", nextUrl));
     }
+    console.log(`[Middleware Redirect] Auth page ${nextUrl.pathname}: Already logged in. Redirecting to home.`);
     return NextResponse.redirect(new URL("/", nextUrl));
   }
 

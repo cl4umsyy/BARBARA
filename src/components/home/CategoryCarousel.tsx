@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
@@ -64,8 +64,6 @@ interface Props {
 }
 
 export function CategoryCarousel({ dbCategories }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   // Merge DB categories with static ones
   const merged = STATIC_CATEGORIES.map((sc) => {
     const db = dbCategories?.find((d) => d.slug === sc.slug);
@@ -100,18 +98,13 @@ export function CategoryCarousel({ dbCategories }: Props) {
         </Link>
       </div>
 
-      {/* Scrollable track */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
+      {/* Grid track */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 overflow-hidden">
         {merged.map((cat) => (
           <Link
             key={cat.id}
             href={`/shop?category=${cat.slug}`}
-            className="group flex-shrink-0 flex flex-col gap-2"
-            style={{ width: "calc((100% - 32px) / 3)" }}
+            className="group flex flex-col gap-2"
           >
             {/* Image card */}
             <div className="relative w-full overflow-hidden rounded-2xl bg-brand-light" style={{ aspectRatio: "4/3" }}>

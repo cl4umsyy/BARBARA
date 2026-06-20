@@ -25,10 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${montserrat.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col font-sans bg-brand-white text-brand-gray antialiased" suppressHydrationWarning>
-        <Script
+      <head>
+        <script
           id="bypass-brave"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -69,6 +68,8 @@ export default function RootLayout({
             `
           }}
         />
+      </head>
+      <body className="min-h-full flex flex-col font-sans bg-brand-white text-brand-gray antialiased" suppressHydrationWarning>
         <Providers>
           <Navbar />
           <div className="flex flex-col flex-1">

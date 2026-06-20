@@ -54,20 +54,24 @@ export function RegisterForm() {
       }
 
       // Auto login after successful registration
+      console.log("[RegisterForm] Auto-logging in user:", email, "callbackUrl:", callbackUrl);
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
+      console.log("[RegisterForm] Auto-login result:", result);
       setIsLoading(false);
 
       if (result?.error) {
         // Registration succeeded but login failed – switch to login tab
+        console.error("[RegisterForm] Auto-login failed:", result.error);
         setActiveTab("login");
         return;
       }
 
+      console.log("[RegisterForm] Registration and auto-login success. Redirecting to:", callbackUrl);
       closeModal();
       window.location.href = callbackUrl;
     } catch {

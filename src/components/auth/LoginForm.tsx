@@ -19,19 +19,23 @@ export function LoginForm() {
     setError("");
     setIsLoading(true);
 
+    console.log("[LoginForm] Logging in user:", email, "callbackUrl:", callbackUrl);
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
 
+    console.log("[LoginForm] signIn result:", result);
     setIsLoading(false);
 
     if (result?.error) {
+      console.error("[LoginForm] Login failed:", result.error);
       setError("Email atau password salah. Silakan coba lagi.");
       return;
     }
 
+    console.log("[LoginForm] Login success. Closing modal, redirecting to:", callbackUrl);
     closeModal();
     // Refresh current page to update session state
     window.location.href = callbackUrl;

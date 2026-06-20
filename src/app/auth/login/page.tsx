@@ -1,14 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginRedirect() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    router.replace("/?showAuth=login");
-  }, [router]);
+    const callbackUrl = searchParams.get("callbackUrl") || "";
+    const target = callbackUrl
+      ? `/?openAuth=login&callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "/?openAuth=login";
+    console.log("[LoginPage Redirect] Redirecting to modal login with target:", target);
+    router.replace(target);
+  }, [router, searchParams]);
 
   return null;
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginRedirect />
+    </Suspense>
+  );
 }
