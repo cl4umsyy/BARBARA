@@ -177,3 +177,94 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    const { data: dbOrders, error } = await supabaseAdmin
+      .from("orders")
+      .select(`
+        id,
+        order_number,
+        status,
+        subtotal,
+        shipping_cost,
+        total,
+        payment_method,
+        payment_status,
+        created_at,
+        order_items (
+          id,
+          product_name,
+          size,
+          color,
+          quantity,
+          price,
+          variant:product_variants (
+            product:products (
+              images:product_images (
+                url,
+                order
+              )
+            )
+          )
+        )
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const orders = (dbOrders || []).map((o: any) => {
+      const orderItems = (o.order_items || []).map((item: any) => {
+        const rawVariant = item.variant;
+        const variant = Array.isArray(rawVariant) ? rawVariant[0] : rawVariant;
+        let imageUrl = null;
+        if (variant?.product) {
+          const product = Array.isArray(variant.product) ? variant.product[0] : variant.product;
+          if (product?.images && product.images.length > 0) {
+            const sortedImages = [...product.images].sort((a: any, b: any) => a.order - b.order);
+            imageUrl = sortedImages[0]?.url || null;
+          }
+        }
+
+        return {
+          id: item.id,
+          productName: item.product_name,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          price: Number(item.price),
+          imageUrl,
+        };
+      });
+
+      return {
+        id: o.id,
+        orderNumber: o.order_number,
+        status: o.status,
+        subtotal: Number(o.subtotal),
+        shippingCost: Number(o.shipping_cost),
+        total: Number(o.total),
+        paymentMethod: o.payment_method,
+        paymentStatus: o.payment_status,
+        createdAt: o.created_at,
+        orderItems,
+      };
+    });
+
+    return NextResponse.json({ orders });
+  } catch (error: any) {
+    console.error("[Orders GET API] Error:", error?.message);
+    return NextResponse.json(
+      { error: error?.message || "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
