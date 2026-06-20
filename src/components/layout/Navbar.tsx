@@ -46,8 +46,8 @@ export const Navbar: React.FC = () => {
     { name: "Semua Toko", href: "/shop" },
     { name: "Pria", href: "/shop?gender=pria" },
     { name: "Wanita", href: "/shop?gender=wanita" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Tentang", href: "/about" },
+    { name: "Kontak", href: "/contact" },
   ];
 
   return (

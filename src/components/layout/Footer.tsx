@@ -30,13 +30,13 @@ export const Footer: React.FC = () => {
           {/* Links: Shop */}
           <div className="flex flex-col gap-3">
             <h5 className="text-xs font-bold uppercase tracking-wider text-brand-black">
-              Collections
+              Koleksi
             </h5>
             <Link
               href="/shop"
               className="text-xs text-brand-gray hover:text-brand-black transition-colors"
             >
-              All Products
+              Semua Produk
             </Link>
             <Link
               href="/shop?category=tops"
@@ -49,26 +49,26 @@ export const Footer: React.FC = () => {
           {/* Links: About */}
           <div className="flex flex-col gap-3">
             <h5 className="text-xs font-bold uppercase tracking-wider text-brand-black">
-              Company
+              Perusahaan
             </h5>
             <Link
               href="/about"
               className="text-xs text-brand-gray hover:text-brand-black transition-colors"
             >
-              Our Story
+              Tentang Kami
             </Link>
             <Link
               href="/contact"
               className="text-xs text-brand-gray hover:text-brand-black transition-colors"
             >
-              Contact Us
+              Hubungi Kami
             </Link>
           </div>
 
           {/* Social Media */}
           <div className="flex flex-col gap-3">
             <h5 className="text-xs font-bold uppercase tracking-wider text-brand-black">
-              Follow Us
+              Ikuti Kami
             </h5>
             <div className="flex gap-4">
               <a
