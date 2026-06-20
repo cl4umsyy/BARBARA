@@ -150,7 +150,7 @@ export const Navbar: React.FC = () => {
                             Pesanan Saya
                           </Link>
                           <Link
-                            href="/account/profile"
+                            href="/profile"
                             onClick={() => setIsProfileDropdownOpen(false)}
                             className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors"
                           >
@@ -309,7 +309,7 @@ export const Navbar: React.FC = () => {
                       Pesanan Saya
                     </Link>
                     <Link
-                      href="/account/profile"
+                      href="/profile"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
                     >

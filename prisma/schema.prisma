@@ -37,6 +37,8 @@ model User {
   password  String
   role      Role       @default(CUSTOMER)
   createdAt DateTime   @default(now()) @map("created_at")
+  phone     String?
+  avatarUrl String?    @map("avatar_url")
   addresses Address[]
   orders    Order[]
   wishlists Wishlist[]
@@ -55,8 +57,11 @@ model Address {
   street        String
   city          String
   province      String
+  district      String?
   postalCode    String  @map("postal_code")
+  addressDetail String? @map("address_detail")
   isDefault     Boolean @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   @@index([userId])
   @@map("addresses")
