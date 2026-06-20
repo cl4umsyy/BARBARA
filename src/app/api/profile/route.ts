@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, isMissingColumnError } from "@/lib/supabase";
 import { z } from "zod";
 
 const ProfileUpdateSchema = z.object({
@@ -28,7 +28,7 @@ export async function GET() {
     let user = userResult.data;
     let error = userResult.error;
 
-    if (error && error.code === "42703") {
+    if (error && isMissingColumnError(error)) {
       const fallbackResult = await supabaseAdmin
         .from("users")
         .select("id, name, email, created_at")
@@ -98,7 +98,7 @@ export async function PUT(req: NextRequest) {
     let updatedUser = updateResult.data;
     let error = updateResult.error;
 
-    if (error && error.code === "42703") {
+    if (error && isMissingColumnError(error)) {
       const fallbackResult = await supabaseAdmin
         .from("users")
         .update({ name })

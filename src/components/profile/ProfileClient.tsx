@@ -86,67 +86,187 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Profile avatar crop states
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imgRef = useRef<HTMLImageElement>(null);
+
   // Mock promo notification state
   const [receivePromo, setReceivePromo] = useState(true);
 
-  // Avatar upload handler
+  // Avatar change picker (opens crop modal)
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 2 MB)
-    if (file.size > 2 * 1024 * 1024) {
-      showToast("Ukuran file maksimal adalah 2 MB", "error");
+    // Validate size (max 5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Ukuran file maksimal adalah 5 MB", "error");
       return;
     }
 
+    // Validate type (JPG, JPEG, PNG, WEBP)
+    const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      showToast("Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setScale(1);
+      setOffset({ x: 0, y: 0 });
+      setIsCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Dragging event handlers for crop window
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+    setOffset({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Touch support for mobile dragging
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    setIsDragging(true);
+    const touch = e.touches[0];
+    setDragStart({ x: touch.clientX - offset.x, y: touch.clientY - offset.y });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    const newX = touch.clientX - dragStart.x;
+    const newY = touch.clientY - dragStart.y;
+    setOffset({ x: newX, y: newY });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Simple canvas 1:1 crop rendering and upload handler
+  const handleCropSave = async () => {
+    if (!cropImageSrc || !imgRef.current) return;
+
     setIsUploadingAvatar(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    setIsCropModalOpen(false);
 
     try {
-      // 1. Upload to Cloudinary
-      const uploadRes = await fetch("/api/profile/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const img = imgRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext("2d");
 
-      if (!uploadRes.ok) {
-        const errorData = await uploadRes.json();
-        throw new Error(errorData.error || "Gagal mengunggah foto");
+      if (ctx) {
+        ctx.translate(200, 200);
+        ctx.scale(scale, scale);
+        ctx.translate(offset.x * (400 / 300) / scale, offset.y * (400 / 300) / scale);
+
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        let drawW, drawH;
+        if (imgAspect >= 1) {
+          drawH = 400;
+          drawW = 400 * imgAspect;
+        } else {
+          drawW = 400;
+          drawH = 400 / imgAspect;
+        }
+        ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
       }
 
-      const { url: avatarUrl } = await uploadRes.json();
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) {
+            showToast("Gagal memotong gambar", "error");
+            setIsUploadingAvatar(false);
+            return;
+          }
 
-      // 2. Save avatar URL to User Profile in Database
-      const updateRes = await fetch("/api/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: profile.name,
-          phone: profile.phone || null,
-          avatarUrl,
-        }),
-      });
+          const fileToUpload = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+          const formData = new FormData();
+          formData.append("file", fileToUpload);
 
-      if (!updateRes.ok) {
-        const errorData = await updateRes.json();
-        throw new Error(errorData.error || "Gagal menyimpan foto profil");
-      }
+          try {
+            const uploadRes = await fetch("/api/profile/avatar", {
+              method: "POST",
+              body: formData,
+            });
 
-      const { user: updatedUser } = await updateRes.json();
-      setProfile({
-        ...profile,
-        avatarUrl: updatedUser.avatarUrl,
-      });
-      showToast("Foto profil berhasil diperbarui!");
+            if (!uploadRes.ok) {
+              const errorData = await uploadRes.json();
+              throw new Error(errorData.error || "Gagal mengunggah foto");
+            }
+
+            const { url: avatarUrl } = await uploadRes.json();
+            setProfile((prev) => ({
+              ...prev,
+              avatarUrl,
+            }));
+            showToast("Foto profil berhasil diperbarui!");
+          } catch (err: any) {
+            showToast(err.message || "Terjadi kesalahan saat mengunggah foto", "error");
+          } finally {
+            setIsUploadingAvatar(false);
+          }
+        },
+        "image/jpeg",
+        0.9
+      );
     } catch (err: any) {
       console.error(err);
-      showToast(err.message || "Terjadi kesalahan saat mengunggah foto", "error");
-    } finally {
+      showToast("Gagal memproses gambar", "error");
       setIsUploadingAvatar(false);
-      // Reset input value to allow selecting same file again if needed
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Avatar delete handler
+  const handleDeleteAvatar = async () => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus foto profil?")) {
+      setIsUploadingAvatar(true);
+      try {
+        const res = await fetch("/api/profile/avatar", {
+          method: "DELETE",
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Gagal menghapus foto profil");
+        }
+
+        setProfile((prev) => ({
+          ...prev,
+          avatarUrl: "",
+        }));
+        showToast("Foto profil berhasil dihapus!");
+      } catch (err: any) {
+        showToast(err.message || "Gagal menghapus foto profil", "error");
+      } finally {
+        setIsUploadingAvatar(false);
+      }
     }
   };
 
@@ -473,36 +593,51 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
               <div className="absolute top-0 left-0 right-0 h-2 bg-brand-black" />
               
               {/* Profile Avatar and Uploader */}
-              <div className="relative group w-24 h-24 rounded-full overflow-hidden border-2 border-brand-black/10 bg-brand-light mt-4 mb-4">
-                {profile.avatarUrl ? (
-                  <Image 
-                    src={profile.avatarUrl} 
-                    alt={profile.name} 
-                    fill 
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-brand-black text-brand-white font-black text-3xl uppercase">
-                    {profile.name.substring(0, 2)}
+              <div className="flex flex-col items-center gap-1 mt-4 mb-4">
+                <div className="relative">
+                  <div className="relative group w-24 h-24 rounded-full overflow-hidden border-2 border-brand-black/10 bg-brand-light flex items-center justify-center">
+                    {profile.avatarUrl ? (
+                      <Image 
+                        src={profile.avatarUrl} 
+                        alt={profile.name} 
+                        fill 
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-brand-black text-brand-white font-black text-3xl uppercase">
+                        {profile.name.substring(0, 2)}
+                      </div>
+                    )}
+                    
+                    {/* Upload Hover Overlay */}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingAvatar}
+                      className="absolute inset-0 bg-brand-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-brand-white text-[9px] font-bold uppercase tracking-wider cursor-pointer disabled:opacity-80"
+                      aria-label="Upload profile picture"
+                    >
+                      {isUploadingAvatar ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Camera className="w-4 h-4 mb-1" />
+                          <span>Ubah</span>
+                        </>
+                      )}
+                    </button>
                   </div>
-                )}
+                  
+                  {/* Floating Camera Button */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="absolute bottom-0 right-0 bg-brand-black text-brand-white p-2 rounded-full border border-brand-white shadow-md hover:bg-brand-white hover:text-brand-black transition-colors cursor-pointer animate-fade-in"
+                    aria-label="Upload profile picture"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 
-                {/* Upload Hover Overlay */}
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingAvatar}
-                  className="absolute inset-0 bg-brand-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-brand-white text-[9px] font-bold uppercase tracking-wider cursor-pointer disabled:opacity-80"
-                  aria-label="Upload profile picture"
-                >
-                  {isUploadingAvatar ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Camera className="w-4 h-4 mb-1" />
-                      <span>Ubah</span>
-                    </>
-                  )}
-                </button>
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -510,6 +645,16 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                   accept="image/*" 
                   className="hidden" 
                 />
+
+                {profile.avatarUrl && (
+                  <button
+                    onClick={handleDeleteAvatar}
+                    disabled={isUploadingAvatar}
+                    className="text-[9px] text-red-600 hover:text-red-700 font-bold uppercase tracking-wider mt-2 cursor-pointer disabled:opacity-50"
+                  >
+                    Hapus Foto
+                  </button>
+                )}
               </div>
 
               {/* User info details */}
@@ -1160,6 +1305,86 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
           </div>
 
         </form>
+      </Modal>
+
+      {/* --- CROP IMAGE MODAL --- */}
+      <Modal
+        isOpen={isCropModalOpen}
+        onClose={() => setIsCropModalOpen(false)}
+        title="Sesuaikan Foto Profil"
+      >
+        <div className="flex flex-col items-center gap-6 py-2">
+          {/* Viewport container with circle mask */}
+          <div 
+            className="w-[300px] h-[300px] bg-brand-light border border-brand-light rounded-xl overflow-hidden relative cursor-move select-none"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Circular mask overlay */}
+            <div className="absolute inset-0 border-[30px] border-black/40 pointer-events-none z-10 flex items-center justify-center">
+              <div className="w-[240px] h-[240px] rounded-full border-2 border-dashed border-brand-white/80" />
+            </div>
+
+            {/* Preview Image */}
+            {cropImageSrc && (
+              <img
+                ref={imgRef}
+                src={cropImageSrc}
+                alt="Crop preview"
+                className="max-w-none pointer-events-none absolute top-0 left-0 w-[300px] h-[300px]"
+                style={{
+                  transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+                  transformOrigin: "center center",
+                  objectFit: "contain",
+                }}
+              />
+            )}
+          </div>
+
+          {/* Zoom Control Slider */}
+          <div className="w-full flex flex-col gap-2 px-2">
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-brand-black">
+              <span>Perbesar Gambar (Zoom)</span>
+              <span>{Math.round(scale * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="3"
+              step="0.05"
+              value={scale}
+              onChange={(e) => setScale(parseFloat(e.target.value))}
+              className="w-full h-1.5 bg-brand-light rounded-lg appearance-none cursor-pointer accent-black"
+            />
+          </div>
+
+          <div className="text-[10px] text-brand-gray text-center max-w-xs leading-relaxed font-semibold uppercase tracking-wider">
+            Geser gambar untuk menyesuaikan bagian yang ingin dipotong.
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 w-full border-t border-brand-light pt-4 mt-2">
+            <button
+              type="button"
+              onClick={handleCropSave}
+              className="flex-1 flex items-center justify-center font-black uppercase tracking-wider text-xs border-2 border-brand-black bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black py-4 rounded-xl transition-all duration-300 cursor-pointer"
+            >
+              Simpan Foto
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCropModalOpen(false)}
+              className="flex-1 font-black uppercase tracking-wider text-xs border-2 border-brand-light bg-brand-white text-brand-gray hover:bg-brand-light hover:text-brand-black py-4 rounded-xl transition-all duration-300 cursor-pointer"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
       </Modal>
 
     </div>

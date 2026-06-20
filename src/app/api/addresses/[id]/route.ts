@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, isMissingColumnError } from "@/lib/supabase";
 import { z } from "zod";
 
 const AddressSchema = z.object({
@@ -100,7 +100,7 @@ export async function PUT(
     let updatedAddr = updateResult.data;
     let updateError = updateResult.error;
 
-    if (updateError && updateError.code === "42703") {
+    if (updateError && isMissingColumnError(updateError)) {
       const fallbackResult = await supabaseAdmin
         .from("addresses")
         .update({
@@ -195,7 +195,7 @@ export async function DELETE(
         .order("created_at", { ascending: false });
 
       let otherAddresses = otherAddressesResult.data;
-      if (otherAddressesResult.error && otherAddressesResult.error.code === "42703") {
+      if (otherAddressesResult.error && isMissingColumnError(otherAddressesResult.error)) {
         const fallbackResult = await supabaseAdmin
           .from("addresses")
           .select("id")

@@ -90,8 +90,13 @@ export async function GET(req: Request) {
   }
 }
 
+let postRequestCount = 0;
+
 export async function POST(req: Request) {
   try {
+    postRequestCount++;
+    console.log(`[LOG][Cart Sync API] POST request received. Total requests since server start: ${postRequestCount}`);
+    
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -186,11 +191,9 @@ export async function POST(req: Request) {
       // Validate target quantity (minimal 1, capped at stock limit)
       const targetQty = Math.max(1, Math.min(localItem.quantity, stock));
 
-      // Stage 3 Logging: When saving/updating items in database
       const productName = (variant.product as any)?.name || "Unknown Product";
-      console.log(`[LOG][Stage 3] Saving cart item to database. Cart ID: "${cartId}", Product Name: "${productName}", Variant ID: "${localItem.variantId}", Target Quantity: ${targetQty} (capped at stock: ${stock})`);
 
-      // Check if item already exists in database cart
+      // Query current DB quantity for logging
       const { data: dbItem } = await supabaseAdmin
         .from("cart_items")
         .select("id, quantity")
@@ -198,23 +201,24 @@ export async function POST(req: Request) {
         .eq("variant_id", localItem.variantId)
         .maybeSingle();
 
-      if (dbItem) {
-        // Overwrite quantity with client target quantity (instead of addition)
-        await supabaseAdmin
-          .from("cart_items")
-          .update({ quantity: targetQty })
-          .eq("id", dbItem.id);
-      } else {
-        // Create new database cart item
-        await supabaseAdmin
-          .from("cart_items")
-          .insert({
-            id: crypto.randomUUID(),
-            cart_id: cartId,
-            variant_id: localItem.variantId,
-            quantity: targetQty,
-          });
-      }
+      const oldQty = dbItem ? dbItem.quantity : 0;
+      console.log(`[LOG][Cart Sync API] Item details - Product: "${productName}", Variant: "${localItem.variantId}". Quantity before update: ${oldQty}, Target quantity: ${targetQty}`);
+
+      // Atomic upsert preserving ID if found, or generating UUID
+      const upsertPayload = {
+        id: dbItem?.id || crypto.randomUUID(),
+        cart_id: cartId,
+        variant_id: localItem.variantId,
+        quantity: targetQty,
+      };
+
+      const { error: upsertErr } = await supabaseAdmin
+        .from("cart_items")
+        .upsert(upsertPayload, { onConflict: "cart_id,variant_id" });
+
+      if (upsertErr) throw upsertErr;
+
+      console.log(`[LOG][Cart Sync API] Successfully upserted item. Quantity updated from ${oldQty} to ${targetQty}`);
     }
 
     // 3. Retrieve final cart items list

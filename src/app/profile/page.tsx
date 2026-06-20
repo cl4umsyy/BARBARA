@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, isMissingColumnError } from "@/lib/supabase";
 import ProfileClient from "@/components/profile/ProfileClient";
 import { Metadata } from "next";
 
@@ -30,7 +30,7 @@ export default async function ProfilePage() {
   let user = userResult.data;
   let userError = userResult.error;
 
-  if (userError && userError.code === "42703") {
+  if (userError && isMissingColumnError(userError)) {
     const fallbackUserResult = await supabaseAdmin
       .from("users")
       .select("id, name, email, created_at")
@@ -65,7 +65,7 @@ export default async function ProfilePage() {
   let dbAddresses = addressResult.data;
   let addressError = addressResult.error;
 
-  if (addressError && addressError.code === "42703") {
+  if (addressError && isMissingColumnError(addressError)) {
     const fallbackAddrResult = await supabaseAdmin
       .from("addresses")
       .select("id, label, recipient_name, phone, street, city, province, postal_code, is_default")

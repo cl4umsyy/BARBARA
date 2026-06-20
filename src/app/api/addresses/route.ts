@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, isMissingColumnError } from "@/lib/supabase";
 import { z } from "zod";
 
 const AddressSchema = z.object({
@@ -32,7 +32,7 @@ export async function GET() {
     let dbAddresses = addressResult.data;
     let error = addressResult.error;
 
-    if (error && error.code === "42703") {
+    if (error && isMissingColumnError(error)) {
       const fallbackResult = await supabaseAdmin
         .from("addresses")
         .select("id, label, recipient_name, phone, street, city, province, postal_code, is_default")
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     let error = insertResult.error;
     let newAddr = insertResult.data;
 
-    if (error && error.code === "42703") {
+    if (error && isMissingColumnError(error)) {
       const fallbackResult = await supabaseAdmin
         .from("addresses")
         .insert({

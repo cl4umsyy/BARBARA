@@ -14,3 +14,21 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
     autoRefreshToken: false,
   },
 });
+
+/**
+ * Helper to check if an error is related to a missing database column.
+ * This checks both PostgreSQL native error code "42703" (undefined_column)
+ * and PostgREST schema cache errors (e.g. "could not find the ... column in the schema cache").
+ */
+export function isMissingColumnError(error: any): boolean {
+  if (!error) return false;
+  const message = (error.message || "").toLowerCase();
+  const code = String(error.code || "");
+  return (
+    code === "42703" ||
+    message.includes("schema cache") ||
+    message.includes("does not exist") ||
+    message.includes("could not find") ||
+    code.startsWith("PGRST")
+  );
+}

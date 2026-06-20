@@ -64,6 +64,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
   // UI States
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -88,12 +89,16 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   };
 
   const handleAddToCart = () => {
+    if (isAdding) return;
+
     if (!selectedSize) {
       alert("Silakan pilih ukuran terlebih dahulu.");
       return;
     }
 
     if (!activeVariant) return;
+
+    setIsAdding(true);
 
     // Stage 2 Logging: User clicks 'Add to Cart' or 'Beli Sekarang'
     console.log(`[LOG][Stage 2] Add to Cart clicked. Product Name: "${product.name}", Variant SKU: "${activeVariant.sku}", Size: "${activeVariant.size}", Color: "${activeVariant.color}", Price: ${product.price}, Quantity: 1`);
@@ -113,7 +118,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
     );
 
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    setTimeout(() => {
+      setIsAdded(false);
+      setIsAdding(false);
+    }, 1000);
   };
 
   return (
@@ -250,16 +258,21 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           {/* Add To Cart */}
           <button
             onClick={handleAddToCart}
-            disabled={!selectedSize || (activeVariant && activeVariant.stock <= 0)}
+            disabled={isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)}
             className={`w-full font-bold uppercase tracking-[0.2em] text-sm py-5 transition-all duration-300 ease-out rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
-              !selectedSize
+              isAdding || !selectedSize
                 ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
                 : isAdded
                 ? "bg-brand-white text-green-500 border-green-500 hover:bg-brand-white hover:text-green-500"
                 : "bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black"
             }`}
           >
-            {isAdded ? (
+            {isAdding ? (
+              <>
+                <div className="w-4 h-4 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin" />
+                Menambahkan...
+              </>
+            ) : isAdded ? (
               <>
                 <Check className="w-4 h-4" />
                 Added to Cart
