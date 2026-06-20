@@ -1,0 +1,39 @@
+---
+description: Prisma ORM, schema PostgreSQL, dan konvensi naming
+globs: prisma/**,src/lib/prisma.ts,**/*prisma*
+alwaysApply: false
+---
+
+# Database & ORM
+
+## Engine & Naming
+- PostgreSQL + Prisma (`prisma/schema.prisma`)
+- Model: PascalCase singular (`User`, `ProductVariant`)
+- Table (`@@map`): snake_case plural (`users`, `product_variants`)
+- Field: camelCase (`createdAt`); kolom DB (`@map`): snake_case (`color_hex`)
+
+## Relational Integrity
+Definisikan `onDelete` secara eksplisit:
+
+**Cascade** — child tidak bisa hidup tanpa parent:
+- `Product` → `ProductImage`, `ProductVariant`
+- `Order` → `OrderItem`, `ShippingAddress`
+- `Cart` → `CartItem`
+
+**Restrict/NoAction** — data historis/krusial:
+- `ProductVariant` dengan `OrderItem` → `Restrict`
+- `User` tidak cascade hapus `Order` (pembukuan)
+
+## Data Types
+- Harga/subtotal/shipping/total: `Decimal` / `Decimal(12, 2)` — jangan Float/Double
+- Stock/qty: `Int`, minimum `0`
+- Status: Prisma enum atau `String` + validasi Zod
+
+## Performance
+- Index pada FK yang sering di-WHERE/JOIN
+- `@unique` pada slug (`Product`, `Category`) dan `Order.orderNumber`
+- `@@index` untuk filter kombinasi (mis. `categoryId` + `isActive`)
+
+## Prisma Client
+- Singleton via `src/lib/prisma.ts` (hindari connection leak di dev)
+- Dilarang `$queryRaw` kecuali query terlalu kompleks untuk Prisma API

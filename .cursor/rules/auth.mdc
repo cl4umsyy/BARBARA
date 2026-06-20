@@ -1,0 +1,37 @@
+---
+description: Autentikasi, otorisasi, dan keamanan API (NextAuth v5)
+globs: src/app/auth/**,src/app/account/**,src/app/admin/**,src/app/api/**,src/middleware.ts,src/lib/auth*.ts
+alwaysApply: false
+---
+
+# Authentication & Security
+
+## Setup
+- NextAuth.js (Auth.js) v5, App Router compatible
+- Session: database-backed (PrismaAdapter) atau JWT
+- **Credentials**: email + password; hash dengan bcrypt/argon2 — dilarang plaintext
+- **OAuth**: Google & Facebook; link akun lokal jika email sama
+
+## Roles
+- `CUSTOMER` (default) dan `ADMIN`
+
+### Page Protection
+- `/account/*`, `/checkout/*`: wajib login → redirect `/auth/login`
+- `/admin/*`: login + role `ADMIN`; non-admin → 403 atau redirect `/` dengan peringatan
+- `/auth/login`, `/auth/register`: user sudah login → redirect `/` (customer) atau `/admin` (admin)
+
+### API Protection
+Routes `/api/user/*`, `/api/cart/*`, `/api/orders/*`, `/api/admin/*`:
+- Gunakan `auth()` dari NextAuth
+- Session null → `401` + `{ "error": "Unauthorized" }`
+- `/api/admin/*` tanpa role `ADMIN` → `403` + `{ "error": "Forbidden" }`
+
+## Input Validation
+- Semua payload API divalidasi dengan Zod sebelum ke database
+- Email: `.toLowerCase()` + `.trim()`
+- Validasi gagal → `400 Bad Request` + detail error
+
+## Environment
+- `NEXTAUTH_SECRET`: entropy tinggi, min 32 karakter, di `.env.local`
+- Production: cookie `secure: true`
+- CSRF: gunakan proteksi bawaan NextAuth untuk POST/PATCH/DELETE

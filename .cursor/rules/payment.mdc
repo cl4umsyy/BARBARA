@@ -1,0 +1,36 @@
+---
+description: Integrasi Midtrans, checkout, webhook, dan stock lock
+globs: src/app/checkout/**,src/app/api/payment/**,src/lib/midtrans*,src/lib/payment*
+alwaysApply: false
+---
+
+# Payment Integration (Midtrans)
+
+## Environment
+- Dev/staging: Sandbox API (`https://api.sandbox.midtrans.com`)
+- Production: hanya jika `MIDTRANS_IS_PRODUCTION=true`
+- Keys di `.env.local`; **Server Key dilarang di client-side**
+
+## Order & Stock
+- Checkout: buat `Order` status `PENDING`, payment `PENDING`
+- Kurangi stok saat order dibuat (lock stok)
+- Auto-cancel order + restore stok jika tidak bayar dalam batas waktu Midtrans (~24 jam)
+
+## Webhook (`/api/payment/notification`)
+Verifikasi signature **sebelum** update DB:
+```
+SHA512(order_id + status_code + gross_amount + ServerKey)
+```
+Mismatch → `400 Bad Request`, abaikan request.
+
+### Status Mapping
+| Midtrans | Order |
+|----------|-------|
+| `capture` / `settlement` | payment `PAID`, status `PROCESSING` |
+| `pending` | payment `PENDING` |
+| `deny` / `cancel` / `expire` | payment `FAILED`, status `CANCELLED`, restore stok |
+
+## Client Flow
+- Midtrans Snap JS (sandbox: `https://app.sandbox.midtrans.com/snap/snap.js`)
+- Prefer modal Snap, bukan redirect eksternal
+- Setelah selesai/gagal → `/checkout/confirmation?orderId=...`

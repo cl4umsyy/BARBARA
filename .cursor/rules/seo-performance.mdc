@@ -1,0 +1,33 @@
+---
+description: SEO metadata, structured data, dan Core Web Vitals
+globs: src/app/**,src/app/sitemap.ts,src/app/robots.ts
+alwaysApply: false
+---
+
+# SEO & Web Performance
+
+## Metadata
+- Static pages: export `metadata` di `page.tsx`
+- Dynamic (`/shop/[slug]`): `generateMetadata` dengan nama, deskripsi, gambar → OpenGraph
+- Semua halaman wajib punya fallback brand BARBARA
+
+## Structured Data
+- Product detail: JSON-LD (`application/ld+json`) — name, image, description, SKU, offers (price, currency, availability)
+- Katalog & detail produk: BreadcrumbList schema
+
+## Sitemap & Robots
+- `src/app/sitemap.ts`: rute statis + dynamic product slugs dari DB
+- `src/app/robots.ts`: allow katalog; block `/cart`, `/checkout`, `/account/*`, `/admin/*`
+
+## Images
+- Wajib `next/image` — dilarang `<img>` kecuali inline SVG kecil
+- Set `sizes` presisi per viewport
+- WebP/AVIF via Next.js; `priority` pada hero homepage & main product image (LCP)
+
+## Rendering Strategy
+| Strategy | Halaman |
+|----------|---------|
+| ISR (`revalidate: 3600`) | `/shop`, `/shop/[slug]` |
+| SSR | Cart, Checkout, Account, Admin |
+| Server Components | Layout & page containers default |
+| `"use client"` | Hanya elemen interaktif (hooks, state, context) |
