@@ -1,6 +1,7 @@
 import React from "react";
 import prisma from "@/lib/prisma";
 import { ShopCatalogClient } from "@/components/shop/ShopCatalogClient";
+import { ShopErrorFallback } from "@/components/shop/ShopErrorFallback";
 
 export const revalidate = 0; // Disable dynamic caching for search queries to reflect real-time filter changes
 
@@ -109,38 +110,60 @@ export default async function ShopPage(props: ShopPageProps) {
     orderBy = { likesCount: "desc" };
   }
 
-  // Fetch initial records parallelly on server-side
-  const [products, total, categoriesList] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-      include: {
-        images: { orderBy: { order: "asc" } },
-        category: true,
-        variants: true,
-        reviews: {
-          where: { isShown: true },
+  // Fetch initial records parallelly on server-side with connection crash-resilience
+  let productsList: any[] = [];
+  let totalCount = 0;
+  let categoriesList: any[] = [];
+  let dbError: any = null;
+
+  try {
+    const [products, total, dbCategoriesList] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+        include: {
+          images: { orderBy: { order: "asc" } },
+          category: true,
+          variants: true,
+          reviews: {
+            where: { isShown: true },
+          },
         },
-      },
-    }),
-    prisma.product.count({ where }),
-    prisma.category.findMany(),
-  ]);
+      }),
+      prisma.product.count({ where }),
+      prisma.category.findMany(),
+    ]);
+    productsList = products;
+    totalCount = total;
+    categoriesList = dbCategoriesList;
+  } catch (err: any) {
+    console.error("[ShopPage Server] Database connection error:", err);
+    dbError = err;
+  }
+
+  if (dbError) {
+    return (
+      <ShopErrorFallback 
+        error={dbError.message || String(dbError)} 
+        code="SHOP_CATALOG_DB_ERROR" 
+      />
+    );
+  }
 
   // Map products data
-  const mappedProducts = products.map((product) => {
+  const mappedProducts = productsList.map((product: any) => {
     const cleanSizes = product.size 
-      ? product.size.split(",").map(s => s.trim()).filter(Boolean) 
+      ? product.size.split(",").map((s: string) => s.trim()).filter(Boolean) 
       : [];
     const cleanColors = product.color 
-      ? product.color.split(",").map(c => c.trim()).filter(Boolean) 
+      ? product.color.split(",").map((c: string) => c.trim()).filter(Boolean) 
       : [];
 
     const reviews = product.reviews || [];
     const rating = reviews.length > 0
-      ? Number((reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1))
+      ? Number((reviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviews.length).toFixed(1))
       : 0;
 
     return {
@@ -162,13 +185,13 @@ export default async function ShopPage(props: ShopPageProps) {
       },
       sizes: cleanSizes,
       colors: cleanColors,
-      images: product.images.map((img) => ({
+      images: product.images.map((img: any) => ({
         id: img.id,
         url: img.url,
         alt: img.alt,
         order: img.order,
       })),
-      variants: product.variants.map((v) => ({
+      variants: product.variants.map((v: any) => ({
         id: v.id,
         size: v.size,
         color: v.color,
@@ -179,7 +202,7 @@ export default async function ShopPage(props: ShopPageProps) {
     };
   });
 
-  const mappedCategories = categoriesList.map((cat) => ({
+  const mappedCategories = categoriesList.map((cat: any) => ({
     id: cat.id,
     name: cat.name,
     slug: cat.slug,
@@ -188,8 +211,8 @@ export default async function ShopPage(props: ShopPageProps) {
   return (
     <ShopCatalogClient
       initialProducts={mappedProducts}
-      initialTotal={total}
-      initialPages={Math.ceil(total / limit)}
+      initialTotal={totalCount}
+      initialPages={Math.ceil(totalCount / limit)}
       categories={mappedCategories}
     />
   );

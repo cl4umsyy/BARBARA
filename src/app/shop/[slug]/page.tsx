@@ -5,6 +5,7 @@ import { ProductDetailClient } from "@/components/product/ProductDetailClient";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
+import { ShopErrorFallback } from "@/components/shop/ShopErrorFallback";
 
 export const revalidate = 0; // Disable dynamic caching to support updates
 
@@ -19,79 +20,104 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await props.params;
 
-  const product = await prisma.product.findFirst({
-    where: {
-      OR: [
-        { slug: slug },
-        { id: slug }
-      ],
-      isActive: true,
-    },
-    include: {
-      images: {
-        orderBy: { order: "asc" }
+  try {
+    const product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: slug },
+          { id: slug }
+        ],
+        isActive: true,
+      },
+      include: {
+        images: {
+          orderBy: { order: "asc" }
+        }
       }
-    }
-  });
+    });
 
-  if (!product) {
+    if (!product) {
+      return {
+        title: "Product Not Found | barbara",
+      };
+    }
+
+    const title = `${product.name} | barbara`;
+    const description = product.description;
+    const imageUrl = product.images[0]?.url || "";
+
     return {
-      title: "Product Not Found | barbara",
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        images: imageUrl ? [{ url: imageUrl }] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: imageUrl ? [imageUrl] : [],
+      },
+    };
+  } catch (error) {
+    console.error("[ProductDetailPage generateMetadata] Database error:", error);
+    return {
+      title: "Premium Streetwear | barbara",
+      description: "Premium fashion & thrift store. Handpicked quality products for your everyday curated style.",
     };
   }
-
-  const title = `${product.name} | barbara`;
-  const description = product.description;
-  const imageUrl = product.images[0]?.url || "";
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      images: imageUrl ? [{ url: imageUrl }] : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: imageUrl ? [imageUrl] : [],
-    },
-  };
 }
 
 export default async function ProductDetailPage(props: ProductDetailPageProps) {
   const { slug } = await props.params;
 
-  const product = await prisma.product.findFirst({
-    where: {
-      OR: [
-        { slug: slug },
-        { id: slug }
-      ],
-      isActive: true,
-    },
-    include: {
-      images: {
-        orderBy: { order: "asc" },
+  let product = null;
+  let dbError: any = null;
+
+  try {
+    product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: slug },
+          { id: slug }
+        ],
+        isActive: true,
       },
-      variants: true,
-      reviews: {
-        where: { isShown: true },
-        orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              name: true,
-              avatarUrl: true,
+      include: {
+        images: {
+          orderBy: { order: "asc" },
+        },
+        variants: true,
+        reviews: {
+          where: { isShown: true },
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: {
+              select: {
+                name: true,
+                avatarUrl: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
+  } catch (err: any) {
+    console.error("[ProductDetailPage Server] Database connection error:", err);
+    dbError = err;
+  }
+
+  if (dbError) {
+    return (
+      <ShopErrorFallback 
+        error={dbError.message || String(dbError)} 
+        code="PRODUCT_DETAIL_DB_ERROR" 
+      />
+    );
+  }
 
   if (!product) {
     return (
