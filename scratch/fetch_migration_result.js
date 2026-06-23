@@ -1,7 +1,7 @@
 async function main() {
-  console.log("Fetching migration API...");
+  console.log("Fetching migrate API...");
   try {
-    const res = await fetch("https://barbara-jade.vercel.app/api/migrate");
+    const res = await fetch("https://barbara-jade.vercel.app/api/migrate?secret=barbara_migrate_2026");
     console.log("Status:", res.status);
     const text = await res.text();
     console.log("Response body:");

@@ -1,8 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const secret = searchParams.get("secret");
+  
+  if (secret !== "barbara_migrate_2026") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const envKeys = Object.keys(process.env);
   const dbUrl = process.env.DATABASE_URL;
   const isSupabaseUrlSet = !!process.env.NEXT_PUBLIC_SUPABASE_URL;

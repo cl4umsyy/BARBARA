@@ -11,7 +11,7 @@ const passwords = [
 ];
 
 async function tryPassword(password) {
-  const connectionString = `postgres://postgres:${password}@db.gyargxxfsuzhepumcynf.supabase.co:5432/postgres`;
+  const connectionString = `postgres://postgres:${password}@db.gyargxxfsuzhepumcynf.supabase.co:6543/postgres?pgbouncer=true`;
   const pool = new Pool({
     connectionString,
     connectionTimeoutMillis: 5000,
