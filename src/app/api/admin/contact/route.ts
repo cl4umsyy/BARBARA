@@ -31,40 +31,69 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    let contactInfo = await prisma.contactInformation.findFirst();
+    let contactInfo = null;
+    try {
+      contactInfo = await prisma.contactInformation.findFirst();
+    } catch (dbError: any) {
+      console.error("[PUT /api/admin/contact] Database read error:", dbError.message || dbError);
+      if (dbError.stack) {
+        console.error(dbError.stack);
+      }
+      return NextResponse.json(
+        { 
+          error: "Gagal mengakses informasi kontak dari database. Pastikan tabel 'contact_information' sudah dibuat (menjalankan migrasi database).", 
+          details: dbError.message 
+        },
+        { status: 500 }
+      );
+    }
 
-    if (contactInfo) {
-      contactInfo = await prisma.contactInformation.update({
-        where: { id: contactInfo.id },
-        data: {
-          storeName,
-          description,
-          address,
-          whatsapp,
-          email,
-          businessHours,
-          instagramUrl,
-          tiktokUrl,
-          facebookUrl,
-          googleMapsUrl,
+    try {
+      if (contactInfo) {
+        contactInfo = await prisma.contactInformation.update({
+          where: { id: contactInfo.id },
+          data: {
+            storeName,
+            description,
+            address,
+            whatsapp,
+            email,
+            businessHours,
+            instagramUrl,
+            tiktokUrl,
+            facebookUrl,
+            googleMapsUrl,
+          },
+        });
+      } else {
+        contactInfo = await prisma.contactInformation.create({
+          data: {
+            id: "contact_info_default",
+            storeName,
+            description,
+            address,
+            whatsapp,
+            email,
+            businessHours,
+            instagramUrl,
+            tiktokUrl,
+            facebookUrl,
+            googleMapsUrl,
+          },
+        });
+      }
+    } catch (dbWriteError: any) {
+      console.error("[PUT /api/admin/contact] Database write error:", dbWriteError.message || dbWriteError);
+      if (dbWriteError.stack) {
+        console.error(dbWriteError.stack);
+      }
+      return NextResponse.json(
+        { 
+          error: "Gagal menyimpan pembaruan kontak ke database. Kemungkinan tabel 'contact_information' belum dimigrasi.", 
+          details: dbWriteError.message 
         },
-      });
-    } else {
-      contactInfo = await prisma.contactInformation.create({
-        data: {
-          id: "contact_info_default",
-          storeName,
-          description,
-          address,
-          whatsapp,
-          email,
-          businessHours,
-          instagramUrl,
-          tiktokUrl,
-          facebookUrl,
-          googleMapsUrl,
-        },
-      });
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -73,7 +102,7 @@ export async function PUT(req: NextRequest) {
       data: contactInfo,
     });
   } catch (error: any) {
-    console.error("PUT /api/admin/contact error:", error);
+    console.error("PUT /api/admin/contact general error:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
       { status: 500 }
