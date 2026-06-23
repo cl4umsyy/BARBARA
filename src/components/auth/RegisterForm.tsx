@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff, UserPlus, Check } from "lucide-react";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 
 export function RegisterForm() {
+  const router = useRouter();
   const { callbackUrl, closeModal, setActiveTab } = useAuthModalStore();
 
   const [name, setName] = useState("");
@@ -73,7 +75,8 @@ export function RegisterForm() {
 
       console.log("[RegisterForm] Registration and auto-login success. Redirecting to:", callbackUrl);
       closeModal();
-      window.location.href = callbackUrl;
+      router.push(callbackUrl);
+      router.refresh();
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");
       setIsLoading(false);

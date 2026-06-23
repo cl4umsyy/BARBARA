@@ -1,4 +1,5 @@
 import React from "react";
+import { SettingsFormClient } from "@/components/admin/SettingsFormClient";
 
 export default function AdminSettingsPage() {
   return (
@@ -15,8 +16,8 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      <div className="border border-brand-light bg-brand-white p-12 text-center text-xs font-bold tracking-widest text-brand-gray-light uppercase">
-        Store Settings (Coming Soon)
+      <div className="mt-6">
+        <SettingsFormClient />
       </div>
     </div>
   );

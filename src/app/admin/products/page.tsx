@@ -53,6 +53,9 @@ export default async function AdminProductsPage(props: {
       images:product_images (
         url,
         order
+      ),
+      reviews (
+        rating
       )
     `;
 
@@ -78,6 +81,11 @@ export default async function AdminProductsPage(props: {
       const rawCategory = p.category;
       const category = Array.isArray(rawCategory) ? rawCategory[0] : rawCategory;
 
+      const reviews = p.reviews || [];
+      const rating = reviews.length > 0
+        ? Number((reviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviews.length).toFixed(1))
+        : 0;
+
       return {
         id: p.id,
         name: p.name,
@@ -87,6 +95,8 @@ export default async function AdminProductsPage(props: {
         category: category ? { name: category.name } : null,
         variants: p.variants || [],
         images: mainImage,
+        rating,
+        reviewCount: reviews.length,
       };
     });
   } catch (error) {
@@ -181,6 +191,12 @@ export default async function AdminProductsPage(props: {
                     Price
                   </th>
                   <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-brand-gray-light">
+                    Rating
+                  </th>
+                  <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-brand-gray-light">
+                    Ulasan
+                  </th>
+                  <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-brand-gray-light">
                     Total Stock
                   </th>
                   <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-brand-gray-light">
@@ -234,6 +250,16 @@ export default async function AdminProductsPage(props: {
                       {/* Price */}
                       <td className="py-4 text-xs font-bold text-brand-black">
                         {formatIDR(product.price)}
+                      </td>
+
+                      {/* Rating */}
+                      <td className="py-4 text-xs font-bold text-brand-black">
+                        {product.rating > 0 ? `★ ${product.rating}` : "-"}
+                      </td>
+
+                      {/* Reviews Count */}
+                      <td className="py-4 text-xs font-medium text-brand-gray">
+                        {product.reviewCount} ulasan
                       </td>
 
                       {/* Total Stock */}

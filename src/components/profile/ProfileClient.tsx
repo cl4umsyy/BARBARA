@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { 
   User as UserIcon, 
   Mail, 
@@ -57,13 +57,21 @@ interface AddressData {
 interface ProfileClientProps {
   initialProfile: ProfileData;
   initialAddresses: AddressData[];
+  initialTab?: "profile" | "addresses" | "security";
 }
 
-export default function ProfileClient({ initialProfile, initialAddresses }: ProfileClientProps) {
+export default function ProfileClient({ initialProfile, initialAddresses, initialTab }: ProfileClientProps) {
   const router = useRouter();
+  const { data: session, update } = useSession();
   
   // Navigation tabs: 'profile' | 'addresses' | 'security'
-  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "security">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "security">(initialTab || "profile");
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   // Notification / toast status
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -76,12 +84,18 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
   };
 
   // --- TAB 1: Profile ---
-  const [profile, setProfile] = useState<ProfileData>(initialProfile);
+  const [userProfile, setUserProfile] = useState<ProfileData>(initialProfile);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: initialProfile.name,
     phone: initialProfile.phone,
   });
+
+  useEffect(() => {
+    console.log("[DEBUG][ProfileClient] Current session user image (from NextAuth):", session?.user?.image);
+    console.log("[DEBUG][ProfileClient] Current profile avatarUrl state:", userProfile?.avatarUrl);
+    console.log("[DEBUG][ProfileClient] Initial profile avatarUrl loaded from server:", initialProfile?.avatarUrl);
+  }, [session, userProfile?.avatarUrl, initialProfile?.avatarUrl]);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -222,10 +236,15 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
             }
 
             const { url: avatarUrl } = await uploadRes.json();
-            setProfile((prev) => ({
+            setUserProfile((prev) => ({
               ...prev,
               avatarUrl,
             }));
+            // Update NextAuth session dynamically
+            await update({
+              name: userProfile.name,
+              image: avatarUrl,
+            });
             showToast("Foto profil berhasil diperbarui!");
           } catch (err: any) {
             showToast(err.message || "Terjadi kesalahan saat mengunggah foto", "error");
@@ -257,10 +276,15 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
           throw new Error(errorData.error || "Gagal menghapus foto profil");
         }
 
-        setProfile((prev) => ({
+        setUserProfile((prev) => ({
           ...prev,
           avatarUrl: "",
         }));
+        // Update NextAuth session dynamically
+        await update({
+          name: userProfile.name,
+          image: null,
+        });
         showToast("Foto profil berhasil dihapus!");
       } catch (err: any) {
         showToast(err.message || "Gagal menghapus foto profil", "error");
@@ -285,7 +309,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
         body: JSON.stringify({
           name: profileForm.name.trim(),
           phone: profileForm.phone.trim() || null,
-          avatarUrl: profile.avatarUrl || null,
+          avatarUrl: userProfile.avatarUrl || null,
         }),
       });
 
@@ -295,10 +319,15 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
       }
 
       const { user: updatedUser } = await res.json();
-      setProfile({
-        ...profile,
+      setUserProfile({
+        ...userProfile,
         name: updatedUser.name,
         phone: updatedUser.phone || "",
+      });
+      // Update NextAuth session dynamically
+      await update({
+        name: updatedUser.name,
+        image: userProfile.avatarUrl || null,
       });
       setIsEditingProfile(false);
       showToast("Informasi profil berhasil diperbarui!");
@@ -596,16 +625,16 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
               <div className="flex flex-col items-center gap-1 mt-4 mb-4">
                 <div className="relative">
                   <div className="relative group w-24 h-24 rounded-full overflow-hidden border-2 border-brand-black/10 bg-brand-light flex items-center justify-center">
-                    {profile.avatarUrl ? (
+                    {userProfile.avatarUrl ? (
                       <Image 
-                        src={profile.avatarUrl} 
-                        alt={profile.name} 
+                        src={userProfile.avatarUrl} 
+                        alt={userProfile.name} 
                         fill 
                         className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-brand-black text-brand-white font-black text-3xl uppercase">
-                        {profile.name.substring(0, 2)}
+                        {userProfile.name.substring(0, 2)}
                       </div>
                     )}
                     
@@ -646,7 +675,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                   className="hidden" 
                 />
 
-                {profile.avatarUrl && (
+                {userProfile.avatarUrl && (
                   <button
                     onClick={handleDeleteAvatar}
                     disabled={isUploadingAvatar}
@@ -659,15 +688,15 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
 
               {/* User info details */}
               <h2 className="font-black text-brand-black text-lg uppercase tracking-wide truncate max-w-full">
-                {profile.name}
+                {userProfile.name}
               </h2>
               <p className="text-[11px] font-medium text-brand-gray-light truncate max-w-full">
-                {profile.email}
+                {userProfile.email}
               </p>
               
               <div className="flex items-center gap-1.5 text-[10px] text-brand-gray mt-4 bg-brand-light/60 px-3 py-1.5 rounded-lg border border-brand-light">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Gabung: {formatDateJoined(profile.createdAt)}</span>
+                <span>Gabung: {formatDateJoined(userProfile.createdAt)}</span>
               </div>
             </div>
 
@@ -706,7 +735,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                 }`}
               >
                 <Shield className="w-4 h-4 flex-shrink-0" />
-                Keamanan & Akun
+                Pengaturan Akun
               </button>
             </div>
 
@@ -736,7 +765,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                           Nama Lengkap
                         </span>
                         <p className="text-xs font-bold text-brand-black mt-1 uppercase tracking-wide">
-                          {profile.name}
+                          {userProfile.name}
                         </p>
                       </div>
                       <div className="border border-brand-light rounded-xl p-4 bg-brand-light/20">
@@ -745,7 +774,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                         </span>
                         <div className="flex items-center justify-between mt-1">
                           <p className="text-xs font-bold text-brand-black truncate pr-2">
-                            {profile.email}
+                            {userProfile.email}
                           </p>
                           <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 border border-green-200 rounded uppercase tracking-wider">
                             Terverifikasi
@@ -757,7 +786,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                           Nomor Telepon
                         </span>
                         <p className="text-xs font-bold text-brand-black mt-1">
-                          {profile.phone || "Belum ditambahkan"}
+                          {userProfile.phone || "Belum ditambahkan"}
                         </p>
                       </div>
                       <div className="border border-brand-light rounded-xl p-4 bg-brand-light/20">
@@ -765,7 +794,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                           Tanggal Pendaftaran
                         </span>
                         <p className="text-xs font-bold text-brand-black mt-1">
-                          {formatDateJoined(profile.createdAt)}
+                          {formatDateJoined(userProfile.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -797,7 +826,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                     <div className="mt-4">
                       <button
                         onClick={() => {
-                          setProfileForm({ name: profile.name, phone: profile.phone });
+                          setProfileForm({ name: userProfile.name, phone: userProfile.phone });
                           setIsEditingProfile(true);
                         }}
                         className="font-black uppercase tracking-wider text-xs border-2 border-brand-black bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black px-6 py-3.5 rounded-xl transition-all duration-300 cursor-pointer"
@@ -835,7 +864,7 @@ export default function ProfileClient({ initialProfile, initialAddresses }: Prof
                         </label>
                         <input
                           type="email"
-                          value={profile.email}
+                          value={userProfile.email}
                           disabled
                           className="input-minimalist bg-brand-light/50 text-brand-gray-light cursor-not-allowed text-xs font-semibold"
                         />

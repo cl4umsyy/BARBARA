@@ -82,6 +82,8 @@ export function CategoryCarousel({ dbCategories }: Props) {
     }
   });
 
+  const displayedCategories = merged.slice(0, 3);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header row: title + arrow link */}
@@ -99,8 +101,8 @@ export function CategoryCarousel({ dbCategories }: Props) {
       </div>
 
       {/* Grid track */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 overflow-hidden">
-        {merged.map((cat) => (
+      <div className="grid grid-cols-3 gap-4 overflow-hidden">
+        {displayedCategories.map((cat) => (
           <Link
             key={cat.id}
             href={`/shop?category=${cat.slug}`}

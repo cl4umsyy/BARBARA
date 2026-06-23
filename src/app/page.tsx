@@ -32,6 +32,10 @@ export default async function Home() {
           size,
           color,
           stock
+        ),
+        reviews (
+          rating,
+          is_shown
         )
       `)
       .eq("is_active", true)
@@ -44,29 +48,38 @@ export default async function Home() {
 
   const categories = categoriesRes.data || [];
 
-  const dbProducts = (productsRes.data || []).map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    price: Number(p.price),
-    isNew: p.is_new,
-    is_active: p.is_active,
-    created_at: p.created_at,
-    images: (p.images || [])
-      .map((img: any) => ({
-        id: img.id,
-        url: img.url,
-        alt: img.alt,
-        order: img.order,
-      }))
-      .sort((a: any, b: any) => a.order - b.order),
-    variants: (p.variants || []).map((v: any) => ({
-      id: v.id,
-      size: v.size,
-      color: v.color,
-      stock: v.stock,
-    })),
-  }));
+  const dbProducts = (productsRes.data || []).map((p: any) => {
+    const reviews = (p.reviews || []).filter((r: any) => r.is_shown);
+    const rating = reviews.length > 0
+      ? Number((reviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / reviews.length).toFixed(1))
+      : 0;
+
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: Number(p.price),
+      isNew: p.is_new,
+      is_active: p.is_active,
+      created_at: p.created_at,
+      images: (p.images || [])
+        .map((img: any) => ({
+          id: img.id,
+          url: img.url,
+          alt: img.alt,
+          order: img.order,
+        }))
+        .sort((a: any, b: any) => a.order - b.order),
+      variants: (p.variants || []).map((v: any) => ({
+        id: v.id,
+        size: v.size,
+        color: v.color,
+        stock: v.stock,
+      })),
+      rating,
+      reviewCount: reviews.length,
+    };
+  });
 
   // Lookbook curators/combos (mimicking recommended sellers)
   const lookbooks = [
@@ -132,9 +145,6 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-transparent to-brand-black/50" />
         
         <div className="relative z-10 flex flex-col items-center text-center gap-4 px-4 max-w-4xl animate-fade-in">
-          <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-red-500">
-            NEW COLLECTION / PRE-RELEASE 2026
-          </p>
           <h1 className="text-3xl font-black tracking-[0.15em] md:text-5xl lg:text-6xl text-brand-white leading-none uppercase select-none">
             Jual-Beli Streetwear <br className="hidden md:inline" /> Premium barbara
           </h1>
@@ -207,6 +217,8 @@ export default async function Home() {
                     isOutOfStock={totalStock === 0}
                     originalPrice={originalPrice}
                     sizes={product.variants.map((v: any) => v.size)}
+                    rating={product.rating}
+                    reviewCount={product.reviewCount}
                   />
                 );
               })}

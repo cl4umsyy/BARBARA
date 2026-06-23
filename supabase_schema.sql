@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "role" "Role" NOT NULL DEFAULT 'CUSTOMER',
+  "phone" TEXT,
+  "avatar_url" TEXT,
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
@@ -43,8 +45,11 @@ CREATE TABLE IF NOT EXISTS "addresses" (
   "street" TEXT NOT NULL,
   "city" TEXT NOT NULL,
   "province" TEXT NOT NULL,
+  "district" TEXT,
   "postal_code" TEXT NOT NULL,
-  "is_default" BOOLEAN NOT NULL DEFAULT FALSE
+  "address_detail" TEXT,
+  "is_default" BOOLEAN NOT NULL DEFAULT FALSE,
+  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 -- Categories Table
@@ -282,3 +287,33 @@ CREATE POLICY "Allow update on shipping_addresses for own order or admin" ON "sh
   EXISTS (SELECT 1 FROM public.orders WHERE id = order_id AND (user_id = auth.uid()::text OR public.is_admin()))
 );
 CREATE POLICY "Allow delete on shipping_addresses for admin only" ON "shipping_addresses" FOR DELETE USING (public.is_admin());
+
+-- Reviews Table
+CREATE TABLE IF NOT EXISTS "reviews" (
+  "id" TEXT PRIMARY KEY,
+  "user_id" TEXT NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+  "order_id" TEXT NOT NULL REFERENCES "orders"("id") ON DELETE CASCADE,
+  "product_id" TEXT NOT NULL REFERENCES "products"("id") ON DELETE CASCADE,
+  "rating" INTEGER NOT NULL CHECK ("rating" >= 1 AND "rating" <= 5),
+  "review" TEXT NOT NULL,
+  "review_images" TEXT[] NOT NULL DEFAULT '{}',
+  "is_shown" BOOLEAN NOT NULL DEFAULT TRUE,
+  "admin_reply" TEXT,
+  "admin_replied_at" TIMESTAMP WITH TIME ZONE,
+  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  UNIQUE("order_id", "product_id")
+);
+
+-- Reviews Indices
+CREATE INDEX IF NOT EXISTS "idx_reviews_user" ON "reviews"("user_id");
+CREATE INDEX IF NOT EXISTS "idx_reviews_product" ON "reviews"("product_id");
+CREATE INDEX IF NOT EXISTS "idx_reviews_order" ON "reviews"("order_id");
+
+-- Enable RLS & Add Policies for Reviews
+ALTER TABLE "reviews" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public select on reviews" ON "reviews" FOR SELECT USING (TRUE);
+CREATE POLICY "Allow insert on reviews for own orders" ON "reviews" FOR INSERT WITH CHECK (auth.uid()::text = user_id OR public.is_admin());
+CREATE POLICY "Allow update on reviews for own reviews" ON "reviews" FOR UPDATE USING (auth.uid()::text = user_id OR public.is_admin());
+CREATE POLICY "Allow delete on reviews for own reviews" ON "reviews" FOR DELETE USING (auth.uid()::text = user_id OR public.is_admin());

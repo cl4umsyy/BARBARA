@@ -43,6 +43,7 @@ model User {
   orders    Order[]
   wishlists Wishlist[]
   cart      Cart?
+  reviews   Review[]
 
   @@map("users")
 }
@@ -94,8 +95,24 @@ model Product {
   images      ProductImage[]
   variants    ProductVariant[]
   wishlists   Wishlist[]
+  reviews     Review[]
+
+  // New fields for high-performance filtering and sorting
+  brand       String?
+  condition   String?
+  likesCount  Int              @default(0) @map("likes_count")
+  categorySlug String?         @map("category") // Maps to the category column in DB
+  size        String?
+  color       String?
 
   @@index([categoryId, isActive])
+  @@index([brand])
+  @@index([condition])
+  @@index([price])
+  @@index([createdAt])
+  @@index([categorySlug])
+  @@index([size])
+  @@index([color])
   @@map("products")
 }
 
@@ -185,6 +202,7 @@ model Order {
   createdAt              DateTime         @default(now()) @map("created_at")
   orderItems             OrderItem[]
   shippingAddress        ShippingAddress?
+  reviews                Review[]
 
   @@index([userId])
   @@index([paymentStatus])
@@ -221,4 +239,56 @@ model ShippingAddress {
   postalCode    String @map("postal_code")
 
   @@map("shipping_addresses")
+}
+
+model ContactInformation {
+  id             String   @id @default(cuid())
+  storeName      String   @map("store_name")
+  description    String
+  address        String
+  whatsapp       String
+  email          String
+  businessHours  String   @map("business_hours")
+  instagramUrl   String?  @map("instagram_url")
+  tiktokUrl      String?  @map("tiktok_url")
+  facebookUrl    String?  @map("facebook_url")
+  googleMapsUrl  String?  @map("google_maps_url")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("contact_information")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
+
+model Review {
+  id             String    @id @default(cuid())
+  userId         String    @map("user_id")
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId        String    @map("order_id")
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String    @map("product_id")
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating         Int
+  review         String
+  reviewImages   String[]  @map("review_images")
+  isShown        Boolean   @default(true) @map("is_shown")
+  adminReply     String?   @map("admin_reply")
+  adminRepliedAt DateTime? @map("admin_replied_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@unique([orderId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@index([orderId])
+  @@map("reviews")
 }

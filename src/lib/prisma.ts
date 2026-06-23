@@ -16,10 +16,18 @@ declare global {
   var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+const getPrismaClient = () => {
+  if (process.env.NODE_ENV === "production") {
+    return prismaClientSingleton();
+  }
+  
+  if (!globalThis.prismaGlobal || !("review" in globalThis.prismaGlobal)) {
+    console.log("[Prisma] Initializing or re-creating PrismaClient singleton with updated models...");
+    globalThis.prismaGlobal = prismaClientSingleton();
+  }
+  return globalThis.prismaGlobal;
+};
+
+const prisma = getPrismaClient();
 
 export default prisma;
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prismaGlobal = prisma;
-}

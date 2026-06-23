@@ -52,7 +52,9 @@ export default async function OrderDetailPage(props: {
         quantity,
         price,
         variant:product_variants (
+          product_id,
           product:products (
+            slug,
             images:product_images (
               url,
               order
@@ -69,6 +71,22 @@ export default async function OrderDetailPage(props: {
     notFound();
   }
 
+  // Fetch reviews for this order
+  const { data: dbReviews } = await supabaseAdmin
+    .from("reviews")
+    .select("id, order_id, product_id, rating, review, review_images, created_at")
+    .eq("order_id", id);
+
+  const initialReviews = (dbReviews || []).map((r: any) => ({
+    id: r.id,
+    orderId: r.order_id,
+    productId: r.product_id,
+    rating: r.rating,
+    review: r.review,
+    reviewImages: r.review_images || [],
+    createdAt: r.created_at,
+  }));
+
   const rawShipping = dbOrder.shipping_addresses;
   const shippingAddress = Array.isArray(rawShipping) ? rawShipping[0] : rawShipping;
 
@@ -76,16 +94,24 @@ export default async function OrderDetailPage(props: {
     const rawVariant = item.variant;
     const variant = Array.isArray(rawVariant) ? rawVariant[0] : rawVariant;
     let imageUrl = null;
-    if (variant?.product) {
-      const product = Array.isArray(variant.product) ? variant.product[0] : variant.product;
-      if (product?.images && product.images.length > 0) {
-        const sortedImages = [...product.images].sort((a: any, b: any) => a.order - b.order);
-        imageUrl = sortedImages[0]?.url || null;
+    let productId = "";
+    let productSlug = null;
+    if (variant) {
+      productId = variant.product_id;
+      if (variant.product) {
+        const product = Array.isArray(variant.product) ? variant.product[0] : variant.product;
+        productSlug = product?.slug || null;
+        if (product?.images && product.images.length > 0) {
+          const sortedImages = [...product.images].sort((a: any, b: any) => a.order - b.order);
+          imageUrl = sortedImages[0]?.url || null;
+        }
       }
     }
 
     return {
       id: item.id,
+      productId,
+      productSlug,
       productName: item.product_name,
       size: item.size,
       color: item.color,
@@ -126,7 +152,7 @@ export default async function OrderDetailPage(props: {
   return (
     <div className="w-full bg-brand-white flex-1">
       <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:px-16 flex flex-col gap-6">
-        <OrderDetailClient order={order} />
+        <OrderDetailClient userId={session.user.id} order={order} initialReviews={initialReviews} />
       </div>
     </div>
   );

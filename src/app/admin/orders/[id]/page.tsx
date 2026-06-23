@@ -434,12 +434,24 @@ export default async function AdminOrderDetailPage(props: {
 
                         {/* Name */}
                         <td className="py-4">
-                          <p className="text-xs font-bold text-brand-black">
-                            {item.productName}
-                          </p>
-                          <p className="text-[9px] uppercase tracking-wider text-brand-gray-light mt-0.5">
-                            Size: {item.size} &bull; Color: {item.color}
-                          </p>
+                          <div className="flex flex-col md:flex-row md:items-center gap-2">
+                            <div>
+                              <p className="text-xs font-bold text-brand-black">
+                                {item.productName}
+                              </p>
+                              <p className="text-[9px] uppercase tracking-wider text-brand-gray-light mt-0.5">
+                                Size: {item.size} &bull; Color: {item.color}
+                              </p>
+                            </div>
+                            {(order.status === "COMPLETED" || order.status === "DELIVERED") && (
+                              <Link
+                                href={`/admin/reviews?search=${encodeURIComponent(item.productName)}`}
+                                className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-brand-black bg-brand-light px-2.5 py-1 rounded hover:bg-brand-black hover:text-brand-white transition-colors w-max md:ml-2"
+                              >
+                                Lihat Ulasan
+                              </Link>
+                            )}
+                          </div>
                         </td>
 
                         {/* Price */}

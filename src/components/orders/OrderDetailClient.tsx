@@ -5,11 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { 
   ArrowLeft, CheckCircle2, Package, Truck, Calendar, MapPin, 
-  CreditCard, Clock, ExternalLink, X 
+  CreditCard, Clock, ExternalLink, X, Star
 } from "lucide-react";
+import { ReviewModal } from "./ReviewModal";
 
 interface OrderItem {
   id: string;
+  productId: string;
+  productSlug?: string | null;
   productName: string;
   size: string;
   color: string;
@@ -47,8 +50,20 @@ interface Order {
   orderItems: OrderItem[];
 }
 
+interface Review {
+  id: string;
+  orderId: string;
+  productId: string;
+  rating: number;
+  review: string;
+  reviewImages: string[];
+  createdAt: string;
+}
+
 interface OrderDetailClientProps {
+  userId: string;
   order: Order;
+  initialReviews?: Review[];
 }
 
 const formatPrice = (val: number) => {
@@ -93,8 +108,44 @@ const getMockTrackingTimeline = (trackingNumber: string, status: string) => {
   return steps.reverse();
 };
 
-export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ order }) => {
+export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ userId, order, initialReviews }) => {
+  const [reviews, setReviews] = useState<Review[]>(initialReviews || []);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [selectedOrderItem, setSelectedOrderItem] = useState<string>("");
+  const [selectedProductName, setSelectedProductName] = useState<string>("");
+  const [activeReview, setActiveReview] = useState<Review | null>(null);
+
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleOpenReview = (orderId: string, orderItemId: string, productId: string, productName: string) => {
+    const existing = reviews.find((r) => r.orderId === orderId && r.productId === productId) || null;
+    setSelectedOrderItem(orderItemId);
+    setSelectedProduct(productId);
+    setSelectedProductName(productName);
+    setActiveReview(existing);
+    setIsModalOpen(true);
+  };
+
+  const handleReviewSubmitSuccess = (savedReview: Review) => {
+    setReviews((prev) => {
+      const exists = prev.some((r) => r.orderId === savedReview.orderId && r.productId === savedReview.productId);
+      if (exists) {
+        return prev.map((r) => (r.orderId === savedReview.orderId && r.productId === savedReview.productId ? savedReview : r));
+      } else {
+        return [savedReview, ...prev];
+      }
+    });
+    const isEdit = reviews.some((r) => r.orderId === savedReview.orderId && r.productId === savedReview.productId);
+    showToast(isEdit ? "Ulasan produk berhasil diperbarui!" : "Terima kasih! Ulasan produk berhasil dikirim.");
+  };
 
   // Map DB status to step values:
   // 1: Paid, 2: Processing, 3: Packed, 4: Shipped, 5: Completed
@@ -257,42 +308,89 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ order }) =
             </h3>
 
             <div className="flex flex-col gap-6">
-              {order.orderItems.map((item) => (
-                <div key={item.id} className="flex gap-4 items-start border-b border-brand-light/50 last:border-b-0 pb-6 last:pb-0">
-                  <div className="relative w-20 h-20 overflow-hidden bg-brand-light border border-brand-light rounded-xl flex-shrink-0">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-5 h-5 text-brand-gray-light" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-brand-black text-sm leading-snug">
-                      {item.productName}
-                    </h4>
-                    <p className="text-xs text-brand-gray mt-1 font-medium">
-                      Ukuran: <span className="font-bold text-brand-black uppercase">{item.size}</span>
-                      <span className="mx-2">|</span>
-                      Warna: <span className="font-bold text-brand-black capitalize">{item.color}</span>
-                    </p>
-                    <p className="text-xs text-brand-gray mt-1">
-                      {item.quantity} x {formatPrice(item.price)}
-                    </p>
-                  </div>
+              {order.orderItems.map((item) => {
+                const review = reviews.find((r) => r.productId === item.productId);
+                const isSelesai = order.status === "DELIVERED" || order.status === "COMPLETED";
 
-                  <p className="font-bold text-brand-black text-sm tracking-wide flex-shrink-0">
-                    {formatPrice(item.price * item.quantity)}
-                  </p>
-                </div>
-              ))}
+                return (
+                  <div key={item.id} className="flex gap-4 items-start border-b border-brand-light/50 last:border-b-0 pb-6 last:pb-0">
+                    <div className="relative w-20 h-20 overflow-hidden bg-brand-light border border-brand-light rounded-xl flex-shrink-0">
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="w-5 h-5 text-brand-gray-light" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/shop/${item.productSlug || item.productId}`} className="hover:opacity-75">
+                        <h4 className="font-bold text-brand-black text-sm leading-snug">
+                          {item.productName}
+                        </h4>
+                      </Link>
+                      <p className="text-xs text-brand-gray mt-1 font-medium">
+                        Ukuran: <span className="font-bold text-brand-black uppercase">{item.size}</span>
+                        <span className="mx-2">|</span>
+                        Warna: <span className="font-bold text-brand-black capitalize">{item.color}</span>
+                      </p>
+                      <p className="text-xs text-brand-gray mt-1">
+                        {item.quantity} x {formatPrice(item.price)}
+                      </p>
+
+                      {/* Review Status Display */}
+                      {isSelesai && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-bold">
+                          {review ? (
+                            <>
+                              <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100 uppercase tracking-wide">
+                                Sudah Diulas
+                              </span>
+                              <div className="flex items-center gap-0.5">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-3 h-3 ${
+                                      i < review.rating ? "fill-amber-400 text-amber-400" : "text-brand-light fill-brand-light/30"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-brand-gray-light font-medium">
+                                Diulas pada {new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(review.createdAt))}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-brand-gray-light bg-brand-light px-2 py-0.5 rounded border border-brand-light uppercase tracking-wide">
+                              Belum Diulas
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                      <p className="font-bold text-brand-black text-sm tracking-wide">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
+                      {isSelesai && (
+                        <button
+                          onClick={() => handleOpenReview(order.id, item.id, item.productId, item.productName)}
+                          className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider border border-brand-black bg-brand-white text-brand-black hover:bg-brand-black hover:text-brand-white px-3.5 py-2 rounded-lg transition-all duration-300 cursor-pointer"
+                        >
+                          {review ? "Edit Ulasan" : "Beri Ulasan"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -465,6 +563,26 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ order }) =
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* Review Modal popup */}
+      <ReviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userId={userId}
+        orderId={order.id}
+        orderItemId={selectedOrderItem}
+        productId={selectedProduct}
+        productName={selectedProductName}
+        existingReview={activeReview}
+        onSubmitSuccess={handleReviewSubmitSuccess}
+      />
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 bg-brand-black text-brand-white border border-brand-light/35 px-6 py-4 rounded-xl shadow-xl flex items-center gap-2 animate-slide-in">
+          <p className="text-xs font-bold uppercase tracking-wider">{toast.message}</p>
         </div>
       )}
 

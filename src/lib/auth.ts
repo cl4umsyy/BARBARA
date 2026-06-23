@@ -41,6 +41,7 @@ const providers: NextAuthConfig["providers"] = [
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.avatar_url,
       };
     },
   }),

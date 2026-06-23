@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 
 export function LoginForm() {
+  const router = useRouter();
   const { callbackUrl, closeModal, setActiveTab } = useAuthModalStore();
 
   const [email, setEmail] = useState("");
@@ -37,8 +39,8 @@ export function LoginForm() {
 
     console.log("[LoginForm] Login success. Closing modal, redirecting to:", callbackUrl);
     closeModal();
-    // Refresh current page to update session state
-    window.location.href = callbackUrl;
+    router.push(callbackUrl);
+    router.refresh();
   }
 
   return (

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Heart } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 
 interface ProductCardProps {
   slug: string;
@@ -16,6 +16,11 @@ interface ProductCardProps {
   isOutOfStock?: boolean;
   originalPrice?: number;
   sizes?: string[];
+  brand?: string;
+  condition?: string;
+  likesCount?: number;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -28,9 +33,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isOutOfStock = false,
   originalPrice,
   sizes = ["M", "L", "XL"],
+  brand = "Vintage",
+  condition = "Baik",
+  likesCount: initialLikesCount,
+  rating,
+  reviewCount,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(() => {
+    if (initialLikesCount !== undefined) return initialLikesCount;
     let hash = 0;
     for (let i = 0; i < slug.length; i++) {
       hash = slug.charCodeAt(i) + ((hash << 5) - hash);
@@ -74,17 +85,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Heart/Like Button */}
+        {/* Heart/Like Button at bottom right */}
         <button
           onClick={handleLikeClick}
-          className="absolute top-3 right-3 z-10 p-1.5 bg-brand-white/80 backdrop-blur-sm hover:bg-brand-white rounded-full text-brand-black shadow-sm transition-all duration-300 cursor-pointer"
+          className="absolute bottom-3 right-3 z-10 py-1 px-2.5 bg-brand-white/90 backdrop-blur-sm hover:bg-brand-white rounded-full text-brand-black shadow-md border border-brand-light/35 flex items-center gap-1 transition-all duration-300 cursor-pointer"
           aria-label="Like Product"
         >
           <Heart
-            className={`w-4 h-4 transition-colors duration-300 ${
+            className={`w-3.5 h-3.5 transition-colors duration-300 ${
               isLiked ? "fill-red-500 text-red-500" : "text-brand-black"
             }`}
           />
+          <span className="text-[10px] font-black text-brand-black">{likesCount}</span>
         </button>
 
         {/* Primary Image */}
@@ -117,16 +129,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product Information */}
       <div className="flex flex-col pt-3 font-sans">
         
-        {/* Sizes Indicator */}
-        <div className="flex flex-wrap gap-1 mb-1.5">
-          {sizes.map((size) => (
-            <span
-              key={size}
-              className="text-[9px] font-bold text-brand-gray-light border border-brand-light px-1.5 py-0.5 rounded-lg"
-            >
-              {size}
-            </span>
-          ))}
+        {/* Brand */}
+        <div className="text-[11px] font-bold text-brand-gray-light uppercase tracking-wider mb-0.5">
+          {brand}
+        </div>
+        
+        {/* Size + Condition */}
+        <div className="text-xs text-brand-gray-light mb-1.5 font-medium">
+          {sizes && sizes.length > 0 ? sizes.join(", ") : "M"} · {condition}
         </div>
 
         {/* Product Title */}
@@ -137,7 +147,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {name}
         </Link>
 
-        {/* Pricing & Likes Row */}
+        {/* Rating Stars */}
+        {rating !== undefined && rating > 0 && (
+          <div className="flex items-center gap-1 mt-1 text-[10px] font-black text-brand-black">
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${
+                    i < Math.round(rating)
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-brand-light fill-brand-light/30"
+                  }`}
+                />
+              ))}
+            </div>
+            <span>{rating.toFixed(1)}</span>
+            <span className="text-brand-gray-light font-medium">({reviewCount})</span>
+          </div>
+        )}
+
+        {/* Pricing */}
         <div className="flex items-center justify-between mt-2">
           <div className="flex flex-wrap items-baseline gap-1.5">
             <span className="text-xs md:text-sm font-black text-brand-black">
@@ -149,10 +179,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[10px] text-brand-gray-light font-bold flex items-center gap-1">
-            <Heart className="w-3 h-3 text-brand-gray-light fill-brand-gray-light/30" />
-            {likesCount}
-          </span>
         </div>
 
       </div>

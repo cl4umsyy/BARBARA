@@ -12,7 +12,14 @@ export const metadata: Metadata = {
   description: "Kelola informasi profil, alamat pengiriman, dan keamanan akun Anda di barbara.",
 };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+  const initialTab = (tab === "profile" || tab === "addresses" || tab === "security") ? tab : "profile";
+
   const session = await auth();
   if (!session?.user) {
     redirect("/auth/login?callbackUrl=/profile");
@@ -30,7 +37,18 @@ export default async function ProfilePage() {
   let user = userResult.data;
   let userError = userResult.error;
 
+  // Debugging info
+  console.log("[DEBUG][ProfilePage Server] DB user result:", {
+    id: user?.id,
+    name: user?.name,
+    email: user?.email,
+    phone: user?.phone,
+    avatar_url: user?.avatar_url,
+  });
+  console.log("[DEBUG][ProfilePage Server] NextAuth session user image:", session.user.image);
+
   if (userError && isMissingColumnError(userError)) {
+    console.warn("[DEBUG][ProfilePage Server] avatar_url column is missing in users table! Falling back...");
     const fallbackUserResult = await supabaseAdmin
       .from("users")
       .select("id, name, email, created_at")
@@ -107,7 +125,7 @@ export default async function ProfilePage() {
     name: user.name,
     email: user.email,
     phone: user.phone || "",
-    avatarUrl: user.avatar_url || "",
+    avatarUrl: user.avatar_url || session.user.image || "",
     createdAt: user.created_at,
   };
 
@@ -130,6 +148,7 @@ export default async function ProfilePage() {
     <ProfileClient 
       initialProfile={initialProfile} 
       initialAddresses={initialAddresses} 
+      initialTab={initialTab}
     />
   );
 }

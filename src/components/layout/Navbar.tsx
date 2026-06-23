@@ -28,6 +28,12 @@ export const Navbar: React.FC = () => {
     `[Navbar Render] path: ${pathname}, status: ${status}, hasMounted: ${hasMounted}, hasUser: ${!!session?.user}, email: ${session?.user?.email ?? "none"}`
   );
 
+  useEffect(() => {
+    if (session?.user) {
+      console.log("[DEBUG][Navbar] User logged in. Avatar URL from session:", session.user.image);
+    }
+  }, [session]);
+
   // Hide Navbar for admin routes
   if (pathname?.startsWith("/admin")) {
     return null;
@@ -92,18 +98,20 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-4">
             
             {/* Cart Icon */}
-            <Link
-              href="/cart"
-              className="relative p-2 text-brand-black hover:opacity-75 transition-opacity"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {hasMounted && cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-brand-black text-[9px] font-black text-brand-white rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            {hasMounted && session?.user && (
+              <Link
+                href="/cart"
+                className="relative p-2 text-brand-black hover:opacity-75 transition-opacity"
+                aria-label="Shopping Cart"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-brand-black text-[9px] font-black text-brand-white rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Profile Dropdown / Login & Register buttons */}
             {hasMounted && (
@@ -111,10 +119,25 @@ export const Navbar: React.FC = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="p-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer flex items-center gap-1"
+                    className="p-1 text-brand-black hover:opacity-75 transition-opacity cursor-pointer flex items-center gap-2"
                     aria-label="User Account"
                   >
-                    <User className="w-5 h-5" />
+                    {session.user.image ? (
+                      <img
+                        src={session.user.image}
+                        alt={session.user.name || "Avatar"}
+                        className="w-9 h-9 rounded-full object-cover border border-brand-light"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-brand-black text-brand-white flex items-center justify-center font-black text-xs uppercase border border-brand-light">
+                        {(session.user.name || session.user.email || "US").substring(0, 2)}
+                      </div>
+                    )}
+                    {session.user.name && (
+                      <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
+                        {session.user.name}
+                      </span>
+                    )}
                   </button>
 
                   {isProfileDropdownOpen && (
@@ -130,7 +153,7 @@ export const Navbar: React.FC = () => {
                               Logged in as
                             </p>
                             <p className="text-xs font-bold truncate text-brand-black">
-                              {session.user.email}
+                              {session.user.name || session.user.email}
                             </p>
                           </div>
                           {session.user.role === "ADMIN" && (
@@ -143,19 +166,14 @@ export const Navbar: React.FC = () => {
                             </Link>
                           )}
                           <Link
-                            href="/orders"
-                            onClick={() => setIsProfileDropdownOpen(false)}
-                            className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors"
-                          >
-                            Pesanan Saya
-                          </Link>
-                          <Link
-                            href="/profile"
+                            href="/profile?tab=profile"
                             onClick={() => setIsProfileDropdownOpen(false)}
                             className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors"
                           >
                             Profil Saya
                           </Link>
+
+
                           <button
                             type="button"
                             onClick={() => {
@@ -173,33 +191,24 @@ export const Navbar: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <>
-                  <div className="hidden md:flex items-center gap-2">
-                    <button
-                      type="button"
-                      id="navbar-signin-btn"
-                      onClick={() => openModal("login")}
-                      className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-3 py-2 cursor-pointer"
-                    >
-                      Login
-                    </button>
-                    <button
-                      type="button"
-                      id="navbar-register-btn"
-                      onClick={() => openModal("register")}
-                      className="text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-4 py-2.5 rounded-xl cursor-pointer"
-                    >
-                      Daftar
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2">
                   <button
+                    type="button"
+                    id="navbar-signin-btn"
                     onClick={() => openModal("login")}
-                    className="md:hidden p-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer"
-                    aria-label="Sign In"
+                    className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-2.5 py-1.5 md:px-3 md:py-2 cursor-pointer"
                   >
-                    <User className="w-5 h-5" />
+                    Login
                   </button>
-                </>
+                  <button
+                    type="button"
+                    id="navbar-register-btn"
+                    onClick={() => openModal("register")}
+                    className="text-[10px] md:text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-3 py-2.5 md:px-4 md:py-2.5 rounded-xl cursor-pointer"
+                  >
+                    Daftar
+                  </button>
+                </div>
               )
             )}
 
@@ -284,13 +293,26 @@ export const Navbar: React.FC = () => {
               {hasMounted && (
                 session?.user ? (
                   <div className="flex flex-col gap-3">
-                    <div className="px-2">
-                      <p className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
-                        Logged in as
-                      </p>
-                      <p className="text-xs font-bold truncate text-brand-black">
-                        {session.user.email}
-                      </p>
+                    <div className="px-2 flex items-center gap-3 pb-3 border-b border-brand-light/50 mb-1">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || "Avatar"}
+                          className="w-10 h-10 rounded-full object-cover border border-brand-light"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-brand-black text-brand-white flex items-center justify-center font-black text-xs uppercase border border-brand-light">
+                          {(session.user.name || session.user.email || "US").substring(0, 2)}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
+                          Logged in as
+                        </p>
+                        <p className="text-xs font-bold truncate text-brand-black">
+                          {session.user.name || session.user.email}
+                        </p>
+                      </div>
                     </div>
                     {session.user.role === "ADMIN" && (
                       <Link
@@ -302,19 +324,14 @@ export const Navbar: React.FC = () => {
                       </Link>
                     )}
                     <Link
-                      href="/orders"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
-                    >
-                      Pesanan Saya
-                    </Link>
-                    <Link
-                      href="/profile"
+                      href="/profile?tab=profile"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
                     >
                       Profil Saya
                     </Link>
+
+
                     <button
                       type="button"
                       onClick={() => {

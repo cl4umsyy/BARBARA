@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useCartStore } from "@/stores/useCartStore";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { Heart, Ruler, Check } from "lucide-react";
+import { Heart, Ruler, Check, Star } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ProductImage {
@@ -24,15 +24,32 @@ interface ProductVariant {
   sku: string;
 }
 
+interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string | null;
+  rating: number;
+  review: string;
+  reviewImages: string[];
+  createdAt: string;
+  adminReply?: string | null;
+  adminRepliedAt?: string | null;
+}
+
 interface Product {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   material: string | null;
   care: string | null;
   images: ProductImage[];
   variants: ProductVariant[];
+  reviews?: Review[];
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 interface ProductDetailClientProps {
@@ -67,6 +84,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [activeZoomImage, setActiveZoomImage] = useState<string | null>(null);
 
   // Stage 1 Logging: User opens the product page
   useEffect(() => {
@@ -107,6 +125,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
       {
         variantId: activeVariant.id,
         productId: product.id,
+        slug: product.slug,
         name: product.name,
         size: activeVariant.size,
         color: activeVariant.color,
@@ -169,6 +188,24 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           <h1 className="text-xl md:text-3xl font-extrabold uppercase tracking-widest text-brand-black">
             {product.name}
           </h1>
+          {product.averageRating !== undefined && product.averageRating > 0 && (
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.round(product.averageRating || 0)
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-brand-light fill-brand-light/30"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-bold text-brand-black">{product.averageRating} / 5.0</span>
+              <span className="text-xs text-brand-gray-light font-medium">({product.reviewCount} ulasan)</span>
+            </div>
+          )}
           <p className="text-xl md:text-2xl font-black text-brand-black mt-2">
             {formatPrice(product.price)}
           </p>
@@ -381,6 +418,192 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           </div>
         </div>
       </Modal>
+
+      {/* Reviews Section */}
+      <div className="border-t border-brand-light pt-16 flex flex-col gap-10">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-gray-light">
+            Customer Feedback
+          </p>
+          <h2 className="text-xl md:text-3xl font-black tracking-widest text-brand-black mt-1">
+            ULASAN & RATING
+          </h2>
+        </div>
+
+        {product.reviews && product.reviews.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            {/* Rating Summary (4 Columns) */}
+            <div className="lg:col-span-4 bg-[#fbfbfb] border border-brand-light p-8 rounded-2xl flex flex-col gap-6">
+              <div className="flex flex-col items-center justify-center text-center py-4 border-b border-brand-light/70">
+                <span className="text-5xl font-black text-brand-black">
+                  {product.averageRating?.toFixed(1) || "0.0"}
+                </span>
+                <span className="text-xs text-brand-gray font-bold uppercase tracking-wider mt-1">
+                  dari 5.0
+                </span>
+                <div className="flex items-center gap-1 mt-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i < Math.round(product.averageRating || 0)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-brand-light fill-brand-light/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-brand-gray-light font-medium mt-2">
+                  ({product.reviewCount} ulasan)
+                </span>
+              </div>
+
+              {/* Star breakdown */}
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: 5 }).map((_, idx) => {
+                  const starVal = 5 - idx;
+                  const count = product.reviews!.filter((r) => r.rating === starVal).length;
+                  const percentage = product.reviews!.length > 0 ? (count / product.reviews!.length) * 100 : 0;
+                  return (
+                    <div key={starVal} className="flex items-center gap-3 text-xs">
+                      <span className="w-3 font-bold text-brand-black">{starVal}</span>
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 flex-shrink-0" />
+                      <div className="flex-1 h-2 bg-brand-light rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-brand-black rounded-full" 
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="w-8 text-right font-medium text-brand-gray-light">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Reviews List (8 Columns) */}
+            <div className="lg:col-span-8 flex flex-col gap-8">
+              {product.reviews.map((rev) => (
+                <div 
+                  key={rev.id} 
+                  className="pb-8 border-b border-brand-light last:pb-0 last:border-b-0 flex flex-col gap-4"
+                >
+                  {/* Review Header */}
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex items-center gap-3">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full bg-brand-light border border-brand-light overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {rev.userAvatar ? (
+                          <Image
+                            src={rev.userAvatar}
+                            alt={rev.userName}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold text-brand-gray">
+                            {rev.userName.slice(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      {/* Name & Stars */}
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-brand-black">
+                          {rev.userName}
+                        </h4>
+                        <div className="flex items-center gap-0.5 mt-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < rev.rating ? "fill-amber-400 text-amber-400" : "text-brand-light fill-brand-light/30"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] text-brand-gray-light font-medium">
+                      {new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(rev.createdAt))}
+                    </span>
+                  </div>
+
+                  {/* Review Comment */}
+                  <p className="text-xs text-brand-gray leading-relaxed whitespace-pre-wrap pl-[52px]">
+                    {rev.review}
+                  </p>
+
+                  {/* Review Images */}
+                  {rev.reviewImages && rev.reviewImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pl-[52px] mt-1">
+                      {rev.reviewImages.map((img, i) => (
+                        <div 
+                          key={i}
+                          onClick={() => setActiveZoomImage(img)}
+                          className="relative w-16 h-16 rounded-xl overflow-hidden bg-brand-light border border-brand-light cursor-pointer hover:opacity-80 transition-opacity"
+                        >
+                          <Image
+                            src={img}
+                            alt={`Ulasan image ${i + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Admin Reply */}
+                  {rev.adminReply && (
+                    <div className="mt-2 ml-[52px] pl-4 border-l-2 border-brand-black bg-[#fbfbfb] p-4 rounded-r-xl space-y-1">
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-brand-black">
+                          Balasan Resmi Tim barbara
+                        </span>
+                        {rev.adminRepliedAt && (
+                          <span className="text-[9px] text-brand-gray-light font-medium">
+                            {new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(rev.adminRepliedAt))}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-brand-gray leading-relaxed whitespace-pre-wrap">
+                        {rev.adminReply}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-[#fbfbfb] border border-brand-light border-dashed p-16 rounded-2xl flex flex-col items-center justify-center text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-gray-light">
+              Belum Ada Ulasan
+            </span>
+            <p className="text-xs text-brand-gray mt-2 max-w-xs leading-relaxed">
+              Jadilah yang pertama untuk memberikan ulasan setelah melakukan pembelian produk ini!
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Review Image Zoom Lightbox */}
+      {activeZoomImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-brand-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setActiveZoomImage(null)}
+        >
+          <div className="relative max-w-3xl max-h-[85vh] w-full h-full flex items-center justify-center">
+            <img
+              src={activeZoomImage}
+              alt="Zoomed review image"
+              className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

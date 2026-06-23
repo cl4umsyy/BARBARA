@@ -15,6 +15,7 @@ export default auth((req) => {
 
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isAccountRoute = nextUrl.pathname.startsWith("/account");
+  const isCartRoute = nextUrl.pathname.startsWith("/cart");
   const isCheckoutRoute = nextUrl.pathname.startsWith("/checkout");
   const isProfileRoute = nextUrl.pathname.startsWith("/profile");
   const isOrdersRoute = nextUrl.pathname.startsWith("/orders");
@@ -24,10 +25,9 @@ export default auth((req) => {
   // ── Admin: must be logged in as ADMIN ────────────────────────────────
   if (isAdminRoute) {
     if (!isLoggedIn) {
-      console.log(`[Middleware Redirect] Admin route ${nextUrl.pathname} protected: Not logged in. Redirecting to auth modal.`);
+      console.log(`[Middleware Redirect] Admin route ${nextUrl.pathname} protected: Not logged in. Redirecting to login page.`);
       const callbackUrl = nextUrl.pathname + nextUrl.search;
-      const redirectUrl = new URL("/", nextUrl);
-      redirectUrl.searchParams.set("openAuth", "login");
+      const redirectUrl = new URL("/auth/login", nextUrl);
       redirectUrl.searchParams.set("callbackUrl", callbackUrl);
       return NextResponse.redirect(redirectUrl);
     }
@@ -37,11 +37,10 @@ export default auth((req) => {
     }
   }
 
-  // ── Protected routes: redirect to home with modal trigger ─────────────
-  // We use /?openAuth=login&callbackUrl=<path> so the AuthModal opens
-  // automatically rather than sending users to a separate auth page.
+  // ── Protected routes: redirect to login page ─────────────────────────
   const isProtectedRoute =
     isAccountRoute ||
+    isCartRoute ||
     isCheckoutRoute ||
     isProfileRoute ||
     isOrdersRoute ||
@@ -49,9 +48,8 @@ export default auth((req) => {
 
   if (isProtectedRoute && !isLoggedIn) {
     const callbackUrl = nextUrl.pathname + nextUrl.search;
-    console.log(`[Middleware Redirect] Protected route ${nextUrl.pathname}: Not logged in. Redirecting with callbackUrl: ${callbackUrl}`);
-    const redirectUrl = new URL("/", nextUrl);
-    redirectUrl.searchParams.set("openAuth", "login");
+    console.log(`[Middleware Redirect] Protected route ${nextUrl.pathname}: Not logged in. Redirecting to /auth/login with callbackUrl: ${callbackUrl}`);
+    const redirectUrl = new URL("/auth/login", nextUrl);
     redirectUrl.searchParams.set("callbackUrl", callbackUrl);
     return NextResponse.redirect(redirectUrl);
   }
@@ -73,6 +71,7 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/account/:path*",
+    "/cart/:path*",
     "/checkout/:path*",
     "/profile/:path*",
     "/orders/:path*",

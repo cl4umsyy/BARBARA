@@ -21,12 +21,20 @@ function CartSync() {
     });
   };
 
+  const prevStatusRef = React.useRef(status);
+
   useEffect(() => {
     // Reset sync flag if user logs out
     if (status === "unauthenticated") {
       setIsInitialSynced(false);
       initialSyncPromiseRef.current = null;
+
+      if (prevStatusRef.current === "authenticated") {
+        console.log("[LOG][CartSync] User logged out. Clearing local cart...");
+        useCartStore.getState().clearCart();
+      }
     }
+    prevStatusRef.current = status;
   }, [status]);
 
   // 1. Initial login/mount sync: runs EXACTLY once when user is authenticated

@@ -98,7 +98,7 @@ export default function CartPage() {
               >
                 {/* Product Image */}
                 <Link
-                  href={`/shop/${item.variantId}`} // Use link to shop details
+                  href={`/shop/${item.slug || item.productId}`} // Use link to shop details
                   className="relative aspect-[3/4] w-24 md:w-32 bg-brand-light shrink-0 overflow-hidden border border-brand-light rounded-xl"
                 >
                   <Image
@@ -113,7 +113,7 @@ export default function CartPage() {
                 <div className="flex-1 flex flex-col md:flex-row justify-between gap-4">
                   <div className="flex flex-col gap-1.5">
                     <Link
-                      href={`/shop/${item.variantId}`}
+                      href={`/shop/${item.slug || item.productId}`}
                       className="text-sm font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity"
                     >
                       {item.name}
