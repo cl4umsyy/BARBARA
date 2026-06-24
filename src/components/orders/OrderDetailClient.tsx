@@ -202,7 +202,7 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ userId, or
       {/* Top action row */}
       <div className="flex items-center justify-between border-b border-brand-light pb-4">
         <Link 
-          href="/orders" 
+          href="/profile?tab=orders" 
           className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

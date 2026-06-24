@@ -18,7 +18,7 @@ export default async function ProfilePage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  const initialTab = (tab === "profile" || tab === "addresses" || tab === "security") ? tab : "profile";
+  const initialTab = (tab === "profile" || tab === "addresses" || tab === "orders" || tab === "security") ? tab : "profile";
 
   const session = await auth();
   if (!session?.user) {
@@ -144,10 +144,117 @@ export default async function ProfilePage({
     createdAt: addr.created_at,
   }));
 
+  // Fetch orders from DB directly
+  const { data: dbOrders, error: ordersErr } = await supabaseAdmin
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      status,
+      subtotal,
+      shipping_cost,
+      total,
+      payment_method,
+      payment_status,
+      created_at,
+      order_items (
+        id,
+        product_name,
+        size,
+        color,
+        quantity,
+        price,
+        variant:product_variants (
+          product_id,
+          product:products (
+            slug,
+            images:product_images (
+              url,
+              order
+            )
+          )
+        )
+      )
+    `)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (ordersErr) {
+    console.error("ProfilePage: Error fetching orders:", ordersErr);
+  }
+
+  // Fetch initial reviews written by this user
+  const { data: dbReviews, error: reviewsErr } = await supabaseAdmin
+    .from("reviews")
+    .select("id, order_id, product_id, rating, review, review_images, created_at")
+    .eq("user_id", userId);
+
+  if (reviewsErr) {
+    console.error("ProfilePage: Error fetching user reviews:", reviewsErr);
+  }
+
+  const initialReviews = (dbReviews || []).map((r: any) => ({
+    id: r.id,
+    orderId: r.order_id,
+    productId: r.product_id,
+    rating: r.rating,
+    review: r.review,
+    reviewImages: r.review_images || [],
+    createdAt: r.created_at,
+  }));
+
+  const initialOrders = (dbOrders || []).map((o: any) => {
+    const orderItems = (o.order_items || []).map((item: any) => {
+      const rawVariant = item.variant;
+      const variant = Array.isArray(rawVariant) ? rawVariant[0] : rawVariant;
+      let imageUrl = null;
+      let productId = "";
+      let productSlug = null;
+      if (variant) {
+        productId = variant.product_id;
+        if (variant.product) {
+          const product = Array.isArray(variant.product) ? variant.product[0] : variant.product;
+          productSlug = product?.slug || null;
+          if (product?.images && product.images.length > 0) {
+            const sortedImages = [...product.images].sort((a: any, b: any) => a.order - b.order);
+            imageUrl = sortedImages[0]?.url || null;
+          }
+        }
+      }
+
+      return {
+        id: item.id,
+        productId,
+        productSlug,
+        productName: item.product_name,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+        price: Number(item.price),
+        imageUrl,
+      };
+    });
+
+    return {
+      id: o.id,
+      orderNumber: o.order_number,
+      status: o.status,
+      subtotal: Number(o.subtotal),
+      shippingCost: Number(o.shipping_cost),
+      total: Number(o.total),
+      paymentMethod: o.payment_method,
+      paymentStatus: o.payment_status,
+      createdAt: o.created_at,
+      orderItems,
+    };
+  });
+
   return (
     <ProfileClient 
       initialProfile={initialProfile} 
       initialAddresses={initialAddresses} 
+      initialOrders={initialOrders}
+      initialReviews={initialReviews}
       initialTab={initialTab}
     />
   );

@@ -174,7 +174,7 @@ export const Navbar: React.FC = () => {
                           </Link>
                           {session.user.role !== "ADMIN" && (
                             <Link
-                              href="/orders"
+                              href="/profile?tab=orders"
                               onClick={() => setIsProfileDropdownOpen(false)}
                               className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors"
                             >
@@ -349,7 +349,7 @@ export const Navbar: React.FC = () => {
                     </Link>
                     {session.user.role !== "ADMIN" && (
                       <Link
-                        href="/orders"
+                        href="/profile?tab=orders"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
                       >

@@ -22,13 +22,16 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle2,
-  X
+  X,
+  Package
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import Image from "next/image";
+import Link from "next/link";
+import { OrdersClient } from "@/components/orders/OrdersClient";
 
 interface ProfileData {
   id: string;
@@ -54,24 +57,91 @@ interface AddressData {
   createdAt: string;
 }
 
+interface OrderItem {
+  id: string;
+  productId: string;
+  productSlug?: string | null;
+  productName: string;
+  size: string;
+  color: string;
+  quantity: number;
+  price: number;
+  imageUrl: string | null;
+}
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+  paymentMethod: string | null;
+  paymentStatus: string;
+  createdAt: string;
+  orderItems: OrderItem[];
+}
+
+interface Review {
+  id: string;
+  orderId: string;
+  productId: string;
+  rating: number;
+  review: string;
+  reviewImages: string[];
+  createdAt: string;
+}
+
 interface ProfileClientProps {
   initialProfile: ProfileData;
   initialAddresses: AddressData[];
-  initialTab?: "profile" | "addresses" | "security";
+  initialOrders?: Order[];
+  initialReviews?: Review[];
+  initialTab?: "profile" | "addresses" | "orders" | "security";
 }
 
-export default function ProfileClient({ initialProfile, initialAddresses, initialTab }: ProfileClientProps) {
+export default function ProfileClient({ 
+  initialProfile, 
+  initialAddresses, 
+  initialOrders = [],
+  initialReviews = [],
+  initialTab 
+}: ProfileClientProps) {
   const router = useRouter();
   const { data: session, update } = useSession();
   
-  // Navigation tabs: 'profile' | 'addresses' | 'security'
-  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "security">(initialTab || "profile");
+  // Navigation tabs: 'profile' | 'addresses' | 'orders' | 'security'
+  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "orders" | "security">(initialTab || "profile");
 
   useEffect(() => {
     if (initialTab) {
       setActiveTab(initialTab);
     }
   }, [initialTab]);
+
+  const orders = initialOrders;
+  const reviews = initialReviews;
+
+  const totalSpending = orders
+    .filter((order) => order.paymentStatus === "PAID")
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const completedOrdersCount = orders.filter(
+    (order) => order.status === "DELIVERED" || order.status === "COMPLETED"
+  ).length;
+
+  const formatPrice = (val: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(val);
+  };
+
+  const handleTabChange = (tab: "profile" | "addresses" | "orders" | "security") => {
+    setActiveTab(tab);
+    router.push(`/profile?tab=${tab}`);
+  };
 
   // Notification / toast status
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -703,7 +773,7 @@ export default function ProfileClient({ initialProfile, initialAddresses, initia
             {/* Sidebar Navigation Buttons */}
             <div className="bg-brand-white border border-brand-light rounded-2xl overflow-hidden p-2 flex flex-col gap-1">
               <button
-                onClick={() => setActiveTab("profile")}
+                onClick={() => handleTabChange("profile")}
                 className={`flex items-center gap-3 w-full text-left px-4 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                   activeTab === "profile" 
                     ? "bg-brand-black text-brand-white" 
@@ -715,7 +785,7 @@ export default function ProfileClient({ initialProfile, initialAddresses, initia
               </button>
               
               <button
-                onClick={() => setActiveTab("addresses")}
+                onClick={() => handleTabChange("addresses")}
                 className={`flex items-center gap-3 w-full text-left px-4 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                   activeTab === "addresses" 
                     ? "bg-brand-black text-brand-white" 
@@ -725,9 +795,21 @@ export default function ProfileClient({ initialProfile, initialAddresses, initia
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 Alamat Pengiriman
               </button>
+
+              <button
+                onClick={() => handleTabChange("orders")}
+                className={`flex items-center gap-3 w-full text-left px-4 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
+                  activeTab === "orders" 
+                    ? "bg-brand-black text-brand-white" 
+                    : "text-brand-black hover:bg-brand-light"
+                }`}
+              >
+                <Package className="w-4 h-4 flex-shrink-0" />
+                Pesanan Saya
+              </button>
               
               <button
-                onClick={() => setActiveTab("security")}
+                onClick={() => handleTabChange("security")}
                 className={`flex items-center gap-3 w-full text-left px-4 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                   activeTab === "security" 
                     ? "bg-brand-black text-brand-white" 
@@ -1029,6 +1111,74 @@ export default function ProfileClient({ initialProfile, initialAddresses, initia
                   </div>
                 )}
 
+              </div>
+            )}
+
+            {/* --- TAB: PESANAN SAYA --- */}
+            {activeTab === "orders" && (
+              <div className="flex flex-col gap-6 animate-fade-in">
+                <div className="border-b border-brand-light pb-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-brand-black">
+                    Pesanan Saya
+                  </h3>
+                  <p className="text-[11px] text-brand-gray mt-1 leading-relaxed">
+                    Kelola dan pantau status pesanan belanja Anda di BARBARA.
+                  </p>
+                </div>
+
+                {orders.length === 0 ? (
+                  /* Empty state for orders */
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-14 h-14 bg-brand-light flex items-center justify-center rounded-2xl border border-brand-light mb-4">
+                      <Package className="w-5 h-5 text-brand-gray-light" />
+                    </div>
+                    <h4 className="font-bold text-brand-black text-sm uppercase tracking-wider">
+                      Anda belum memiliki pesanan.
+                    </h4>
+                    <p className="text-[11px] text-brand-gray mt-1.5 max-w-xs leading-relaxed">
+                      Anda belum melakukan pemesanan apa pun. Jelajahi katalog kami dan mulai belanja produk streetwear barbara.
+                    </p>
+                    <Link href="/shop" className="mt-6">
+                      <button className="font-black uppercase tracking-wider text-[10px] border-2 border-brand-black bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black px-6 py-3.5 rounded-xl transition-all duration-300 cursor-pointer">
+                        Mulai Belanja
+                      </button>
+                    </Link>
+                  </div>
+                ) : (
+                  /* Orders dashboard and list */
+                  <div>
+                    {/* Stats Dashboard Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                      <div className="border border-brand-light rounded-xl p-4 bg-[#fbfbfb] flex flex-col justify-between min-h-[90px]">
+                        <span className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
+                          Total Pesanan
+                        </span>
+                        <p className="text-xl font-black text-brand-black mt-2">
+                          {orders.length}
+                        </p>
+                      </div>
+                      <div className="border border-brand-light rounded-xl p-4 bg-[#fbfbfb] flex flex-col justify-between min-h-[90px]">
+                        <span className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
+                          Total Belanja
+                        </span>
+                        <p className="text-xl font-black text-brand-black mt-2">
+                          {formatPrice(totalSpending)}
+                        </p>
+                      </div>
+                      <div className="border border-brand-light rounded-xl p-4 bg-[#fbfbfb] flex flex-col justify-between min-h-[90px]">
+                        <span className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
+                          Pesanan Selesai
+                        </span>
+                        <p className="text-xl font-black text-brand-black mt-2">
+                          {completedOrdersCount}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* OrdersClient list wrapper */}
+                    <OrdersClient userId={userProfile.id} orders={orders} initialReviews={reviews} />
+                  </div>
+                )}
               </div>
             )}
 
