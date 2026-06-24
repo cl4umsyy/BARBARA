@@ -109,7 +109,7 @@ export default function AboutPage() {
               </span>
               <h3 className="text-lg font-black tracking-wider uppercase mt-2">Cerita Kami</h3>
               <p className="text-xs text-brand-gray-light font-medium leading-relaxed">
-                Dimulai sebagai kurasi thrift premium berskala lokal, BARBARA berkembang menjadi platform fashion online tepercaya yang menawarkan koleksi unisex handpicked terlengkap untuk pria dan wanita. Kami konsisten menyajikan produk dengan siluet minimalis, warna-warna netral, dan detail modern yang menjawab kebutuhan tren masa kini.
+                Didirikan dengan komitmen untuk menghadirkan desain fashion modern kontemporer yang berkarakter, BARBARA berkembang menjadi brand fashion online tepercaya yang menawarkan koleksi unisex kontemporer terlengkap untuk pria dan wanita. Kami konsisten menyajikan produk dengan siluet minimalis, warna-warna netral, dan detail modern yang menjawab kebutuhan tren masa kini.
               </p>
             </div>
 

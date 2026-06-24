@@ -150,7 +150,7 @@ export default async function Home() {
           </h1>
           <p className="text-[10px] md:text-xs tracking-widest text-brand-light font-medium uppercase max-w-2xl leading-relaxed">
             Contemporary unisex streetwear. Bold cuts, raw textures, pure monochrome. 
-            Thrift-like aesthetics with brand-new premium quality standards.
+            Contemporary aesthetics with brand-new premium quality standards.
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             <Link href="/shop">

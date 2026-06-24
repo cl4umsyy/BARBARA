@@ -6,7 +6,7 @@ export const revalidate = 0; // Disable dynamic caching to ensure fresh info
 const fallbackContactInfo = {
   id: "contact_info_default",
   storeName: "BARBARA",
-  description: "Premium fashion & thrift store. Handpicked quality products for your everyday curated style.",
+  description: "Premium contemporary fashion store. Handpicked quality products for your everyday curated style.",
   address: "Jl. Sunan Kudus No. 100, Kudus, Jawa Tengah 59313, Indonesia",
   whatsapp: "6281234567890",
   email: "contact@barbarastore.com",

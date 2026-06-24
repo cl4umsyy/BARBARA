@@ -20,7 +20,7 @@ export default async function ContactPage() {
 
   const formattedContactInfo = {
     storeName: contactInfo?.storeName || "BARBARA",
-    description: contactInfo?.description || "Premium fashion & thrift store. Handpicked quality products for your everyday curated style.",
+    description: contactInfo?.description || "Premium contemporary fashion store. Handpicked quality products for your everyday curated style.",
     address: contactInfo?.address || "Jl. Sunan Kudus No. 100, Kudus, Jawa Tengah 59313, Indonesia",
     whatsapp: contactInfo?.whatsapp || "6281234567890",
     email: contactInfo?.email || "contact@barbarastore.com",

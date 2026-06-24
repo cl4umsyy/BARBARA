@@ -66,7 +66,7 @@ export async function generateMetadata(
     console.error("[ProductDetailPage generateMetadata] Database error:", error);
     return {
       title: "Premium Streetwear | barbara",
-      description: "Premium fashion & thrift store. Handpicked quality products for your everyday curated style.",
+      description: "Premium contemporary fashion store. Handpicked quality products for your everyday curated style.",
     };
   }
 }
