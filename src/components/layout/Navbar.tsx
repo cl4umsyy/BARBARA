@@ -49,9 +49,9 @@ export const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { name: "Semua Toko", href: "/shop" },
     { name: "Pria", href: "/shop?gender=pria" },
     { name: "Wanita", href: "/shop?gender=wanita" },
+    { name: "Sale", href: "/shop?sale=true", isSale: true },
     { name: "Tentang", href: "/about" },
     { name: "Kontak", href: "/contact" },
   ];
@@ -230,17 +230,15 @@ export const Navbar: React.FC = () => {
             <Link
               key={link.name}
               href={link.href}
-              className="hover:opacity-75 transition-opacity"
+              className={
+                link.isSale
+                  ? "text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em] transition-colors"
+                  : "hover:opacity-75 transition-opacity"
+              }
             >
               {link.name}
             </Link>
           ))}
-          <Link
-            href="/shop?sale=true"
-            className="text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em] transition-colors"
-          >
-            Sale
-          </Link>
         </div>
       </div>
 
@@ -283,18 +281,15 @@ export const Navbar: React.FC = () => {
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="hover:opacity-70 transition-opacity"
+                  className={
+                    link.isSale
+                      ? "text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em]"
+                      : "hover:opacity-70 transition-opacity"
+                  }
                 >
                   {link.name}
                 </Link>
               ))}
-              <Link
-                href="/shop?sale=true"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em]"
-              >
-                Sale
-              </Link>
             </nav>
 
             {/* Mobile Auth Actions */}
