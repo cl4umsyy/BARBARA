@@ -200,24 +200,37 @@ export const Navbar: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <>
+                  {/* Desktop Auth Buttons */}
+                  <div className="hidden md:flex items-center gap-2">
+                    <button
+                      type="button"
+                      id="navbar-signin-btn"
+                      onClick={() => openModal("login")}
+                      className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-3 py-2 cursor-pointer"
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      id="navbar-register-btn"
+                      onClick={() => openModal("register")}
+                      className="text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-4 py-2.5 rounded-xl cursor-pointer"
+                    >
+                      Daftar
+                    </button>
+                  </div>
+                  {/* Mobile Auth Button (Icon Only) */}
                   <button
                     type="button"
-                    id="navbar-signin-btn"
+                    id="navbar-signin-btn-mobile"
                     onClick={() => openModal("login")}
-                    className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-2.5 py-1.5 md:px-3 md:py-2 cursor-pointer"
+                    className="md:hidden p-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer"
+                    aria-label="Login"
                   >
-                    Login
+                    <User className="w-5 h-5" />
                   </button>
-                  <button
-                    type="button"
-                    id="navbar-register-btn"
-                    onClick={() => openModal("register")}
-                    className="text-[10px] md:text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-3 py-2.5 md:px-4 md:py-2.5 rounded-xl cursor-pointer"
-                  >
-                    Daftar
-                  </button>
-                </div>
+                </>
               )
             )}
 

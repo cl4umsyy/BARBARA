@@ -369,44 +369,46 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             Semua ukuran disesuaikan untuk standar oversized unisex barbara. Silakan ukur sebelum memesan.
           </p>
 
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b-2 border-brand-black">
-                <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
-                  Size
-                </th>
-                <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
-                  Chest Width (cm)
-                </th>
-                <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
-                  Length (cm)
-                </th>
-                <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
-                  Sleeve Length (cm)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-brand-light">
-                <td className="py-3 font-bold text-brand-black">M</td>
-                <td className="py-3 text-brand-gray">54</td>
-                <td className="py-3 text-brand-gray">72</td>
-                <td className="py-3 text-brand-gray">24</td>
-              </tr>
-              <tr className="border-b border-brand-light">
-                <td className="py-3 font-bold text-brand-black">L</td>
-                <td className="py-3 text-brand-gray">57</td>
-                <td className="py-3 text-brand-gray">75</td>
-                <td className="py-3 text-brand-gray">25</td>
-              </tr>
-              <tr className="border-b border-brand-black">
-                <td className="py-3 font-bold text-brand-black">XL</td>
-                <td className="py-3 text-brand-gray">60</td>
-                <td className="py-3 text-brand-gray">78</td>
-                <td className="py-3 text-brand-gray">26</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="overflow-x-auto w-full scrollbar-none">
+            <table className="w-full min-w-[400px] text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b-2 border-brand-black">
+                  <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
+                    Size
+                  </th>
+                  <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
+                    Chest Width (cm)
+                  </th>
+                  <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
+                    Length (cm)
+                  </th>
+                  <th className="py-3 font-bold uppercase tracking-wider text-brand-black">
+                    Sleeve Length (cm)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-brand-light">
+                  <td className="py-3 font-bold text-brand-black">M</td>
+                  <td className="py-3 text-brand-gray">54</td>
+                  <td className="py-3 text-brand-gray">72</td>
+                  <td className="py-3 text-brand-gray">24</td>
+                </tr>
+                <tr className="border-b border-brand-light">
+                  <td className="py-3 font-bold text-brand-black">L</td>
+                  <td className="py-3 text-brand-gray">57</td>
+                  <td className="py-3 text-brand-gray">75</td>
+                  <td className="py-3 text-brand-gray">25</td>
+                </tr>
+                <tr className="border-b border-brand-black">
+                  <td className="py-3 font-bold text-brand-black">XL</td>
+                  <td className="py-3 text-brand-gray">60</td>
+                  <td className="py-3 text-brand-gray">78</td>
+                  <td className="py-3 text-brand-gray">26</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
           <div className="bg-brand-light p-4 rounded-xl">
             <span className="text-[10px] uppercase font-bold tracking-wider text-brand-gray-light block">
