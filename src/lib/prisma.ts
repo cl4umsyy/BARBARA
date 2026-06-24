@@ -3,8 +3,20 @@ import { Pool } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const prismaClientSingleton = () => {
+  const dbUrl = process.env.DATABASE_URL;
+  let dbHost = "NOT_SET";
+  if (dbUrl) {
+    try {
+      const parsed = new URL(dbUrl);
+      dbHost = parsed.host;
+    } catch {
+      dbHost = dbUrl.substring(0, 15) + "...";
+    }
+  }
+  console.log(`[Prisma Runtime] Instantiating PrismaClient with host: ${dbHost}`);
+
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: dbUrl,
   });
   const adapter = new PrismaPg(pool);
 
