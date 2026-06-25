@@ -60,7 +60,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
   ];
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" });
+    signOut({ callbackUrl: window.location.origin });
   };
 
   const SidebarContent = () => (

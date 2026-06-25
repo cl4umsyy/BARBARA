@@ -187,7 +187,7 @@ export const Navbar: React.FC = () => {
                             type="button"
                             onClick={() => {
                               setIsProfileDropdownOpen(false);
-                              signOut({ callbackUrl: "/" });
+                              signOut({ callbackUrl: window.location.origin });
                             }}
                             className="flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors w-full text-left cursor-pointer"
                           >
@@ -362,7 +362,7 @@ export const Navbar: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        signOut({ callbackUrl: "/" });
+                        signOut({ callbackUrl: window.location.origin });
                       }}
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 hover:opacity-70 transition-opacity px-2 py-1 text-left cursor-pointer"
                     >

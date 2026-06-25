@@ -636,7 +636,7 @@ export default function ProfileClient({
   };
 
   const handleSignOut = async () => {
-    signOut({ callbackUrl: "/" });
+    signOut({ callbackUrl: window.location.origin });
   };
 
   // Date Formatting Helper
