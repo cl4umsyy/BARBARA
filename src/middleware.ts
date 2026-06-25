@@ -19,7 +19,7 @@ export default auth((req) => {
   const isCheckoutRoute = nextUrl.pathname.startsWith("/checkout");
   const isProfileRoute = nextUrl.pathname.startsWith("/profile");
   const isOrdersRoute = nextUrl.pathname.startsWith("/orders");
-  const isWishlistRoute = nextUrl.pathname.startsWith("/wishlist");
+  const isFavoritRoute = nextUrl.pathname.startsWith("/favorit");
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 
   // ── Admin: must be logged in as ADMIN ────────────────────────────────
@@ -44,7 +44,7 @@ export default auth((req) => {
     isCheckoutRoute ||
     isProfileRoute ||
     isOrdersRoute ||
-    isWishlistRoute;
+    isFavoritRoute;
 
   if (isProtectedRoute && !isLoggedIn) {
     const callbackUrl = nextUrl.pathname + nextUrl.search;
@@ -75,7 +75,7 @@ export const config = {
     "/checkout/:path*",
     "/profile/:path*",
     "/orders/:path*",
-    "/wishlist/:path*",
+    "/favorit/:path*",
     "/auth/:path*",
   ],
 };

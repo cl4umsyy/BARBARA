@@ -3,10 +3,14 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/Badge";
+import { useFavoriteStore } from "@/stores/useFavoriteStore";
+import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { Heart, Star } from "lucide-react";
 
 interface ProductCardProps {
+  id?: string;
   slug: string;
   name: string;
   price: number;
@@ -24,6 +28,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
+  id,
   slug,
   name,
   price,
@@ -39,7 +44,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   rating,
   reviewCount,
 }) => {
-  const [isLiked, setIsLiked] = useState(false);
+  const { data: session } = useSession();
+  const isFavorite = useFavoriteStore((s) => (id ? s.isFavorite(id) : false));
+  const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
+  const openModal = useAuthModalStore((s) => s.openModal);
+
   const [likesCount, setLikesCount] = useState(() => {
     if (initialLikesCount !== undefined) return initialLikesCount;
     let hash = 0;
@@ -57,11 +66,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }).format(val);
   };
 
-  const handleLikeClick = (e: React.MouseEvent) => {
+  const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsLiked(!isLiked);
-    setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+
+    if (!session?.user) {
+      openModal("login");
+      return;
+    }
+
+    if (!id) return;
+
+    const wasLiked = isFavorite;
+    // Optimistic likes count update
+    setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
+    await toggleFavorite(id);
   };
 
   return (
@@ -89,11 +108,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <button
           onClick={handleLikeClick}
           className="absolute bottom-3 right-3 z-10 py-1 px-2.5 bg-brand-white/90 backdrop-blur-sm hover:bg-brand-white rounded-full text-brand-black shadow-md border border-brand-light/35 flex items-center gap-1 transition-all duration-300 cursor-pointer"
-          aria-label="Like Product"
+          aria-label="Favorit"
         >
           <Heart
             className={`w-3.5 h-3.5 transition-colors duration-300 ${
-              isLiked ? "fill-red-500 text-red-500" : "text-brand-black"
+              isFavorite ? "fill-red-500 text-red-500" : "text-brand-black"
             }`}
           />
           <span className="text-[10px] font-black text-brand-black">{likesCount}</span>

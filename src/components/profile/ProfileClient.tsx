@@ -23,7 +23,8 @@ import {
   AlertCircle,
   CheckCircle2,
   X,
-  Package
+  Package,
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -97,7 +98,7 @@ interface ProfileClientProps {
   initialAddresses: AddressData[];
   initialOrders?: Order[];
   initialReviews?: Review[];
-  initialTab?: "profile" | "addresses" | "orders" | "security";
+  initialTab?: "profile" | "addresses" | "orders" | "favorites" | "security";
 }
 
 export default function ProfileClient({ 
@@ -110,8 +111,8 @@ export default function ProfileClient({
   const router = useRouter();
   const { data: session, update } = useSession();
   
-  // Navigation tabs: 'profile' | 'addresses' | 'orders' | 'security'
-  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "orders" | "security">(initialTab || "profile");
+  // Navigation tabs
+  const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "orders" | "favorites" | "security">(initialTab || "profile");
 
   useEffect(() => {
     if (initialTab) {
@@ -138,7 +139,7 @@ export default function ProfileClient({
     }).format(val);
   };
 
-  const handleTabChange = (tab: "profile" | "addresses" | "orders" | "security") => {
+  const handleTabChange = (tab: "profile" | "addresses" | "orders" | "favorites" | "security") => {
     setActiveTab(tab);
     router.push(`/profile?tab=${tab}`);
   };
@@ -807,6 +808,18 @@ export default function ProfileClient({
                 <Package className="w-4 h-4 flex-shrink-0" />
                 Pesanan Saya
               </button>
+
+              <button
+                onClick={() => handleTabChange("favorites")}
+                className={`flex items-center gap-3 w-full text-left px-4 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
+                  activeTab === "favorites" 
+                    ? "bg-brand-black text-brand-white" 
+                    : "text-brand-black hover:bg-brand-light"
+                }`}
+              >
+                <Heart className="w-4 h-4 flex-shrink-0" />
+                Favorit
+              </button>
               
               <button
                 onClick={() => handleTabChange("security")}
@@ -1179,6 +1192,40 @@ export default function ProfileClient({
                     <OrdersClient userId={userProfile.id} orders={orders} initialReviews={reviews} />
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* --- TAB: FAVORIT --- */}
+            {activeTab === "favorites" && (
+              <div className="flex flex-col gap-6 animate-fade-in">
+                <div className="border-b border-brand-light pb-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-brand-black">
+                    Favorit Saya
+                  </h3>
+                  <p className="text-[11px] text-brand-gray mt-1 leading-relaxed">
+                    Produk yang Anda simpan sebagai favorit.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center py-10 text-center gap-6">
+                  <div className="w-14 h-14 bg-red-50 border border-red-100 flex items-center justify-center rounded-2xl">
+                    <Heart className="w-5 h-5 text-red-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-brand-black uppercase tracking-wider">
+                      Lihat semua produk favorit Anda
+                    </p>
+                    <p className="text-[11px] text-brand-gray mt-1.5 max-w-xs leading-relaxed">
+                      Kelola daftar produk favorit Anda, tambahkan ke keranjang, atau hapus dari daftar.
+                    </p>
+                  </div>
+                  <Link href="/favorit">
+                    <button className="font-black uppercase tracking-wider text-[10px] border-2 border-brand-black bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black px-6 py-3.5 rounded-xl transition-all duration-300 cursor-pointer flex items-center gap-2">
+                      <Heart className="w-3.5 h-3.5" />
+                      Buka Halaman Favorit
+                    </button>
+                  </Link>
+                </div>
               </div>
             )}
 

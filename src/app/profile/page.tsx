@@ -18,7 +18,7 @@ export default async function ProfilePage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  const initialTab = (tab === "profile" || tab === "addresses" || tab === "orders" || tab === "security") ? tab : "profile";
+  const initialTab = (tab === "profile" || tab === "addresses" || tab === "orders" || tab === "favorites" || tab === "security") ? tab : "profile";
 
   const session = await auth();
   if (!session?.user) {

@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { useCartStore } from "@/stores/useCartStore";
+import { useFavoriteStore } from "@/stores/useFavoriteStore";
+import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Heart, Ruler, Check, Star } from "lucide-react";
@@ -54,12 +57,27 @@ interface Product {
 
 interface ProductDetailClientProps {
   product: Product;
+  initialFavoriteIds?: string[];
 }
 
 export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   product,
+  initialFavoriteIds,
 }) => {
+  const { data: session } = useSession();
   const addItem = useCartStore((state) => state.addItem);
+  const isFavorite = useFavoriteStore((s) => s.isFavorite(product.id));
+  const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
+  const setFavoriteIds = useFavoriteStore((s) => s.setFavoriteIds);
+  const isFavLoaded = useFavoriteStore((s) => s.isLoaded);
+  const openModal = useAuthModalStore((s) => s.openModal);
+
+  // Seed store with SSR-fetched IDs (avoids an extra API round-trip)
+  useEffect(() => {
+    if (!isFavLoaded && initialFavoriteIds) {
+      setFavoriteIds(initialFavoriteIds);
+    }
+  }, [isFavLoaded, initialFavoriteIds, setFavoriteIds]);
 
   // Gallery State
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -83,7 +101,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isTogglingFav, setIsTogglingFav] = useState(false);
   const [activeZoomImage, setActiveZoomImage] = useState<string | null>(null);
 
   // Stage 1 Logging: User opens the product page
@@ -141,6 +159,16 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
       setIsAdded(false);
       setIsAdding(false);
     }, 1000);
+  };
+
+  const handleToggleFavorit = async () => {
+    if (!session?.user) {
+      openModal("login");
+      return;
+    }
+    setIsTogglingFav(true);
+    await toggleFavorite(product.id);
+    setIsTogglingFav(false);
   };
 
   return (
@@ -323,17 +351,26 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             )}
           </button>
 
-          {/* Add To Wishlist */}
+          {/* Tambah ke Favorit */}
           <button
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className="w-full font-bold uppercase tracking-[0.2em] text-sm py-5 transition-all duration-300 ease-out rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer bg-transparent text-brand-black hover:bg-brand-black hover:text-brand-white flex items-center justify-center gap-2"
+            onClick={handleToggleFavorit}
+            disabled={isTogglingFav}
+            className={`w-full font-bold uppercase tracking-[0.2em] text-sm py-5 transition-all duration-300 ease-out rounded-xl border-2 focus:outline-none cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 ${
+              isFavorite
+                ? "bg-red-50 text-red-500 border-red-300 hover:bg-red-500 hover:text-white hover:border-red-500"
+                : "bg-transparent text-brand-black border-brand-black hover:bg-brand-black hover:text-brand-white"
+            }`}
           >
             <Heart
               className={`w-4 h-4 transition-colors ${
-                isWishlisted ? "fill-brand-black text-brand-black group-hover:fill-brand-white hover:text-brand-white" : ""
+                isFavorite ? "fill-red-500" : ""
               }`}
             />
-            {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+            {isTogglingFav
+              ? "Memproses..."
+              : isFavorite
+              ? "Sudah Difavoritkan"
+              : "TAMBAH KE FAVORIT"}
           </button>
         </div>
 

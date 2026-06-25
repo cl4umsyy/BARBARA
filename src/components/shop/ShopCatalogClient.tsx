@@ -858,6 +858,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                 return (
                   <ProductCard
                     key={product.id}
+                    id={product.id}
                     slug={product.slug}
                     name={product.name}
                     price={product.price}

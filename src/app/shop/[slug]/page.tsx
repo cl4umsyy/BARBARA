@@ -1,6 +1,8 @@
 import React from "react";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase";
 import { ProductDetailClient } from "@/components/product/ProductDetailClient";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -198,6 +200,21 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     reviewCount: reviews.length,
   };
 
+  // Fetch user's favorite IDs server-side to seed the Zustand store
+  let initialFavoriteIds: string[] = [];
+  try {
+    const session = await auth();
+    if (session?.user?.id) {
+      const { data: favData } = await supabaseAdmin
+        .from("wishlists")
+        .select("product_id")
+        .eq("user_id", session.user.id);
+      initialFavoriteIds = (favData || []).map((f: any) => f.product_id);
+    }
+  } catch (e) {
+    // Non-critical: silently ignore
+  }
+
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -262,7 +279,7 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
       />
       
       <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:px-16">
-        <ProductDetailClient product={formattedProduct} />
+        <ProductDetailClient product={formattedProduct} initialFavoriteIds={initialFavoriteIds} />
       </div>
     </div>
   );

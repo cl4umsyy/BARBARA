@@ -6,7 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import { Search, ShoppingBag, User, X, LogOut, Menu } from "lucide-react";
+import { useFavoriteStore } from "@/stores/useFavoriteStore";
+import { Search, ShoppingBag, User, X, LogOut, Menu, Heart } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
@@ -14,6 +15,9 @@ export const Navbar: React.FC = () => {
   const { data: session, status } = useSession();
   const cartCount = useCartStore((state) => state.getCartCount());
   const openModal = useAuthModalStore((s) => s.openModal);
+  const favoriteCount = useFavoriteStore((s) => s.count);
+  const fetchFavorites = useFavoriteStore((s) => s.fetchFavorites);
+  const isFavLoaded = useFavoriteStore((s) => s.isLoaded);
 
   const [hasMounted, setHasMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +27,13 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  // Fetch favorites when user logs in
+  useEffect(() => {
+    if (session?.user && !isFavLoaded) {
+      fetchFavorites();
+    }
+  }, [session?.user, isFavLoaded, fetchFavorites]);
 
   console.log(
     `[Navbar Render] path: ${pathname}, status: ${status}, hasMounted: ${hasMounted}, hasUser: ${!!session?.user}, email: ${session?.user?.email ?? "none"}`
@@ -96,7 +107,33 @@ export const Navbar: React.FC = () => {
 
           {/* Action Icons (Right) */}
           <div className="flex items-center gap-4">
-            
+
+            {/* Favorit Icon */}
+            {hasMounted && (
+              session?.user ? (
+                <Link
+                  href="/favorit"
+                  className="relative p-2 text-brand-black hover:opacity-75 transition-opacity"
+                  aria-label="Favorit"
+                >
+                  <Heart className="w-5 h-5" />
+                  {favoriteCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-red-500 text-[9px] font-black text-brand-white rounded-full">
+                      {favoriteCount}
+                    </span>
+                  )}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => openModal("login")}
+                  className="relative p-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer"
+                  aria-label="Favorit"
+                >
+                  <Heart className="w-5 h-5" />
+                </button>
+              )
+            )}
+
             {/* Cart Icon */}
             {hasMounted && session?.user && (
               <Link
@@ -181,7 +218,16 @@ export const Navbar: React.FC = () => {
                               Pesanan Saya
                             </Link>
                           )}
-
+                          {session.user.role !== "ADMIN" && (
+                            <Link
+                              href="/favorit"
+                              onClick={() => setIsProfileDropdownOpen(false)}
+                              className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light transition-colors flex items-center gap-2"
+                            >
+                              <Heart className="w-3.5 h-3.5" />
+                              Favorit
+                            </Link>
+                          )}
 
                           <button
                             type="button"
@@ -356,7 +402,16 @@ export const Navbar: React.FC = () => {
                         Pesanan Saya
                       </Link>
                     )}
-
+                    {session.user.role !== "ADMIN" && (
+                      <Link
+                        href="/favorit"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1 flex items-center gap-2"
+                      >
+                        <Heart className="w-3.5 h-3.5" />
+                        Favorit
+                      </Link>
+                    )}
 
                     <button
                       type="button"
