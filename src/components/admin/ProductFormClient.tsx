@@ -320,7 +320,7 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
 
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm, onValidationError)} className="space-y-12 font-sans max-w-4xl">
+    <form onSubmit={handleSubmit(onSubmitForm, onValidationError)} className="space-y-12 font-sans">
       {/* Global Error Banner */}
       {submitError && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex flex-col gap-1">

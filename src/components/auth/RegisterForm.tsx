@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Eye, EyeOff, UserPlus, Check } from "lucide-react";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 
@@ -73,9 +73,18 @@ export function RegisterForm() {
         return;
       }
 
-      console.log("[RegisterForm] Registration and auto-login success. Redirecting to:", callbackUrl);
+      console.log("[RegisterForm] Registration and auto-login success. Fetching session...");
+      const session = await getSession();
+      const userRole = session?.user?.role;
+      console.log("[RegisterForm] Session fetched. Role:", userRole);
+
       closeModal();
-      router.push(callbackUrl);
+      if (userRole === "ADMIN") {
+        router.push("/admin");
+      } else {
+        const targetUrl = (callbackUrl === "/" || callbackUrl.startsWith("/auth")) ? "/" : callbackUrl;
+        router.push(targetUrl);
+      }
       router.refresh();
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");

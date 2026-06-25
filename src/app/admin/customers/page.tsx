@@ -36,7 +36,7 @@ export default async function AdminCustomersPage() {
 
   if (dbError) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:px-16">
+      <div className="px-4 py-16 md:px-8 lg:px-16">
         <ShopErrorFallback
           error={dbError.message || String(dbError)}
           code="ADMIN_CUSTOMERS_DB_ERROR"

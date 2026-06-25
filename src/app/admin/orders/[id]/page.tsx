@@ -327,7 +327,7 @@ export default async function AdminOrderDetailPage(props: {
   }
 
   return (
-    <div className="space-y-10 font-sans max-w-5xl">
+    <div className="space-y-10 font-sans">
       {/* Top Header & Back Button */}
       <div className="border-b border-brand-light pb-6">
         <Link
