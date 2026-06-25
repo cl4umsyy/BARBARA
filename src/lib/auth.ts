@@ -30,6 +30,11 @@ const providers: NextAuthConfig["providers"] = [
         return null;
       }
 
+      if (user.is_active === false) {
+        console.warn("[NextAuth authorize] User account is deactivated:", email);
+        return null;
+      }
+
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {

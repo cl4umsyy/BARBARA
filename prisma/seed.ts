@@ -44,7 +44,7 @@ async function main() {
         name: "BARBARA Customer",
         email: "customer@barbara.com",
         password: customerPassword,
-        role: Role.CUSTOMER,
+        role: Role.USER,
       },
     ],
   });

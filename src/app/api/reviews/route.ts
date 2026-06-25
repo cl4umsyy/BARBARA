@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
           name: session.user.name || "Customer",
           email: session.user.email || `${userId}@placeholder.com`,
           password: "placeholder_hash",
-          role: "CUSTOMER",
+          role: "USER",
         }
       });
 

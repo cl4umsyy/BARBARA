@@ -8,7 +8,7 @@ datasource db {
 }
 
 enum Role {
-  CUSTOMER
+  USER
   ADMIN
 }
 
@@ -35,10 +35,11 @@ model User {
   name      String
   email     String     @unique
   password  String
-  role      Role       @default(CUSTOMER)
+  role      Role       @default(USER)
   createdAt DateTime   @default(now()) @map("created_at")
   phone     String?
   avatarUrl String?    @map("avatar_url")
+  isActive  Boolean    @default(true) @map("is_active")
   addresses Address[]
   orders    Order[]
   wishlists Wishlist[]
@@ -72,9 +73,11 @@ model Category {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
-  image       String?
+  imageUrl    String?   @map("image")
   description String?
   products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
 
   @@map("categories")
 }

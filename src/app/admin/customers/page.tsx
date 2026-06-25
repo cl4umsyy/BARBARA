@@ -53,6 +53,8 @@ export default async function AdminCustomersPage() {
     name: c.name,
     email: c.email,
     phone: c.phone || null,
+    role: c.role,
+    isActive: c.isActive,
     createdAt: c.createdAt.toISOString(),
     avatarUrl: c.avatarUrl || null,
     orders: c.orders.map((o: any) => ({
@@ -70,7 +72,7 @@ export default async function AdminCustomersPage() {
         </div>
       }
     >
-      <CustomersClient initialCustomers={formattedCustomers} />
+      <CustomersClient initialCustomers={formattedCustomers} currentUserId={session.user.id} />
     </React.Suspense>
   );
 }

@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
     const { count: customersCount, error: custErr } = await supabaseAdmin
       .from("users")
       .select("*", { count: "exact", head: true })
-      .eq("role", "CUSTOMER");
+      .eq("role", "USER");
 
     if (custErr) throw custErr;
     totalCustomers = customersCount || 0;

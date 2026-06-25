@@ -54,7 +54,7 @@ async function main() {
       name: "BARBARA Customer",
       email: "customer@barbara.com",
       password: customerPassword,
-      role: "CUSTOMER",
+      role: "USER",
     },
   ]);
 

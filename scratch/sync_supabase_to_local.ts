@@ -42,14 +42,15 @@ async function main() {
       update: {
         name: cat.name,
         slug: cat.slug,
-        image: cat.image,
+        imageUrl: cat.image,
         description: cat.description,
       },
+
       create: {
         id: cat.id,
         name: cat.name,
         slug: cat.slug,
-        image: cat.image,
+        imageUrl: cat.image,
         description: cat.description,
       }
     });

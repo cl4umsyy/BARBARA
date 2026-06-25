@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  Tags,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -36,6 +37,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
       name: "Products",
       href: "/admin/products",
       icon: Package,
+    },
+    {
+      name: "Categories",
+      href: "/admin/categories",
+      icon: Tags,
     },
     {
       name: "Orders",

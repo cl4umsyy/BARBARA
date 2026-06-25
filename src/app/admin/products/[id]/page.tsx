@@ -3,6 +3,9 @@ import { ProductFormClient } from "@/components/admin/ProductFormClient";
 import Link from "next/link";
 import { ArrowLeft, Star, MessageSquare } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
+
 export default async function AdminEditProductPage(props: {
   params: Promise<{ id: string }>;
 }) {
@@ -124,74 +127,6 @@ export default async function AdminEditProductPage(props: {
     }
   } catch (error) {
     console.error("Failed to load product or reviews for editing:", error);
-  }
-
-  // Fallback Mock Data for testing if database is offline or not found
-  if (!product && (id === "prod1" || id === "prod2")) {
-    categories = [
-      { id: "cat1", name: "T-Shirts" },
-      { id: "cat2", name: "Jackets" },
-    ];
-    product =
-      id === "prod1"
-        ? {
-            id: "prod1",
-            name: "MONOCHROME OVERSINK TEE",
-            description:
-              "A premium oversized tee featuring pure monochrome accents, drop shoulders, and organic cotton. Perfect streetwear look.",
-            price: 349000,
-            material: "100% Organic Cotton",
-            care: "Cold machine wash, air dry",
-            categoryId: "cat1",
-            images: [
-              { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300" },
-            ],
-            variants: [
-              {
-                size: "M",
-                color: "Black",
-                colorHex: "#000000",
-                stock: 15,
-                sku: "BBR-TEE-BLK-M",
-              },
-              {
-                size: "L",
-                color: "Black",
-                colorHex: "#000000",
-                stock: 10,
-                sku: "BBR-TEE-BLK-L",
-              },
-              {
-                size: "XL",
-                color: "Black",
-                colorHex: "#000000",
-                stock: 5,
-                sku: "BBR-TEE-BLK-XL",
-              },
-            ],
-          }
-        : {
-            id: "prod2",
-            name: "DARK LINEN BLAZER",
-            description:
-              "Tailored minimalist blazer with sharp shoulder padding and clean double breast closures. Sleek unisex styling.",
-            price: 899000,
-            material: "80% Linen, 20% Cotton",
-            care: "Dry clean only",
-            categoryId: "cat2",
-            images: [
-              { url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300" },
-            ],
-            variants: [
-              {
-                size: "M",
-                color: "Charcoal",
-                colorHex: "#333333",
-                stock: 3,
-                sku: "BBR-BLZ-CHR-M",
-              },
-            ],
-          };
   }
 
   if (!product) {
