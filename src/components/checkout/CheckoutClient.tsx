@@ -62,7 +62,7 @@ export const CheckoutClient: React.FC<CheckoutClientProps> = () => {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const res = await fetch("/api/addresses");
+        const res = await fetch("/api/addresses", { cache: "no-store" });
         if (!res.ok) throw new Error("Gagal memuat alamat");
         const data = await res.json();
         const addressList = data.addresses || [];
@@ -160,6 +160,7 @@ export const CheckoutClient: React.FC<CheckoutClientProps> = () => {
       // ── STEP 2: Create order + deduct stock ───────────────────────────────
       setSubmitStep("Membuat pesanan...");
       const orderPayload = {
+        addressId: selectedAddress.id,
         recipientName: selectedAddress.recipientName,
         phone: selectedAddress.phone,
         street: selectedAddress.addressDetail || selectedAddress.street,

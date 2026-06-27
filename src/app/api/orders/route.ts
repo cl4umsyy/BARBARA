@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 const checkoutSchema = z.object({
+  addressId: z.string().optional(),
   recipientName: z.string().min(1, "Recipient name is required"),
   phone: z.string().min(5, "Valid phone number is required"),
   street: z.string().min(1, "Street address is required"),
@@ -30,6 +31,24 @@ export async function POST(req: Request) {
 
     const addressData = validation.data;
     const userId = session.user.id;
+
+    // Verify addressId ownership
+    if (addressData.addressId) {
+      const { data: addressRecord, error: addressRecordErr } = await supabaseAdmin
+        .from("addresses")
+        .select("id")
+        .eq("id", addressData.addressId)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (addressRecordErr || !addressRecord) {
+        return NextResponse.json(
+          { error: "Alamat pengiriman tidak valid atau bukan milik Anda" },
+          { status: 400 }
+        );
+      }
+      console.log(`[Checkout] verified address ownership: ${addressData.addressId}`);
+    }
 
     // 1. Get the user's cart and items
     const { data: cart, error: cartErr } = await supabaseAdmin
@@ -117,6 +136,7 @@ export async function POST(req: Request) {
         shipping_cost: shippingCost,
         total,
         payment_status: "PENDING",
+        address_id: addressData.addressId || null,
       });
 
     if (orderErr) throw orderErr;

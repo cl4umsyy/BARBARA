@@ -111,6 +111,8 @@ export async function POST(req: Request) {
     const { paymentStatus, orderStatus, isPaid, shouldRestoreStock } =
       mapMidtransStatus(transaction_status, fraud_status);
 
+    console.log(`[Webhook] Mapped status for order ${order_id} -> paymentStatus: ${paymentStatus}, orderStatus: ${orderStatus}, isPaid: ${isPaid}`);
+
     // ─── 5. Determine paidAt timestamp ──────────────────────────────────────
     let paidAt: Date | null = null;
     if (isPaid) {
@@ -118,6 +120,7 @@ export async function POST(req: Request) {
     }
 
     // ─── 6. Update order + restore stock sequentially ────────────────────────
+    console.log(`[Webhook] Attempting database update for order ${order_id}...`);
     const { error: updateErr } = await supabaseAdmin
       .from("orders")
       .update({
@@ -125,14 +128,15 @@ export async function POST(req: Request) {
         status: orderStatus,
         payment_type: payment_type || null,
         midtrans_transaction_id: transaction_id || null,
-        transaction_status: transaction_status || null,
-        fraud_status: fraud_status || null,
-        settlement_time: settlement_time || null,
         paid_at: paidAt ? paidAt.toISOString() : null,
       })
       .eq("id", order_id);
 
-    if (updateErr) throw updateErr;
+    if (updateErr) {
+      console.error(`[Webhook] Database update failed for order ${order_id}:`, updateErr);
+      throw updateErr;
+    }
+    console.log(`[Webhook] Database update succeeded for order ${order_id}`);
 
     // Restore stock only if transitioning to a terminal failure state
     // and the order was NOT already cancelled (avoid double-restore)

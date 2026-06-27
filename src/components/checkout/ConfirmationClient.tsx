@@ -74,6 +74,9 @@ interface ConfirmationClientProps {
   initialPaymentStatus: string; // from server render (uppercase e.g. "PENDING")
   totalAmount: string;       // formatted IDR string
   snapToken: string | null;
+  initialMidtransTransactionId?: string | null;
+  initialPaymentType?: string | null;
+  initialPaidAt?: string | null;
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -83,6 +86,9 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
   initialPaymentStatus,
   totalAmount,
   snapToken: initialSnapToken,
+  initialMidtransTransactionId,
+  initialPaymentType,
+  initialPaidAt,
 }) => {
   // Normalize initial status to lowercase
   const normalize = (s: string): PaymentStatusKey => {
@@ -97,8 +103,11 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
   const [isPaying, setIsPaying] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
-  const [paidAt, setPaidAt] = useState<string | null>(null);
-  const [paymentType, setPaymentType] = useState<string | null>(null);
+  const [midtransTransactionId, setMidtransTransactionId] = useState<string | null>(
+    initialMidtransTransactionId || null
+  );
+  const [paidAt, setPaidAt] = useState<string | null>(initialPaidAt || null);
+  const [paymentType, setPaymentType] = useState<string | null>(initialPaymentType || null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const config = STATUS_CONFIG[paymentStatus] ?? STATUS_CONFIG.pending;
@@ -124,10 +133,12 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
       if (newStatus !== paymentStatus) {
         console.log(`[Polling] Status changed: ${paymentStatus} → ${newStatus}`);
         setPaymentStatus(newStatus);
-        if (data.paidAt) setPaidAt(data.paidAt);
-        if (data.paymentType) setPaymentType(data.paymentType);
-        if (data.snapToken) setSnapToken(data.snapToken);
       }
+      
+      if (data.paidAt) setPaidAt(data.paidAt);
+      if (data.paymentType) setPaymentType(data.paymentType);
+      if (data.midtransTransactionId) setMidtransTransactionId(data.midtransTransactionId);
+      if (data.snapToken) setSnapToken(data.snapToken);
     } catch (err) {
       console.warn("[Polling] Fetch error:", err);
     } finally {
@@ -217,20 +228,30 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
       <div className="border-t border-brand-gray-light/20 pt-6 w-full grid grid-cols-2 gap-4 text-left text-xs text-brand-gray">
         <div>
           <span className="font-bold uppercase tracking-wider text-brand-gray-light block">
-            Order Number
+            Nomor Pesanan
           </span>
           <span className="font-black text-brand-black mt-1 block">{orderNumber}</span>
         </div>
         <div>
           <span className="font-bold uppercase tracking-wider text-brand-gray-light block">
-            Total Bill
+            Total Pembayaran
           </span>
           <span className="font-black text-brand-black mt-1 block">{totalAmount}</span>
         </div>
+        {midtransTransactionId && (
+          <div className="col-span-2 sm:col-span-1">
+            <span className="font-bold uppercase tracking-wider text-brand-gray-light block">
+              Nomor Transaksi Midtrans
+            </span>
+            <span className="font-bold text-brand-black mt-1 block truncate">
+              {midtransTransactionId}
+            </span>
+          </div>
+        )}
         {paymentType && (
           <div>
             <span className="font-bold uppercase tracking-wider text-brand-gray-light block">
-              Metode Bayar
+              Metode Pembayaran
             </span>
             <span className="font-bold text-brand-black mt-1 block capitalize">
               {paymentType.replace(/_/g, " ")}
@@ -238,9 +259,9 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
           </div>
         )}
         {paidAt && (
-          <div>
+          <div className="col-span-2 sm:col-span-1">
             <span className="font-bold uppercase tracking-wider text-brand-gray-light block">
-              Waktu Bayar
+              Tanggal Pembayaran
             </span>
             <span className="font-bold text-emerald-700 mt-1 block">
               {new Intl.DateTimeFormat("id-ID", {
@@ -292,14 +313,14 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
 
       {/* Navigation buttons — always show */}
       <div className="flex flex-wrap gap-3 justify-center w-full pt-2">
-        <Link href="/shop">
+        <Link href="/profile?tab=orders">
           <button className="font-bold uppercase tracking-[0.2em] text-xs py-3 px-6 border-2 border-brand-black bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black transition-colors cursor-pointer rounded-xl">
-            Shop Collection
+            Lihat Pesanan
           </button>
         </Link>
-        <Link href="/">
+        <Link href="/shop">
           <button className="font-bold uppercase tracking-[0.2em] text-xs py-3 px-6 border-2 border-brand-black bg-transparent text-brand-black hover:bg-brand-black hover:text-brand-white transition-colors cursor-pointer rounded-xl">
-            Home
+            Lanjut Belanja
           </button>
         </Link>
       </div>

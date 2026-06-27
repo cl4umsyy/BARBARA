@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { supabaseAdmin, isMissingColumnError } from "@/lib/supabase";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const AddressSchema = z.object({
   label: z.string().min(1, "Label alamat wajib diisi (misal: Rumah, Kantor)"),
   recipientName: z.string().min(1, "Nama penerima wajib diisi"),

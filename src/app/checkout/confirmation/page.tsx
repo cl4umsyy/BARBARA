@@ -35,6 +35,9 @@ export default async function ConfirmationPage(props: ConfirmationPageProps) {
       payment_status,
       total,
       midtrans_id,
+      midtrans_transaction_id,
+      payment_type,
+      paid_at,
       shipping_addresses (
         recipient_name,
         phone,
@@ -63,6 +66,9 @@ export default async function ConfirmationPage(props: ConfirmationPageProps) {
     paymentStatus: orderData.payment_status,
     total: orderData.total,
     midtransId: orderData.midtrans_id,
+    midtransTransactionId: orderData.midtrans_transaction_id,
+    paymentType: orderData.payment_type,
+    paidAt: orderData.paid_at,
     shippingAddress: shippingAddress
       ? {
           recipientName: shippingAddress.recipient_name,
@@ -93,6 +99,9 @@ export default async function ConfirmationPage(props: ConfirmationPageProps) {
           initialPaymentStatus={order.paymentStatus}
           totalAmount={formatPrice(Number(order.total))}
           snapToken={order.midtransId}
+          initialMidtransTransactionId={order.midtransTransactionId}
+          initialPaymentType={order.paymentType}
+          initialPaidAt={order.paidAt}
         />
 
         {/* Shipping details — static, always shown */}

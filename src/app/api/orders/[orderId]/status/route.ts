@@ -66,6 +66,7 @@ export async function GET(
         orderStatus: order.status.toLowerCase(),
         paidAt: order.paid_at,
         paymentType: order.payment_type,
+        midtransTransactionId: order.midtrans_transaction_id,
         snapToken: null,
       });
     }
@@ -144,14 +145,14 @@ export async function GET(
           status: orderStatus,
           payment_type: midtransPaymentType || null,
           midtrans_transaction_id: midtransTransactionId || null,
-          transaction_status: midtransStatus || null,
-          fraud_status: midtransFraudStatus || null,
-          settlement_time: midtransSettlementTime || null,
           paid_at: paidAt ? paidAt.toISOString() : null,
         })
         .eq("id", order.id);
 
-      if (updateErr) throw updateErr;
+      if (updateErr) {
+        console.error(`[Status Check] Database update failed for order ${order.order_number}:`, updateErr);
+        throw updateErr;
+      }
 
       console.log(`[Status Check] ✅ DB updated for order ${order.order_number}`);
 
@@ -161,6 +162,7 @@ export async function GET(
         orderStatus: orderStatus.toLowerCase(),
         paidAt,
         paymentType: midtransPaymentType ?? order.payment_type,
+        midtransTransactionId: midtransTransactionId ?? order.midtrans_transaction_id,
         snapToken: isPaid ? null : order.midtrans_id,
       });
     }
@@ -172,6 +174,7 @@ export async function GET(
       orderStatus: order.status.toLowerCase(),
       paidAt: order.paid_at,
       paymentType: order.payment_type,
+      midtransTransactionId: order.midtrans_transaction_id,
       snapToken: order.midtrans_id,
     });
   } catch (error: any) {

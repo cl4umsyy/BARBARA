@@ -494,7 +494,7 @@ export default function ProfileClient({
       const data = await res.json();
       
       // Refresh address list from database to ensure default flag sync across items
-      const fetchRes = await fetch("/api/addresses");
+      const fetchRes = await fetch("/api/addresses", { cache: "no-store" });
       if (fetchRes.ok) {
         const { addresses: updatedList } = await fetchRes.json();
         setAddresses(updatedList);
@@ -535,7 +535,7 @@ export default function ProfileClient({
       }
 
       // Refresh list
-      const fetchRes = await fetch("/api/addresses");
+      const fetchRes = await fetch("/api/addresses", { cache: "no-store" });
       if (fetchRes.ok) {
         const { addresses: updatedList } = await fetchRes.json();
         setAddresses(updatedList);
@@ -562,7 +562,7 @@ export default function ProfileClient({
       }
 
       // Refresh list
-      const fetchRes = await fetch("/api/addresses");
+      const fetchRes = await fetch("/api/addresses", { cache: "no-store" });
       if (fetchRes.ok) {
         const { addresses: updatedList } = await fetchRes.json();
         setAddresses(updatedList);
