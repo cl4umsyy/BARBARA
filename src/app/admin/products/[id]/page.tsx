@@ -36,6 +36,7 @@ export default async function AdminEditProductPage(props: {
           material,
           care,
           category_id,
+          collection,
           is_active,
           is_new,
           images:product_images (
@@ -93,6 +94,7 @@ export default async function AdminEditProductPage(props: {
         material: dbProduct.material,
         care: dbProduct.care,
         categoryId: dbProduct.category_id,
+        collection: dbProduct.collection,
         isActive: dbProduct.is_active,
         isNew: dbProduct.is_new,
         images: sortedImages,

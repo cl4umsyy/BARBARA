@@ -20,6 +20,7 @@ export default async function ShopPage(props: ShopPageProps) {
   const colorParam = typeof searchParams.color === "string" ? searchParams.color : undefined;
   const sizeParam = typeof searchParams.size === "string" ? searchParams.size : undefined;
   const conditionParam = typeof searchParams.condition === "string" ? searchParams.condition : undefined;
+  const collectionParam = typeof searchParams.collection === "string" ? searchParams.collection : undefined;
   const minPriceParam = typeof searchParams.minPrice === "string" ? searchParams.minPrice : undefined;
   const maxPriceParam = typeof searchParams.maxPrice === "string" ? searchParams.maxPrice : undefined;
   const sort = typeof searchParams.sort === "string" ? searchParams.sort : "latest";
@@ -29,6 +30,14 @@ export default async function ShopPage(props: ShopPageProps) {
   const where: any = {
     isActive: true, // Only show active products
   };
+
+  // Collection
+  if (collectionParam) {
+    const collections = collectionParam.split(",").map(c => c.trim().toUpperCase()).filter(Boolean);
+    if (collections.length > 0) {
+      where.collection = { in: collections };
+    }
+  }
 
   // Categories
   if (categoryParam) {

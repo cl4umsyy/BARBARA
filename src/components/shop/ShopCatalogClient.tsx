@@ -100,6 +100,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
 
   // Selected filters state
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -115,6 +116,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     };
 
     setSelectedCategories(parseParam("category"));
+    setSelectedCollections(parseParam("collection"));
     setSelectedSizes(parseParam("size"));
     setSelectedColors(parseParam("color"));
     setSelectedBrands(parseParam("brand"));
@@ -159,12 +161,14 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     conditionsList: string[],
     priceRangesList: string[],
     sortVal: string,
-    pageNum: number
+    pageNum: number,
+    collectionsList: string[] = selectedCollections
   ) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (categoriesList.length > 0) params.set("category", categoriesList.join(","));
+      if (collectionsList.length > 0) params.set("collection", collectionsList.join(","));
       if (sizesList.length > 0) params.set("size", sizesList.join(","));
       if (colorsList.length > 0) params.set("color", colorsList.join(","));
       if (brandsList.length > 0) params.set("brand", brandsList.join(","));
@@ -205,6 +209,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
   // Trigger filters update
   const handleFilterChange = (type: string, value: string) => {
     let newCategories = [...selectedCategories];
+    let newCollections = [...selectedCollections];
     let newSizes = [...selectedSizes];
     let newColors = [...selectedColors];
     let newBrands = [...selectedBrands];
@@ -212,12 +217,17 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     let newPriceRanges = [...selectedPriceRanges];
     let newSort = selectedSort;
     let newPage = 1; // Reset to page 1 on filter change
-
+ 
     if (type === "category") {
       newCategories = newCategories.includes(value)
         ? newCategories.filter(x => x !== value)
         : [...newCategories, value];
       setSelectedCategories(newCategories);
+    } else if (type === "collection") {
+      newCollections = newCollections.includes(value)
+        ? newCollections.filter(x => x !== value)
+        : [...newCollections, value];
+      setSelectedCollections(newCollections);
     } else if (type === "size") {
       newSizes = newSizes.includes(value)
         ? newSizes.filter(x => x !== value)
@@ -259,7 +269,8 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
       newConditions,
       newPriceRanges,
       newSort,
-      newPage
+      newPage,
+      newCollections
     );
   };
 
@@ -275,7 +286,8 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
       selectedConditions,
       selectedPriceRanges,
       selectedSort,
-      pageNum
+      pageNum,
+      selectedCollections
     );
     // Smooth scroll back to top of product list
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -290,12 +302,13 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     setSelectedConditions([]);
     setSelectedPriceRanges([]);
     setSelectedSort("latest");
+    setSelectedCollections([]);
     setCurrentPage(1);
 
     window.history.pushState({ path: "/shop" }, "", "/shop");
 
     // Re-fetch clean list
-    fetchFilteredProducts([], [], [], [], [], [], "latest", 1);
+    fetchFilteredProducts([], [], [], [], [], [], "latest", 1, []);
   };
 
   // Toggle single dropdown trigger
@@ -306,6 +319,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
   // Check if any filter is active
   const hasActiveFilters =
     selectedCategories.length > 0 ||
+    selectedCollections.length > 0 ||
     selectedSizes.length > 0 ||
     selectedColors.length > 0 ||
     selectedBrands.length > 0 ||
@@ -741,6 +755,19 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                 <span key={slug} className="flex items-center gap-1 py-1 px-3 bg-brand-light text-brand-black text-[10px] font-black uppercase tracking-wider rounded-full border border-brand-light/60">
                   {name}
                   <button onClick={() => handleFilterChange("category", slug)} className="cursor-pointer hover:opacity-60 text-brand-black ml-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              );
+            })}
+
+            {/* Collection Chips */}
+            {selectedCollections.map((colValue) => {
+              const label = colValue.replace(/_/g, " ");
+              return (
+                <span key={colValue} className="flex items-center gap-1 py-1 px-3 bg-brand-light text-brand-black text-[10px] font-black uppercase tracking-wider rounded-full border border-brand-light/60">
+                  Koleksi: {label}
+                  <button onClick={() => handleFilterChange("collection", colValue)} className="cursor-pointer hover:opacity-60 text-brand-black ml-0.5">
                     <X className="w-3 h-3" />
                   </button>
                 </span>

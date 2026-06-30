@@ -83,6 +83,7 @@ export async function PUT(
         material: data.material || null,
         care: data.care || null,
         category_id: data.categoryId,
+        collection: data.collection || null,
       })
       .eq("id", productId)
       .select()
@@ -227,6 +228,7 @@ export async function PUT(
       material: product.material,
       care: product.care,
       categoryId: product.category_id,
+      collection: product.collection,
       isActive: product.is_active,
       isNew: product.is_new,
     };

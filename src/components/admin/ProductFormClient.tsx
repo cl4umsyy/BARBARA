@@ -23,6 +23,7 @@ interface ProductFormClientProps {
     material: string | null;
     care: string | null;
     categoryId: string;
+    collection: string | null;
     images: { url: string }[];
     variants: { size: string; color: string; colorHex: string; stock: number; sku: string }[];
   };
@@ -72,6 +73,7 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
         material: initialProduct.material || "",
         care: initialProduct.care || "",
         categoryId: initialProduct.categoryId,
+        collection: initialProduct.collection || "",
         images: initialProduct.images.map((img) => img.url),
         variants: initialProduct.variants.map((v) => ({
           size: v.size as "M" | "L" | "XL",
@@ -88,6 +90,7 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
         material: "",
         care: "",
         categoryId: "",
+        collection: "",
         images: [],
         variants: [{ size: "M", color: "", colorHex: "#000000", stock: 10, sku: "" }],
       };
@@ -404,8 +407,8 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
               )}
             </div>
 
-            {/* Category & Price Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Category, Collection & Price Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {/* Category */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">
@@ -429,6 +432,30 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
                 )}
               </div>
 
+              {/* Collection */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">
+                  Collection
+                </label>
+                <select
+                  {...register("collection")}
+                  className="w-full bg-brand-light border border-transparent py-3.5 px-4 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all duration-200"
+                >
+                  <option value="">No Collection</option>
+                  <option value="NEW_ARRIVALS">New Arrivals</option>
+                  <option value="BEST_SELLERS">Best Sellers</option>
+                  <option value="GRAPHIC_TEES">Graphic Tees</option>
+                  <option value="OVERSIZED_COLLECTION">Oversized Collection</option>
+                  <option value="ESSENTIALS">Essentials</option>
+                  <option value="LIMITED_EDITION">Limited Edition</option>
+                </select>
+                {errors.collection && (
+                  <p className="text-[10px] font-bold text-red-500 uppercase mt-1">
+                    {errors.collection.message}
+                  </p>
+                )}
+              </div>
+
               {/* Price */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">
@@ -448,7 +475,6 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
               </div>
             </div>
 
-            {/* Material & Care */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-brand-light">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">

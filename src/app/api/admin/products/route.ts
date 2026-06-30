@@ -138,6 +138,7 @@ export async function POST(req: Request) {
         material: data.material || null,
         care: data.care || null,
         category_id: data.categoryId,
+        collection: data.collection || null,
         is_active: true,
         is_new: true,
       })
@@ -197,6 +198,7 @@ export async function POST(req: Request) {
       material: newProduct.material,
       care: newProduct.care,
       categoryId: newProduct.category_id,
+      collection: newProduct.collection,
       isActive: newProduct.is_active,
       isNew: newProduct.is_new,
     };

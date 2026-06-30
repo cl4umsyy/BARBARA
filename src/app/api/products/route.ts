@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const colorParam = searchParams.get("color");
     const sizeParam = searchParams.get("size");
     const conditionParam = searchParams.get("condition");
+    const collectionParam = searchParams.get("collection");
     const minPriceParam = searchParams.get("minPrice");
     const maxPriceParam = searchParams.get("maxPrice");
     const sort = searchParams.get("sort") || "latest";
@@ -23,6 +24,16 @@ export async function GET(req: NextRequest) {
     const where: any = {
       isActive: true, // Only show active products
     };
+
+    // Collection filter: support multi-value (comma-separated, e.g. "NEW_ARRIVALS")
+    if (collectionParam) {
+      const collections = collectionParam.split(",").map(c => c.trim().toUpperCase()).filter(Boolean);
+      if (collections.length > 0) {
+        where.collection = {
+          in: collections,
+        };
+      }
+    }
 
     // Category filter: support multi-value (comma-separated, e.g. "kaos,jaket")
     if (categoryParam) {

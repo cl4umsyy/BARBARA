@@ -14,40 +14,40 @@ interface Category {
 
 const STATIC_CATEGORIES = [
   {
-    id: "tops",
-    name: "Tops",
-    slug: "tops",
+    id: "NEW_ARRIVALS",
+    name: "New Arrivals",
+    slug: "new-arrivals",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800",
+  },
+  {
+    id: "BEST_SELLERS",
+    name: "Best Sellers",
+    slug: "best-sellers",
+    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
+  },
+  {
+    id: "GRAPHIC_TEES",
+    name: "Graphic Tees",
+    slug: "graphic-tees",
+    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800",
+  },
+  {
+    id: "OVERSIZED_COLLECTION",
+    name: "Oversized Collection",
+    slug: "oversized-collection",
+    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
+  },
+  {
+    id: "ESSENTIALS",
+    name: "Essentials",
+    slug: "essentials",
     image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800",
   },
   {
-    id: "bottoms",
-    name: "Bottoms",
-    slug: "bottoms",
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800",
-  },
-  {
-    id: "footwear",
-    name: "Footwear",
-    slug: "footwear",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
-  },
-  {
-    id: "outerwear",
-    name: "Outerwear",
-    slug: "outerwear",
-    image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=800",
-  },
-  {
-    id: "dresses",
-    name: "Dresses",
-    slug: "dresses",
-    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800",
-  },
-  {
-    id: "accessories",
-    name: "Accessories",
-    slug: "accessories",
-    image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800",
+    id: "LIMITED_EDITION",
+    name: "Limited Edition",
+    slug: "limited-edition",
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800",
   },
 ];
 
