@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const sizeParam = searchParams.get("size");
     const conditionParam = searchParams.get("condition");
     const collectionParam = searchParams.get("collection");
+    const genderParam = searchParams.get("gender");
     const minPriceParam = searchParams.get("minPrice");
     const maxPriceParam = searchParams.get("maxPrice");
     const sort = searchParams.get("sort") || "latest";
@@ -25,6 +26,18 @@ export async function GET(req: NextRequest) {
       isActive: true, // Only show active products
     };
 
+    // Gender filter: pria -> MEN, wanita -> WOMEN
+    if (genderParam) {
+      const g = genderParam.trim().toLowerCase();
+      if (g === "pria") {
+        where.gender = "MEN";
+      } else if (g === "wanita") {
+        where.gender = "WOMEN";
+      } else if (g.toUpperCase() === "MEN" || g.toUpperCase() === "WOMEN") {
+        where.gender = g.toUpperCase() as any;
+      }
+    }
+
     // Collection filter: support multi-value (comma-separated, e.g. "NEW_ARRIVALS")
     if (collectionParam) {
       const collections = collectionParam.split(",").map(c => c.trim().toUpperCase()).filter(Boolean);
@@ -35,13 +48,24 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Category filter: support multi-value (comma-separated, e.g. "kaos,jaket")
+    // Category filter: support multi-value (comma-separated, e.g. "tops,bottoms,outerwear")
     if (categoryParam) {
       const categories = categoryParam.split(",").map(c => c.trim().toLowerCase()).filter(Boolean);
       if (categories.length > 0) {
-        where.categorySlug = {
-          in: categories,
-        };
+        const catConditions = [
+          { categorySlug: { in: categories } },
+          { category: { slug: { in: categories } } }
+        ];
+        if (where.OR) {
+          const existingOR = where.OR;
+          delete where.OR;
+          where.AND = [
+            { OR: existingOR },
+            { OR: catConditions }
+          ];
+        } else {
+          where.OR = catConditions;
+        }
       }
     }
 

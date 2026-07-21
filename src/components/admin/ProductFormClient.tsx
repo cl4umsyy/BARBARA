@@ -24,13 +24,40 @@ interface ProductFormClientProps {
     care: string | null;
     categoryId: string;
     collection: string | null;
+    gender: string | null;
     images: { url: string }[];
     variants: { size: string; color: string; colorHex: string; stock: number; sku: string }[];
   };
 }
 
+import { COLORS_OPTIONS } from "@/components/shop/ShopCatalogClient";
+
 const getColorHex = (colorName: string) => {
   const colors: Record<string, string> = {
+    hitam: "#000000",
+    putih: "#ffffff",
+    "abu-abu": "#808080",
+    abu: "#808080",
+    biru: "#3b82f6",
+    merah: "#ef4444",
+    hijau: "#22c55e",
+    kuning: "#facc15",
+    orange: "#fb923c",
+    ungu: "#7c3aed",
+    pink: "#db2777",
+    coklat: "#78350f",
+    beige: "#f5f5dc",
+    cream: "#fffdd0",
+    navy: "#000080",
+    olive: "#808000",
+    khaki: "#c3b091",
+    maroon: "#800000",
+    tosca: "#40e0d0",
+    cyan: "#00ffff",
+    gold: "#ffd700",
+    silver: "#c0c0c0",
+
+    // English fallbacks
     black: "#000000",
     white: "#ffffff",
     red: "#ef4444",
@@ -39,13 +66,7 @@ const getColorHex = (colorName: string) => {
     gray: "#808080",
     grey: "#808080",
     charcoal: "#333333",
-    navy: "#000080",
-    yellow: "#facc15",
-    orange: "#fb923c",
-    pink: "#db2777",
     purple: "#7c3aed",
-    beige: "#f5f5dc",
-    cream: "#fffdd0",
     brown: "#78350f",
   };
   const name = colorName.toLowerCase().trim();
@@ -73,10 +94,11 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
         material: initialProduct.material || "",
         care: initialProduct.care || "",
         categoryId: initialProduct.categoryId,
-        collection: initialProduct.collection || "",
+        collection: (initialProduct.collection || "") as any,
+        gender: (initialProduct.gender || "") as any,
         images: initialProduct.images.map((img) => img.url),
         variants: initialProduct.variants.map((v) => ({
-          size: v.size as "M" | "L" | "XL",
+          size: v.size as "XS" | "S" | "M" | "L" | "XL" | "XXL",
           color: v.color,
           colorHex: v.colorHex,
           stock: v.stock,
@@ -90,7 +112,8 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
         material: "",
         care: "",
         categoryId: "",
-        collection: "",
+        collection: "" as any,
+        gender: "" as any,
         images: [],
         variants: [{ size: "M", color: "", colorHex: "#000000", stock: 10, sku: "" }],
       };
@@ -261,13 +284,28 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
     if (!data.name || data.name.trim().length < 3) preflightErrors.push("• Nama produk minimal 3 karakter");
     if (!data.description || data.description.trim().length < 10) preflightErrors.push("• Deskripsi minimal 10 karakter");
     if (!data.categoryId) preflightErrors.push("• Pilih kategori terlebih dahulu");
+    if (!data.gender) preflightErrors.push("• Pilih gender terlebih dahulu");
     if (!data.price || data.price <= 0) preflightErrors.push("• Harga harus lebih dari 0");
     if (!data.images || data.images.length === 0) preflightErrors.push("• Minimal 1 gambar harus ditambahkan. Klik tombol 'Add' setelah memasukkan URL gambar");
     if (!data.variants || data.variants.length === 0) preflightErrors.push("• Minimal 1 varian produk harus diisi");
+    
+    // Check duplicate color-size combinations
+    const combinations = new Set<string>();
+    let hasDuplicate = false;
     data.variants?.forEach((v, i) => {
       if (!v.color) preflightErrors.push(`• Varian ${i + 1}: Warna wajib diisi`);
       if (!v.sku || v.sku.length < 3) preflightErrors.push(`• Varian ${i + 1}: SKU minimal 3 karakter`);
+      
+      const key = `${v.color.trim().toLowerCase()}-${v.size}`;
+      if (combinations.has(key)) {
+        hasDuplicate = true;
+      }
+      combinations.add(key);
     });
+
+    if (hasDuplicate) {
+      preflightErrors.push("• Tidak boleh membuat variasi dengan kombinasi ukuran dan warna yang sama");
+    }
 
     if (preflightErrors.length > 0) {
       setSubmitError(preflightErrors.join("\n"));
@@ -407,8 +445,8 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
               )}
             </div>
 
-            {/* Category, Collection & Price Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {/* Category, Gender, Collection & Price Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
               {/* Category */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">
@@ -419,15 +457,37 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
                   className="w-full bg-brand-light border border-transparent py-3.5 px-4 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all duration-200"
                 >
                   <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
+                  {categories
+                    .filter((cat) => ["Tops", "Bottoms", "Outerwear"].includes(cat.name))
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                 </select>
                 {errors.categoryId && (
                   <p className="text-[10px] font-bold text-red-500 uppercase mt-1">
                     {errors.categoryId.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Gender */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray">
+                  Gender *
+                </label>
+                <select
+                  {...register("gender")}
+                  className="w-full bg-brand-light border border-transparent py-3.5 px-4 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all duration-200"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="MEN">Pria</option>
+                  <option value="WOMEN">Wanita</option>
+                </select>
+                {errors.gender && (
+                  <p className="text-[10px] font-bold text-red-500 uppercase mt-1">
+                    {errors.gender.message}
                   </p>
                 )}
               </div>
@@ -547,23 +607,34 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
                       {...register(`variants.${index}.size` as const)}
                       className="w-full bg-brand-light border border-transparent py-2.5 px-3 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all duration-200"
                     >
+                      <option value="XS">XS</option>
+                      <option value="S">S</option>
                       <option value="M">M</option>
                       <option value="L">L</option>
                       <option value="XL">XL</option>
+                      <option value="XXL">XXL</option>
                     </select>
                   </div>
  
                   {/* Color */}
                   <div className="sm:col-span-4 space-y-1">
                     <label className="text-[9px] font-black uppercase tracking-wider text-brand-gray-light">
-                      Color Name
+                      Warna Varian *
                     </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Jet Black"
+                    <select
                       {...register(`variants.${index}.color` as const)}
-                      className="w-full bg-brand-light border border-transparent py-2.5 px-3 outline-none rounded-xl text-xs text-brand-black placeholder-brand-gray-light focus:border-brand-black focus:bg-brand-white transition-all duration-200"
-                    />
+                      className="w-full bg-brand-light border border-transparent py-2.5 px-3 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all duration-200"
+                    >
+                      <option value="">Pilih Warna</option>
+                      {COLORS_OPTIONS.map((col) => (
+                        <option key={col} value={col}>
+                          {col}
+                        </option>
+                      ))}
+                      {field.color && !COLORS_OPTIONS.includes(field.color as any) && (
+                        <option value={field.color}>{field.color}</option>
+                      )}
+                    </select>
                     {(errors.variants as any)?.[index]?.color && (
                       <p className="text-[9px] font-bold text-red-500 mt-1">{(errors.variants as any)[index].color.message}</p>
                     )}

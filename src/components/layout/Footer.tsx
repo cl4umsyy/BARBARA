@@ -51,28 +51,10 @@ export const Footer: React.FC = () => {
               Bottoms
             </Link>
             <Link
-              href="/shop?category=footwear"
-              className="text-xs text-brand-gray hover:text-brand-black transition-colors"
-            >
-              Footwear
-            </Link>
-            <Link
               href="/shop?category=outerwear"
               className="text-xs text-brand-gray hover:text-brand-black transition-colors"
             >
               Outerwear
-            </Link>
-            <Link
-              href="/shop?category=dresses"
-              className="text-xs text-brand-gray hover:text-brand-black transition-colors"
-            >
-              Dresses
-            </Link>
-            <Link
-              href="/shop?category=accessories"
-              className="text-xs text-brand-gray hover:text-brand-black transition-colors"
-            >
-              Accessories
             </Link>
           </div>
 

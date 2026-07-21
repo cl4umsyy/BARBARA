@@ -72,6 +72,13 @@ export async function PUT(
       }
     }
 
+    // Calculate color and size summary strings for fast filtering
+    const uniqueColors = Array.from(new Set(data.variants.map((v) => v.color).filter(Boolean)));
+    const colorSummary = uniqueColors.length > 0 ? `,${uniqueColors.join(",")},` : null;
+
+    const uniqueSizes = Array.from(new Set(data.variants.map((v) => v.size).filter(Boolean)));
+    const sizeSummary = uniqueSizes.length > 0 ? `,${uniqueSizes.join(",")},` : null;
+
     // 5. Update product core fields
     const { data: product, error: updateErr } = await supabaseAdmin
       .from("products")
@@ -84,6 +91,9 @@ export async function PUT(
         care: data.care || null,
         category_id: data.categoryId,
         collection: data.collection || null,
+        gender: data.gender,
+        color: colorSummary,
+        size: sizeSummary,
       })
       .eq("id", productId)
       .select()
@@ -174,23 +184,24 @@ export async function PUT(
     // 1. Fetch current images from database to identify removals
     const { data: dbImages, error: imgGetErr } = await supabaseAdmin
       .from("product_images")
-      .select("url, public_id")
+      .select("url")
       .eq("product_id", productId);
     if (imgGetErr) throw imgGetErr;
 
     // 2. Identify images removed in this update
     const incomingUrls = data.images || [];
     const removedImages = (dbImages || []).filter(
-      (img) => img.public_id && !incomingUrls.includes(img.url)
+      (img) => !incomingUrls.includes(img.url)
     );
 
     // 3. Delete removed images from Cloudinary
     for (const img of removedImages) {
-      if (img.public_id) {
+      const pubId = extractPublicId(img.url);
+      if (pubId) {
         try {
-          await deleteFromCloudinary(img.public_id);
+          await deleteFromCloudinary(pubId);
         } catch (err) {
-          console.error(`Error deleting image ${img.public_id} from Cloudinary:`, err);
+          console.error(`Error deleting image ${pubId} from Cloudinary:`, err);
         }
       }
     }
@@ -202,7 +213,7 @@ export async function PUT(
       .eq("product_id", productId);
     if (imgDelErr) throw imgDelErr;
 
-    // 5. Insert new database records including public_id
+    // 5. Insert new database records
     if (data.images && data.images.length > 0) {
       const { error: imgInsErr } = await supabaseAdmin
         .from("product_images")
@@ -213,7 +224,6 @@ export async function PUT(
             url,
             alt: `${data.name} image ${index + 1}`,
             order: index,
-            public_id: extractPublicId(url),
           }))
         );
       if (imgInsErr) throw imgInsErr;
@@ -229,6 +239,7 @@ export async function PUT(
       care: product.care,
       categoryId: product.category_id,
       collection: product.collection,
+      gender: product.gender,
       isActive: product.is_active,
       isNew: product.is_new,
     };
@@ -303,19 +314,20 @@ export async function DELETE(
       });
     }
 
-    // Fetch images before deleting the product so we have their public_ids
+    // Fetch images before deleting the product so we can delete them from Cloudinary
     const { data: dbImages, error: imgGetErr } = await supabaseAdmin
       .from("product_images")
-      .select("public_id")
+      .select("url")
       .eq("product_id", productId);
 
     if (!imgGetErr && dbImages && dbImages.length > 0) {
       for (const img of dbImages) {
-        if (img.public_id) {
+        const pubId = extractPublicId(img.url);
+        if (pubId) {
           try {
-            await deleteFromCloudinary(img.public_id);
+            await deleteFromCloudinary(pubId);
           } catch (err) {
-            console.error(`Error deleting image ${img.public_id} from Cloudinary:`, err);
+            console.error(`Error deleting image ${pubId} from Cloudinary:`, err);
           }
         }
       }

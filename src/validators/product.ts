@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const productVariantSchema = z.object({
-  size: z.enum(["M", "L", "XL"], {
-    message: "Ukuran harus M, L, atau XL",
+  size: z.enum(["XS", "S", "M", "L", "XL", "XXL"], {
+    message: "Ukuran harus XS, S, M, L, XL, atau XXL",
   }),
   color: z.string().min(1, { message: "Warna wajib diisi" }),
   colorHex: z.string().regex(/^#[0-9A-F]{6}$/i, { message: "Format hex warna tidak valid (contoh: #FFFFFF)" }),
@@ -14,6 +14,7 @@ export const productSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter" }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter" }),
   categoryId: z.string().min(1, { message: "Kategori wajib dipilih" }),
+  gender: z.enum(["MEN", "WOMEN"], { message: "Gender wajib dipilih" }),
   collection: z.enum([
     "NEW_ARRIVALS",
     "BEST_SELLERS",

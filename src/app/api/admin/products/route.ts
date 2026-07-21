@@ -31,6 +31,7 @@ export async function GET(req: Request) {
         price,
         material,
         care,
+        gender,
         is_new,
         is_active,
         created_at,
@@ -63,6 +64,7 @@ export async function GET(req: Request) {
         price: Number(p.price),
         material: p.material,
         care: p.care,
+        gender: p.gender,
         isNew: p.is_new,
         isActive: p.is_active,
         createdAt: p.created_at,
@@ -126,6 +128,13 @@ export async function POST(req: Request) {
 
     const productId = crypto.randomUUID();
 
+    // Calculate color and size summary strings for fast filtering
+    const uniqueColors = Array.from(new Set(data.variants.map((v) => v.color).filter(Boolean)));
+    const colorSummary = uniqueColors.length > 0 ? `,${uniqueColors.join(",")},` : null;
+
+    const uniqueSizes = Array.from(new Set(data.variants.map((v) => v.size).filter(Boolean)));
+    const sizeSummary = uniqueSizes.length > 0 ? `,${uniqueSizes.join(",")},` : null;
+
     // 4. Insert product
     const { data: newProduct, error: prodErr } = await supabaseAdmin
       .from("products")
@@ -139,6 +148,9 @@ export async function POST(req: Request) {
         care: data.care || null,
         category_id: data.categoryId,
         collection: data.collection || null,
+        gender: data.gender,
+        color: colorSummary,
+        size: sizeSummary,
         is_active: true,
         is_new: true,
       })
@@ -177,7 +189,6 @@ export async function POST(req: Request) {
               url,
               alt: `${data.name} image ${index + 1}`,
               order: index,
-              public_id: extractPublicId(url),
             }))
           );
         if (imgErr) throw imgErr;
@@ -199,6 +210,7 @@ export async function POST(req: Request) {
       care: newProduct.care,
       categoryId: newProduct.category_id,
       collection: newProduct.collection,
+      gender: newProduct.gender,
       isActive: newProduct.is_active,
       isNew: newProduct.is_new,
     };

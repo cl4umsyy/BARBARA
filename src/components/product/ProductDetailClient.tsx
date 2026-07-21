@@ -94,7 +94,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const colorVariants = product.variants.filter(
     (v) => v.color === selectedColor
   );
-  const sizes = ["M", "L", "XL"];
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
   const [selectedSize, setSelectedSize] = useState("");
 
   // UI States
@@ -426,6 +426,18 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               </thead>
               <tbody>
                 <tr className="border-b border-brand-light">
+                  <td className="py-3 font-bold text-brand-black">XS</td>
+                  <td className="py-3 text-brand-gray">48</td>
+                  <td className="py-3 text-brand-gray">66</td>
+                  <td className="py-3 text-brand-gray">22</td>
+                </tr>
+                <tr className="border-b border-brand-light">
+                  <td className="py-3 font-bold text-brand-black">S</td>
+                  <td className="py-3 text-brand-gray">51</td>
+                  <td className="py-3 text-brand-gray">69</td>
+                  <td className="py-3 text-brand-gray">23</td>
+                </tr>
+                <tr className="border-b border-brand-light">
                   <td className="py-3 font-bold text-brand-black">M</td>
                   <td className="py-3 text-brand-gray">54</td>
                   <td className="py-3 text-brand-gray">72</td>
@@ -437,11 +449,17 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   <td className="py-3 text-brand-gray">75</td>
                   <td className="py-3 text-brand-gray">25</td>
                 </tr>
-                <tr className="border-b border-brand-black">
+                <tr className="border-b border-brand-light">
                   <td className="py-3 font-bold text-brand-black">XL</td>
                   <td className="py-3 text-brand-gray">60</td>
                   <td className="py-3 text-brand-gray">78</td>
                   <td className="py-3 text-brand-gray">26</td>
+                </tr>
+                <tr className="border-b border-brand-black">
+                  <td className="py-3 font-bold text-brand-black">XXL</td>
+                  <td className="py-3 text-brand-gray">63</td>
+                  <td className="py-3 text-brand-gray">81</td>
+                  <td className="py-3 text-brand-gray">27</td>
                 </tr>
               </tbody>
             </table>

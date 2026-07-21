@@ -21,6 +21,7 @@ export default async function ShopPage(props: ShopPageProps) {
   const sizeParam = typeof searchParams.size === "string" ? searchParams.size : undefined;
   const conditionParam = typeof searchParams.condition === "string" ? searchParams.condition : undefined;
   const collectionParam = typeof searchParams.collection === "string" ? searchParams.collection : undefined;
+  const genderParam = typeof searchParams.gender === "string" ? searchParams.gender : undefined;
   const minPriceParam = typeof searchParams.minPrice === "string" ? searchParams.minPrice : undefined;
   const maxPriceParam = typeof searchParams.maxPrice === "string" ? searchParams.maxPrice : undefined;
   const sort = typeof searchParams.sort === "string" ? searchParams.sort : "latest";
@@ -30,6 +31,18 @@ export default async function ShopPage(props: ShopPageProps) {
   const where: any = {
     isActive: true, // Only show active products
   };
+
+  // Gender filter: pria -> MEN, wanita -> WOMEN
+  if (genderParam) {
+    const g = genderParam.trim().toLowerCase();
+    if (g === "pria") {
+      where.gender = "MEN";
+    } else if (g === "wanita") {
+      where.gender = "WOMEN";
+    } else if (g.toUpperCase() === "MEN" || g.toUpperCase() === "WOMEN") {
+      where.gender = g.toUpperCase() as any;
+    }
+  }
 
   // Collection
   if (collectionParam) {
@@ -43,7 +56,10 @@ export default async function ShopPage(props: ShopPageProps) {
   if (categoryParam) {
     const categories = categoryParam.split(",").map(c => c.trim().toLowerCase()).filter(Boolean);
     if (categories.length > 0) {
-      where.categorySlug = { in: categories };
+      where.OR = [
+        { categorySlug: { in: categories } },
+        { category: { slug: { in: categories } } }
+      ];
     }
   }
 
@@ -211,11 +227,14 @@ export default async function ShopPage(props: ShopPageProps) {
     };
   });
 
-  const mappedCategories = categoriesList.map((cat: any) => ({
-    id: cat.id,
-    name: cat.name,
-    slug: cat.slug,
-  }));
+  const allowedCategorySlugs = ["tops", "bottoms", "outerwear"];
+  const mappedCategories = categoriesList
+    .filter((cat: any) => allowedCategorySlugs.includes(cat.slug.toLowerCase()))
+    .map((cat: any) => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+    }));
 
   return (
     <ShopCatalogClient

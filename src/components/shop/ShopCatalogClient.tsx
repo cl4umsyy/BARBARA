@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, X, RotateCcw, Heart } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronLeft, X, RotateCcw, Heart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductSkeleton } from "./ProductSkeleton";
@@ -57,7 +57,29 @@ interface ShopCatalogClientProps {
 
 // Predefined Filter Options
 const SIZES_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
-const COLORS_OPTIONS = ["Hitam", "Putih", "Abu-abu", "Biru", "Merah", "Hijau"];
+export const COLORS_OPTIONS = [
+  "Hitam",
+  "Putih",
+  "Abu-Abu",
+  "Biru",
+  "Merah",
+  "Hijau",
+  "Kuning",
+  "Orange",
+  "Ungu",
+  "Pink",
+  "Coklat",
+  "Beige",
+  "Cream",
+  "Navy",
+  "Olive",
+  "Khaki",
+  "Maroon",
+  "Tosca",
+  "Cyan",
+  "Gold",
+  "Silver"
+];
 const BRANDS_OPTIONS = ["Nike", "Adidas", "Puma", "New Balance", "Vintage", "Lainnya"];
 const CONDITIONS_OPTIONS = ["Baru", "Sangat Baik", "Baik", "Cukup"];
 
@@ -107,6 +129,9 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   const [selectedSort, setSelectedSort] = useState<string>("latest");
+  const [selectedGender, setSelectedGender] = useState<string>("");
+  const [categoryGender, setCategoryGender] = useState<"pria" | "wanita" | null>(null);
+  const [sizeGender, setSizeGender] = useState<"pria" | "wanita" | null>(null);
 
   // Load initial filters from URL on mount
   useEffect(() => {
@@ -121,6 +146,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     setSelectedColors(parseParam("color"));
     setSelectedBrands(parseParam("brand"));
     setSelectedConditions(parseParam("condition"));
+    setSelectedGender(searchParams.get("gender") || "");
     setSelectedSort(searchParams.get("sort") || "latest");
     setCurrentPage(parseInt(searchParams.get("page") || "1", 10));
 
@@ -162,7 +188,8 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     priceRangesList: string[],
     sortVal: string,
     pageNum: number,
-    collectionsList: string[] = selectedCollections
+    collectionsList: string[] = selectedCollections,
+    genderVal: string = selectedGender
   ) => {
     setLoading(true);
     try {
@@ -173,6 +200,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
       if (colorsList.length > 0) params.set("color", colorsList.join(","));
       if (brandsList.length > 0) params.set("brand", brandsList.join(","));
       if (conditionsList.length > 0) params.set("condition", conditionsList.join(","));
+      if (genderVal) params.set("gender", genderVal);
       if (sortVal && sortVal !== "latest") params.set("sort", sortVal);
       if (pageNum > 1) params.set("page", String(pageNum));
 
@@ -293,6 +321,72 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Hierarchical category selection handler (Gender + Category)
+  const handleHierarchicalCategoryChange = (gender: "pria" | "wanita", slug: string) => {
+    let newCategories = [...selectedCategories];
+    let newGender: string = gender;
+
+    if (newCategories.includes(slug) && selectedGender === gender) {
+      newCategories = newCategories.filter((x) => x !== slug);
+      if (newCategories.length === 0 && selectedSizes.length === 0) {
+        newGender = "";
+      }
+    } else {
+      newCategories = newCategories.includes(slug) ? newCategories : [...newCategories, slug];
+      newGender = gender;
+    }
+
+    setSelectedCategories(newCategories);
+    setSelectedGender(newGender);
+    setCurrentPage(1);
+
+    fetchFilteredProducts(
+      newCategories,
+      selectedSizes,
+      selectedColors,
+      selectedBrands,
+      selectedConditions,
+      selectedPriceRanges,
+      selectedSort,
+      1,
+      selectedCollections,
+      newGender
+    );
+  };
+
+  // Hierarchical size selection handler (Gender + Size)
+  const handleHierarchicalSizeChange = (gender: "pria" | "wanita", sz: string) => {
+    let newSizes = [...selectedSizes];
+    let newGender: string = gender;
+
+    if (newSizes.includes(sz) && selectedGender === gender) {
+      newSizes = newSizes.filter((x) => x !== sz);
+      if (newSizes.length === 0 && selectedCategories.length === 0) {
+        newGender = "";
+      }
+    } else {
+      newSizes = newSizes.includes(sz) ? newSizes : [...newSizes, sz];
+      newGender = gender;
+    }
+
+    setSelectedSizes(newSizes);
+    setSelectedGender(newGender);
+    setCurrentPage(1);
+
+    fetchFilteredProducts(
+      selectedCategories,
+      newSizes,
+      selectedColors,
+      selectedBrands,
+      selectedConditions,
+      selectedPriceRanges,
+      selectedSort,
+      1,
+      selectedCollections,
+      newGender
+    );
+  };
+
   // Reset all filters
   const handleResetFilters = () => {
     setSelectedCategories([]);
@@ -303,16 +397,26 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     setSelectedPriceRanges([]);
     setSelectedSort("latest");
     setSelectedCollections([]);
+    setSelectedGender("");
+    setCategoryGender(null);
+    setSizeGender(null);
     setCurrentPage(1);
 
     window.history.pushState({ path: "/shop" }, "", "/shop");
 
     // Re-fetch clean list
-    fetchFilteredProducts([], [], [], [], [], [], "latest", 1, []);
+    fetchFilteredProducts([], [], [], [], [], [], "latest", 1, [], "");
   };
 
   // Toggle single dropdown trigger
   const toggleDropdown = (name: string) => {
+    if (activeDropdown !== name) {
+      if (name === "category") {
+        setCategoryGender(selectedGender === "pria" || selectedGender === "wanita" ? (selectedGender as "pria" | "wanita") : null);
+      } else if (name === "size") {
+        setSizeGender(selectedGender === "pria" || selectedGender === "wanita" ? (selectedGender as "pria" | "wanita") : null);
+      }
+    }
     setActiveDropdown(activeDropdown === name ? null : name);
   };
 
@@ -325,6 +429,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     selectedBrands.length > 0 ||
     selectedConditions.length > 0 ||
     selectedPriceRanges.length > 0 ||
+    Boolean(selectedGender) ||
     selectedSort !== "latest";
 
   return (
@@ -385,19 +490,54 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                         </button>
                       </div>
 
-                      <div className="flex flex-col gap-3">
-                        {categories.map((cat) => (
-                          <label key={cat.id} className="flex items-center gap-2.5 text-xs font-bold text-brand-black uppercase cursor-pointer hover:opacity-80">
-                            <input
-                              type="checkbox"
-                              checked={selectedCategories.includes(cat.slug)}
-                              onChange={() => handleFilterChange("category", cat.slug)}
-                              className="w-4 h-4 rounded accent-brand-black cursor-pointer"
-                            />
-                            {cat.name}
-                          </label>
-                        ))}
-                      </div>
+                      {!categoryGender ? (
+                        <div className="flex flex-col divide-y divide-brand-light/35">
+                          <button
+                            type="button"
+                            onClick={() => setCategoryGender("wanita")}
+                            className="flex items-center justify-between py-3 px-1 text-xs font-bold text-brand-black cursor-pointer hover:opacity-70 transition-opacity group"
+                          >
+                            <span>Womens</span>
+                            <ChevronRight className="w-4 h-4 text-brand-black/60 group-hover:text-brand-black transition-colors" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCategoryGender("pria")}
+                            className="flex items-center justify-between py-3 px-1 text-xs font-bold text-brand-black cursor-pointer hover:opacity-70 transition-opacity group"
+                          >
+                            <span>Mens</span>
+                            <ChevronRight className="w-4 h-4 text-brand-black/60 group-hover:text-brand-black transition-colors" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setCategoryGender(null)}
+                            className="flex items-center gap-1.5 pb-2 text-[11px] font-black uppercase tracking-wider text-brand-gray hover:text-brand-black border-b border-brand-light/60 cursor-pointer transition-colors"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                            <span>Kategori {categoryGender === "pria" ? "Mens" : "Womens"}</span>
+                          </button>
+
+                          {categories
+                            .filter((cat) => ["tops", "bottoms", "outerwear"].includes(cat.slug.toLowerCase()))
+                            .map((cat) => {
+                              const isChecked = selectedCategories.includes(cat.slug) && selectedGender === categoryGender;
+                              return (
+                                <label key={cat.id} className="flex items-center gap-2.5 text-xs font-bold text-brand-black uppercase cursor-pointer hover:opacity-80">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => handleHierarchicalCategoryChange(categoryGender, cat.slug)}
+                                    className="w-4 h-4 rounded accent-brand-black cursor-pointer"
+                                  />
+                                  {cat.name}
+                                </label>
+                              );
+                            })}
+                        </div>
+                      )}
                     </motion.div>
                   </>
                 )}
@@ -441,19 +581,52 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                         </button>
                       </div>
 
-                      <div className="flex flex-col gap-3">
-                        {SIZES_OPTIONS.map((sz) => (
-                          <label key={sz} className="flex items-center gap-2.5 text-xs font-bold text-brand-black uppercase cursor-pointer hover:opacity-80">
-                            <input
-                              type="checkbox"
-                              checked={selectedSizes.includes(sz)}
-                              onChange={() => handleFilterChange("size", sz)}
-                              className="w-4 h-4 rounded accent-brand-black cursor-pointer"
-                            />
-                            {sz}
-                          </label>
-                        ))}
-                      </div>
+                      {!sizeGender ? (
+                        <div className="flex flex-col divide-y divide-brand-light/35">
+                          <button
+                            type="button"
+                            onClick={() => setSizeGender("wanita")}
+                            className="flex items-center justify-between py-3 px-1 text-xs font-bold text-brand-black cursor-pointer hover:opacity-70 transition-opacity group"
+                          >
+                            <span>Womens</span>
+                            <ChevronRight className="w-4 h-4 text-brand-black/60 group-hover:text-brand-black transition-colors" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSizeGender("pria")}
+                            className="flex items-center justify-between py-3 px-1 text-xs font-bold text-brand-black cursor-pointer hover:opacity-70 transition-opacity group"
+                          >
+                            <span>Mens</span>
+                            <ChevronRight className="w-4 h-4 text-brand-black/60 group-hover:text-brand-black transition-colors" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setSizeGender(null)}
+                            className="flex items-center gap-1.5 pb-2 text-[11px] font-black uppercase tracking-wider text-brand-gray hover:text-brand-black border-b border-brand-light/60 cursor-pointer transition-colors"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                            <span>Size {sizeGender === "pria" ? "Mens" : "Womens"}</span>
+                          </button>
+
+                          {SIZES_OPTIONS.map((sz) => {
+                            const isChecked = selectedSizes.includes(sz) && selectedGender === sizeGender;
+                            return (
+                              <label key={sz} className="flex items-center gap-2.5 text-xs font-bold text-brand-black uppercase cursor-pointer hover:opacity-80">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleHierarchicalSizeChange(sizeGender, sz)}
+                                  className="w-4 h-4 rounded accent-brand-black cursor-pointer"
+                                />
+                                {sz}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
                     </motion.div>
                   </>
                 )}
@@ -497,7 +670,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                         </button>
                       </div>
 
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-3 max-h-48 overflow-y-auto pr-1">
                         {COLORS_OPTIONS.map((color) => (
                           <label key={color} className="flex items-center gap-2.5 text-xs font-bold text-brand-black uppercase cursor-pointer hover:opacity-80">
                             <input
@@ -748,6 +921,33 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
           {/* Active Chips */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* Gender Chip */}
+            {selectedGender && (
+              <span className="flex items-center gap-1 py-1 px-3 bg-brand-black text-brand-white text-[10px] font-black uppercase tracking-wider rounded-full">
+                Gender: {selectedGender === "pria" ? "Mens" : "Womens"}
+                <button
+                  onClick={() => {
+                    setSelectedGender("");
+                    fetchFilteredProducts(
+                      selectedCategories,
+                      selectedSizes,
+                      selectedColors,
+                      selectedBrands,
+                      selectedConditions,
+                      selectedPriceRanges,
+                      selectedSort,
+                      1,
+                      selectedCollections,
+                      ""
+                    );
+                  }}
+                  className="cursor-pointer hover:opacity-75 text-brand-white ml-0.5"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
             {/* Category Chips */}
             {selectedCategories.map((slug) => {
               const name = categories.find(c => c.slug === slug)?.name || slug;

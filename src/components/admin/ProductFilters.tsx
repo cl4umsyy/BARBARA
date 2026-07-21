@@ -52,11 +52,13 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({ categories }) =>
           className="w-full bg-brand-white border border-brand-light py-2.5 px-4 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black cursor-pointer transition-all duration-200"
         >
           <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
+          {categories
+            .filter((cat) => ["Tops", "Bottoms", "Outerwear"].includes(cat.name))
+            .map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
         </select>
       </div>
     </div>
