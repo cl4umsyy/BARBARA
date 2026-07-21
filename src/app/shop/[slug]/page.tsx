@@ -89,6 +89,7 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
         isActive: true,
       },
       include: {
+        category: true,
         images: {
           orderBy: { order: "asc" },
         },
@@ -153,6 +154,35 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     );
   }
 
+  // Fetch related products in the same category
+  let relatedProductsRaw: any[] = [];
+  try {
+    relatedProductsRaw = await prisma.product.findMany({
+      where: {
+        categoryId: product.categoryId,
+        id: { not: product.id },
+        isActive: true,
+      },
+      take: 4,
+      include: {
+        images: { orderBy: { order: "asc" }, take: 1 },
+        category: true,
+      },
+    });
+  } catch (e) {
+    // Silently fallback if error
+  }
+
+  const formattedRelatedProducts = relatedProductsRaw.map((rp) => ({
+    id: rp.id,
+    name: rp.name,
+    slug: rp.slug,
+    price: Number(rp.price),
+    imageUrl: rp.images[0]?.url || "/images/placeholder.jpg",
+    categoryName: rp.category?.name || "Kategori",
+    isNew: rp.isNew,
+  }));
+
   const reviews = (product.reviews || []).map((r) => ({
     id: r.id,
     userId: r.userId,
@@ -179,6 +209,11 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     price: Number(product.price),
     material: product.material,
     care: product.care,
+    categoryName: (product as any).category?.name || "Tops",
+    categorySlug: (product as any).category?.slug || "tops",
+    gender: product.gender === "WOMEN" ? "Wanita" : "Pria",
+    collection: product.collection ? String(product.collection) : null,
+    isNew: product.isNew,
     images: product.images.map((img) => ({
       id: img.id,
       url: img.url,
@@ -270,16 +305,22 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     <div className="w-full bg-brand-white">
       {/* Schema Markups */}
       <script
+        id="product-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
       <script
+        id="breadcrumb-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       
       <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 lg:px-16">
-        <ProductDetailClient product={formattedProduct} initialFavoriteIds={initialFavoriteIds} />
+        <ProductDetailClient
+          product={formattedProduct}
+          relatedProducts={formattedRelatedProducts}
+          initialFavoriteIds={initialFavoriteIds}
+        />
       </div>
     </div>
   );

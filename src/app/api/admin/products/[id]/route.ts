@@ -152,7 +152,9 @@ export async function PUT(
 
     // Upsert incoming variants
     for (const v of data.variants) {
-      const existing = (dbVariants || []).find((ev) => ev.sku === v.sku);
+      const existing = (dbVariants || []).find(
+        (ev) => ev.sku === v.sku || (ev.color.trim().toLowerCase() === v.color.trim().toLowerCase() && ev.size === v.size)
+      );
       if (existing) {
         const { error: varUpdErr } = await supabaseAdmin
           .from("product_variants")
@@ -161,6 +163,7 @@ export async function PUT(
             color: v.color,
             color_hex: v.colorHex,
             stock: v.stock,
+            sku: v.sku,
           })
           .eq("id", existing.id);
         if (varUpdErr) throw varUpdErr;

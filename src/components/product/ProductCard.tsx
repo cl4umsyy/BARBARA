@@ -146,15 +146,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </Link>
 
       {/* Product Information */}
-      <div className="flex flex-col pt-3 font-sans">
+      <div className="flex flex-col pt-3 font-sans" suppressHydrationWarning>
         
         {/* Brand */}
-        <div className="text-[11px] font-bold text-brand-gray-light uppercase tracking-wider mb-0.5">
+        <div className="text-[11px] font-bold text-brand-gray-light uppercase tracking-wider mb-0.5" suppressHydrationWarning>
           {brand}
         </div>
         
         {/* Size + Condition */}
-        <div className="text-xs text-brand-gray-light mb-1.5 font-medium">
+        <div className="text-xs text-brand-gray-light mb-1.5 font-medium" suppressHydrationWarning>
           {sizes && sizes.length > 0 ? sizes.join(", ") : "M"} · {condition}
         </div>
 

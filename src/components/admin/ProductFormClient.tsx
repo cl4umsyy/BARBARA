@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, ProductInput } from "@/validators/product";
-import { Plus, Trash2, Upload, Loader2, Image as ImageIcon, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Upload, Loader2, Image as ImageIcon, ArrowLeft, Palette } from "lucide-react";
 import Link from "next/link";
+import { Modal } from "@/components/ui/Modal";
 
 interface Category {
   id: string;
@@ -136,6 +137,39 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
   });
 
   const currentImages = watch("images") || [];
+
+  // Add Color modal state
+  const [isAddColorModalOpen, setIsAddColorModalOpen] = useState(false);
+  const [modalColor, setModalColor] = useState("");
+  const [modalSizes, setModalSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL"]);
+  const [modalStock, setModalStock] = useState(10);
+
+  const handleGenerateColorVariants = () => {
+    if (!modalColor || modalSizes.length === 0) return;
+
+    const productName = watch("name") || "PRD";
+    const namePrefix = productName.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "B");
+    const colorPrefix = modalColor.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "X");
+
+    modalSizes.forEach((sz, idx) => {
+      const sizePrefix = sz.toUpperCase();
+      const randomSuffix = Math.floor(100 + Math.random() * 900) + idx;
+      const sku = `BBR-${namePrefix}-${colorPrefix}-${sizePrefix}-${randomSuffix}`;
+
+      append({
+        size: sz as any,
+        color: modalColor,
+        colorHex: getColorHex(modalColor),
+        stock: modalStock,
+        sku,
+      });
+    });
+
+    setIsAddColorModalOpen(false);
+    setModalColor("");
+    setModalSizes(["XS", "S", "M", "L", "XL", "XXL"]);
+    setModalStock(10);
+  };
 
   // Handle image upload via API
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,12 +323,23 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
     if (!data.images || data.images.length === 0) preflightErrors.push("• Minimal 1 gambar harus ditambahkan. Klik tombol 'Add' setelah memasukkan URL gambar");
     if (!data.variants || data.variants.length === 0) preflightErrors.push("• Minimal 1 varian produk harus diisi");
     
+    // Auto-generate missing SKUs for variants before validation
+    data.variants?.forEach((v, idx) => {
+      if (!v.sku || v.sku.trim().length < 3) {
+        const namePrefix = (data.name || "PRD").slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "B");
+        const colorPrefix = (v.color || "CLR").slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "X");
+        const sizePrefix = (v.size || "M").toUpperCase();
+        const randomSuffix = Math.floor(100 + Math.random() * 900) + idx;
+        v.sku = `BBR-${namePrefix}-${colorPrefix}-${sizePrefix}-${randomSuffix}`;
+        setValue(`variants.${idx}.sku`, v.sku);
+      }
+    });
+
     // Check duplicate color-size combinations
     const combinations = new Set<string>();
     let hasDuplicate = false;
     data.variants?.forEach((v, i) => {
       if (!v.color) preflightErrors.push(`• Varian ${i + 1}: Warna wajib diisi`);
-      if (!v.sku || v.sku.length < 3) preflightErrors.push(`• Varian ${i + 1}: SKU minimal 3 karakter`);
       
       const key = `${v.color.trim().toLowerCase()}-${v.size}`;
       if (combinations.has(key)) {
@@ -564,26 +609,36 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
 
           {/* Dynamic Variant Manager */}
           <div className="border border-brand-light bg-brand-white p-6 md:p-8 space-y-6 rounded-2xl shadow-sm">
-            <div className="flex items-center justify-between border-b border-brand-light pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-light pb-3">
               <h2 className="text-xs font-black uppercase tracking-widest text-brand-black">
                 Product Variants
               </h2>
-              <button
-                type="button"
-                onClick={() =>
-                  append({
-                    size: "M",
-                    color: "",
-                    colorHex: "#000000",
-                    stock: 5,
-                    sku: "",
-                  })
-                }
-                className="flex items-center gap-1 border border-brand-black text-brand-black text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 hover:bg-brand-black hover:text-brand-white transition-all cursor-pointer rounded-xl"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Variant</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddColorModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-brand-black text-brand-white text-[9px] font-bold uppercase tracking-widest px-3 py-2 hover:bg-brand-gray transition-all cursor-pointer rounded-xl shadow-sm"
+                >
+                  <Palette className="w-3.5 h-3.5" />
+                  <span>+ Tambah Warna Baru</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    append({
+                      size: "M",
+                      color: "",
+                      colorHex: "#000000",
+                      stock: 5,
+                      sku: "",
+                    })
+                  }
+                  className="flex items-center gap-1 border border-brand-black text-brand-black text-[9px] font-bold uppercase tracking-widest px-2.5 py-2 hover:bg-brand-black hover:text-brand-white transition-all cursor-pointer rounded-xl"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Single Varian</span>
+                </button>
+              </div>
             </div>
 
             {errors.variants?.message && (
@@ -818,6 +873,96 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ── TAMBAH VARIAN WARNA BARU MODAL ──────────────────────────────── */}
+      <Modal
+        isOpen={isAddColorModalOpen}
+        onClose={() => setIsAddColorModalOpen(false)}
+        title="Tambah Varian Warna Baru"
+      >
+        <div className="flex flex-col gap-5">
+          <p className="text-xs text-brand-gray leading-relaxed">
+            Pilih warna dan centang ukuran yang ingin ditambahkan. Sistem akan otomatis membuat varian ukuran beserta SKU untuk warna tersebut.
+          </p>
+
+          {/* Color Selection */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">
+              Nama Warna *
+            </label>
+            <select
+              value={modalColor}
+              onChange={(e) => setModalColor(e.target.value)}
+              className="w-full bg-brand-light border border-transparent py-3 px-4 outline-none rounded-xl text-xs font-bold uppercase tracking-wider text-brand-black focus:border-brand-black focus:bg-brand-white transition-all cursor-pointer"
+            >
+              <option value="">-- Pilih Warna --</option>
+              {COLORS_OPTIONS.map((col) => (
+                <option key={col} value={col}>
+                  {col}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Size Checkboxes */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">
+              Ukuran Yang Tersedia *
+            </label>
+            <div className="grid grid-cols-6 gap-2">
+              {["XS", "S", "M", "L", "XL", "XXL"].map((sz) => {
+                const isChecked = modalSizes.includes(sz);
+                return (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      if (isChecked) {
+                        setModalSizes(modalSizes.filter((s) => s !== sz));
+                      } else {
+                        setModalSizes([...modalSizes, sz]);
+                      }
+                    }}
+                    className={`py-2.5 border text-xs font-bold uppercase rounded-xl transition-all cursor-pointer ${
+                      isChecked
+                        ? "bg-brand-black text-brand-white border-brand-black shadow-sm"
+                        : "border-brand-light bg-brand-white text-brand-black hover:border-brand-black"
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Stock Input */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">
+              Stok Per Ukuran (Pcs)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={modalStock}
+              onChange={(e) => setModalStock(Math.max(0, parseInt(e.target.value, 10) || 0))}
+              className="w-full bg-brand-light border border-transparent py-3 px-4 outline-none rounded-xl text-xs font-bold text-brand-black focus:border-brand-black focus:bg-brand-white transition-all"
+            />
+          </div>
+
+          {/* Submit CTA */}
+          <div className="pt-3">
+            <button
+              type="button"
+              onClick={handleGenerateColorVariants}
+              disabled={!modalColor || modalSizes.length === 0}
+              className="w-full bg-brand-black text-brand-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-md"
+            >
+              Generate Varian Warna ({modalSizes.length} Ukuran)
+            </button>
+          </div>
+        </div>
+      </Modal>
     </form>
   );
 };
