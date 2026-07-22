@@ -227,7 +227,7 @@ export default async function ShopPage(props: ShopPageProps) {
     };
   });
 
-  const allowedCategorySlugs = ["tops", "bottoms", "outerwear"];
+  const allowedCategorySlugs = ["tops", "bottom", "bottoms", "outerwear"];
   const mappedCategories = categoriesList
     .filter((cat: any) => allowedCategorySlugs.includes(cat.slug.toLowerCase()))
     .map((cat: any) => ({

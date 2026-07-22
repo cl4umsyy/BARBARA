@@ -108,7 +108,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
             All Products
           </button>
           {categories
-            .filter((cat) => ["tops", "bottoms", "outerwear"].includes(cat.slug.toLowerCase()))
+            .filter((cat) => ["tops", "bottom", "bottoms", "outerwear"].includes(cat.slug.toLowerCase()))
             .map((cat) => (
             <button
               key={cat.id}

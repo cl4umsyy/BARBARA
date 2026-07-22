@@ -503,7 +503,7 @@ export const ProductFormClient: React.FC<ProductFormClientProps> = ({
                 >
                   <option value="">Select Category</option>
                   {categories
-                    .filter((cat) => ["Tops", "Bottoms", "Outerwear"].includes(cat.name))
+                    .filter((cat) => ["tops", "bottom", "bottoms", "outerwear"].includes(cat.name.toLowerCase()))
                     .map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}

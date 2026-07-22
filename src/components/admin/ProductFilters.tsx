@@ -53,7 +53,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({ categories }) =>
         >
           <option value="">All Categories</option>
           {categories
-            .filter((cat) => ["Tops", "Bottoms", "Outerwear"].includes(cat.name))
+            .filter((cat) => ["tops", "bottom", "bottoms", "outerwear"].includes(cat.name.toLowerCase()))
             .map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}

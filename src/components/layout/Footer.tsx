@@ -45,10 +45,10 @@ export const Footer: React.FC = () => {
               Tops
             </Link>
             <Link
-              href="/shop?category=bottoms"
+              href="/shop?category=bottom"
               className="text-xs text-brand-gray hover:text-brand-black transition-colors"
             >
-              Bottoms
+              Bottom
             </Link>
             <Link
               href="/shop?category=outerwear"

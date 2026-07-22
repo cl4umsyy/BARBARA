@@ -12,759 +12,897 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+// Categories: Exactly 3 ONLY
 const categoriesData = [
-  { name: "New Arrivals", slug: "new-arrivals", description: "Produk terbaru yang baru dirilis di BARBARA." },
-  { name: "Best Sellers", slug: "best-sellers", description: "Produk yang paling banyak dibeli oleh pelanggan." },
-  { name: "Graphic Tees", slug: "graphic-tees", description: "Koleksi kaos dengan desain grafis dan artwork eksklusif." },
-  { name: "Oversized Collection", slug: "oversized-collection", description: "Koleksi kaos dan hoodie oversized dengan fit longgar dan nyaman." },
-  { name: "Essentials", slug: "essentials", description: "Koleksi pakaian basic dan minimalis untuk dipakai setiap hari." },
-  { name: "Limited Edition", slug: "limited-edition", description: "Produk edisi terbatas dengan stok yang sangat sedikit." },
-  { name: "Tops", slug: "tops", description: "Koleksi atasan BARBARA: Kaos, Kemeja, Jaket, Hoodie." },
-  { name: "Bottoms", slug: "bottoms", description: "Koleksi bawahan BARBARA: Celana panjang, pendek, jeans." },
-  { name: "Outerwear", slug: "outerwear", description: "Koleksi luaran BARBARA: Jaket tebal, mantel, bomber." },
-  { name: "Footwear", slug: "footwear", description: "Koleksi alas kaki BARBARA: Sepatu, sandal." }
+  { name: "Tops", slug: "tops", description: "Koleksi atasan BARBARA: Kaos, Kemeja, Polo, Henley." },
+  { name: "Bottom", slug: "bottom", description: "Koleksi bawahan BARBARA: Celana jeans, cargo, chino, shorts." },
+  { name: "Outerwear", slug: "outerwear", description: "Koleksi luaran BARBARA: Hoodie, Jaket, Bomber, Varsity, Parka." },
 ];
 
+// Color palette mapping
+const COLOR_MAP: Record<string, { hex: string; code: string }> = {
+  "Hitam": { hex: "#000000", code: "BLK" },
+  "Putih": { hex: "#FFFFFF", code: "WHT" },
+  "Abu-Abu": { hex: "#808080", code: "GRY" },
+  "Navy": { hex: "#0A192F", code: "NVY" },
+  "Biru": { hex: "#1E40AF", code: "BLU" },
+  "Coklat": { hex: "#5C3A21", code: "BRN" },
+  "Beige": { hex: "#F5F5DC", code: "BGE" },
+  "Cream": { hex: "#FFFDD0", code: "CRM" },
+  "Hijau Army": { hex: "#4B5320", code: "ARM" },
+  "Hijau Olive": { hex: "#556B2F", code: "OLV" },
+  "Merah": { hex: "#DC2626", code: "RED" },
+  "Maroon": { hex: "#800000", code: "MRN" },
+  "Kuning": { hex: "#EAB308", code: "YEL" },
+  "Mustard": { hex: "#D97706", code: "MST" },
+  "Pink": { hex: "#EC4899", code: "PNK" },
+  "Ungu": { hex: "#8B5CF6", code: "PUR" },
+  "Orange": { hex: "#F97316", code: "ORG" },
+  "Denim": { hex: "#3B82F6", code: "DNM" },
+  "Khaki": { hex: "#C2B280", code: "KHK" },
+};
+
+// 42 Detailed Products across Tops (15), Bottom (14), Outerwear (13)
 const productsData = [
-  // --- KAOS / TOPS (5) ---
+  // ==================== TOPS (15 Products: Rp99.000 – Rp299.000) ====================
   {
-    name: "BARBARA Oversized Noir Tee",
-    slug: "barbara-oversized-noir-tee",
-    description: "Kaos oversized katun premium berwarna hitam dengan detail visual yang bold. Potongan kain boxy fit yang memberikan siluet modern dan santai.",
-    price: 299000,
-    material: "100% Heavyweight Cotton 24s",
-    care: "Cuci dengan air dingin, jangan disetrika pada bagian print grafis.",
-    categorySlug: "tops",
-    collection: Collection.OVERSIZED_COLLECTION,
-    gender: ProductGender.MEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800", alt: "Front view image", order: 0 },
-      { url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800", alt: "Detail view image", order: 1 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "White", hex: "#ffffff", skuCode: "WHT" }
-    ]
-  },
-  {
-    name: "BARBARA Acid Wash Vintage Tee",
-    slug: "barbara-acid-wash-vintage-tee",
-    description: "Kaos bergaya vintage dengan proses pencucian acid wash yang memberikan tekstur warna memudar estetik. Sangat nyaman untuk gaya kasual sehari-hari.",
-    price: 329000,
-    material: "100% Premium Cotton Terry",
-    care: "Cuci terpisah dengan warna serupa. Jemur di tempat teduh.",
+    name: "BARBARA Minimalist Basic Tee",
+    slug: "barbara-minimalist-basic-tee",
+    description: "Kaos polos basic dari bahan katun murni berkualitas tinggi. Dipotong dengan siluet relaxed fit yang memberikan kenyamanan maksimal untuk pemakaian sehari-hari.",
+    price: 99000,
+    material: "100% Premium Combed Cotton 30s",
+    care: "Cuci dengan air dingin, jangan gunakan pemutih, setrika suhu hangat.",
     categorySlug: "tops",
     collection: Collection.ESSENTIALS,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Baru",
+    colors: ["Hitam", "Putih"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800", alt: "Acid Wash Tee front", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" },
-      { name: "Navy", hex: "#000080", skuCode: "NVY" }
+      { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800", alt: "Basic Tee Front", order: 0 },
+      { url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800", alt: "Basic Tee Detail", order: 1 }
     ]
   },
   {
-    name: "BARBARA Graphic Cyberpunk Tee",
-    slug: "barbara-graphic-cyberpunk-tee",
-    description: "Kaos dengan grafis futuristik bertema cyberpunk di bagian belakang. Dicetak menggunakan tinta plastisol kualitas tinggi yang tahan lama.",
-    price: 349000,
+    name: "BARBARA Vintage Graphic Tee",
+    slug: "barbara-vintage-graphic-tee",
+    description: "Kaos berdesain artwork grafis vintage bertema street culture. Menggunakan teknik cetak washed plastisol yang tahan lama dan tidak mudah retak.",
+    price: 129000,
+    material: "100% Cotton 24s Washed",
+    care: "Cuci terbalik, hindari menyetrika langsung pada bagian cetakan grafis.",
+    categorySlug: "tops",
+    collection: Collection.GRAPHIC_TEES,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Abu-Abu", "Hitam"],
+    sizes: ["M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800", alt: "Graphic Tee Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Oversized Boxy Tee",
+    slug: "barbara-oversized-boxy-tee",
+    description: "Kaos potongan oversized boxy fit dengan bahu turun (drop shoulder). Bahan kain berbobot mantap namun tetap sejuk dipakai sepanjang hari.",
+    price: 149000,
     material: "100% Heavyweight Cotton 20s",
-    care: "Setrika bagian dalam baju saja. Cuci dengan mesin menggunakan air dingin.",
+    care: "Cuci dengan mesin putaran lembut. Jemur gantung di tempat teduh.",
     categorySlug: "tops",
-    collection: Collection.GRAPHIC_TEES,
-    gender: ProductGender.MEN,
-    isNew: true,
+    collection: Collection.OVERSIZED_COLLECTION,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Cream", "Beige"],
+    sizes: ["XS", "S", "M", "L"],
     images: [
-      { url: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800", alt: "Cyberpunk Tee front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
+      { url: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800", alt: "Oversized Tee Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Heavyweight Blank Tee",
-    slug: "barbara-heavyweight-blank-tee",
-    description: "Kaos polos basic dengan bahan katun sangat tebal yang memberikan ketahanan ekstra dan mempertahankan bentuk kaos walau sering dicuci.",
-    price: 249000,
-    material: "100% Heavyweight Cotton 16s Open-End",
-    care: "Aman dicuci dengan mesin. Gunakan pemutih non-klorin jika diperlukan.",
+    name: "BARBARA Tactical Pocket Tee",
+    slug: "barbara-tactical-pocket-tee",
+    description: "Kaos kasual dengan saku dada bergaya taktis utilitas. Cocok untuk tampilan perkotaan yang minimalis dan fungsional.",
+    price: 139000,
+    material: "100% Cotton Combed 24s",
+    care: "Aman dicuci mesin. Setrika suhu sedang.",
     categorySlug: "tops",
     collection: Collection.ESSENTIALS,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Baik",
+    colors: ["Hijau Army", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800", alt: "Blank Tee Front", order: 0 }
-    ],
-    colors: [
-      { name: "White", hex: "#ffffff", skuCode: "WHT" },
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800", alt: "Pocket Tee Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Distressed Grunge Tee",
-    slug: "barbara-distressed-grunge-tee",
-    description: "Kaos dengan detail distressed (sobekan halus buatan) pada kerah dan keliman bawah untuk memberikan nuansa grunge ala tahun 90-an.",
-    price: 319000,
-    material: "100% Combed Cotton 24s",
-    care: "Disarankan cuci dengan tangan secara perlahan demi menjaga keutuhan serat robekan.",
+    name: "BARBARA Heavyweight Long Sleeve Tee",
+    slug: "barbara-heavyweight-long-sleeve-tee",
+    description: "Kaos lengan panjang kain katun tebal dengan rib manset di pergelangan tangan. Melindungi dari angin saat beraktivitas di luar ruangan.",
+    price: 179000,
+    material: "100% Heavyweight Cotton 20s",
+    care: "Cuci dengan air dingin dan warna serupa.",
     categorySlug: "tops",
-    collection: Collection.GRAPHIC_TEES,
-    gender: ProductGender.MEN,
-    isNew: false,
-    images: [
-      { url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800", alt: "Distressed Tee front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
-    ]
-  },
-
-  // --- OUTERWEAR / HOODIES (5) ---
-  {
-    name: "BARBARA Classic Black Boxy Hoodie",
-    slug: "barbara-classic-black-boxy-hoodie",
-    description: "Hoodie bersiluet boxy dengan bahan fleece super tebal dan lembut. Dilengkapi dengan tudung kepala ganda dan saku kanguru yang fungsional.",
-    price: 549000,
-    material: "Heavyweight Cotton Fleece 380 gsm",
-    care: "Jangan gunakan mesin pengering. Cuci dengan putaran lambat.",
-    categorySlug: "outerwear",
-    collection: Collection.OVERSIZED_COLLECTION,
-    gender: ProductGender.WOMEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Black Hoodie Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-  {
-    name: "BARBARA Heavyweight Olive Hoodie",
-    slug: "barbara-heavyweight-olive-hoodie",
-    description: "Hoodie tebal berwarna hijau zaitun (olive) dengan jahitan drop shoulder. Sangat hangat dan cocok dipadukan dengan celana cargo.",
-    price: 549000,
-    material: "Heavyweight Cotton Fleece 380 gsm",
-    care: "Cuci dengan air dingin berputar lembut. Jangan disetrika langsung di atas bahan fleece hangat.",
-    categorySlug: "outerwear",
-    collection: Collection.OVERSIZED_COLLECTION,
-    gender: ProductGender.WOMEN,
-    isNew: false,
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Olive Hoodie Front", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
-    ]
-  },
-  {
-    name: "BARBARA Zip-up Charcoal Hoodie",
-    slug: "barbara-zip-up-charcoal-hoodie",
-    description: "Hoodie model ritsleting penuh (zip-up) dengan warna abu-abu arang. Menggunakan ritsleting logam YKK berkualitas tinggi.",
-    price: 579000,
-    material: "Cotton Fleece Blend 350 gsm",
-    care: "Tutup ritsleting sebelum mencuci. Cuci dengan mesin menggunakan air dingin.",
-    categorySlug: "outerwear",
     collection: Collection.ESSENTIALS,
-    gender: ProductGender.WOMEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Charcoal Zip Hoodie Front", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
-    ]
-  },
-  {
-    name: "BARBARA Cyber-Goth Graphic Hoodie",
-    slug: "barbara-cyber-goth-graphic-hoodie",
-    description: "Hoodie bertema cyber-goth dengan grafis sablon tebal pada bagian lengan dan tudung kepala. Memberikan tampilan yang edgy.",
-    price: 599000,
-    material: "100% Premium Fleece 360 gsm",
-    care: "Balik pakaian saat dicuci. Sablon jangan disetrika langsung.",
-    categorySlug: "outerwear",
-    collection: Collection.GRAPHIC_TEES,
-    gender: ProductGender.WOMEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Goth Hoodie Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-  {
-    name: "BARBARA Acid Wash Sand Hoodie",
-    slug: "barbara-acid-wash-sand-hoodie",
-    description: "Hoodie katun rajut tebal bertekstur acid wash dengan nuansa warna pasir. Nyaman dipakai saat cuaca dingin.",
-    price: 589000,
-    material: "Heavyweight Cotton Fleece 380 gsm",
-    care: "Cuci dengan air dingin dan putaran lambat bersama pakaian dengan warna senada.",
-    categorySlug: "outerwear",
-    collection: Collection.LIMITED_EDITION,
-    gender: ProductGender.WOMEN,
-    isNew: false,
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Sand Hoodie Front", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
-    ]
-  },
-
-  // --- OUTERWEAR / JACKETS (5) ---
-  {
-    name: "BARBARA Canvas Work Jacket",
-    slug: "barbara-canvas-work-jacket",
-    description: "Jaket bertipe workwear klasik dengan bahan kanvas kasar yang kuat. Dilengkapi dengan kerah corduroy berwarna coklat kontras dan furing hangat di bagian dalam.",
-    price: 899000,
-    material: "100% Heavy Duty Cotton Duck Canvas",
-    care: "Cukup bersihkan noda kecil dengan sikat basah. Cuci kering (dry clean) untuk hasil terbaik.",
-    categorySlug: "outerwear",
-    collection: Collection.LIMITED_EDITION,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Baru",
+    colors: ["Navy", "Putih"],
+    sizes: ["M", "L", "XL", "XXL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Work Jacket Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Navy", hex: "#000080", skuCode: "NVY" }
+      { url: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800", alt: "Long Sleeve Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Denim Vintage Trucker",
-    slug: "barbara-denim-vintage-trucker",
-    description: "Jaket denim gaya trucker dengan efek luntur vintage alami. Dibuat menggunakan selvedge denim berkualitas premium.",
-    price: 799000,
-    material: "14oz Indigo Rigid Selvedge Denim",
-    care: "Jarang dicuci untuk menjaga warna memudar alami. Jika terpaksa, cuci manual dengan tangan menggunakan air dingin.",
-    categorySlug: "outerwear",
+    name: "BARBARA Classic Pique Polo Shirt",
+    slug: "barbara-classic-pique-polo-shirt",
+    description: "Kemeja polo bahan kain rajut pique bertekstur rapat. Memberikan nuansa smart-casual yang rapi dan elegan.",
+    price: 199000,
+    material: "100% Cotton Pique Premium",
+    care: "Setrika kerah dengan teliti agar tetap berdiri tegak.",
+    categorySlug: "tops",
     collection: Collection.BEST_SELLERS,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Sangat Baik",
+    colors: ["Merah", "Navy"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800", alt: "Denim Jacket Front", order: 0 }
-    ],
-    colors: [
-      { name: "Navy", hex: "#000080", skuCode: "NVY" }
+      { url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800", alt: "Polo Shirt Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Technical Windbreaker",
-    slug: "barbara-technical-windbreaker",
-    description: "Jaket penahan angin dengan bahan anti air (water-resistant) yang ringan namun kuat. Cocok digunakan untuk aktivitas outdoor modern.",
-    price: 699000,
-    material: "Nylon Ripstop dengan Lapisan DWR",
-    care: "Jangan disetrika. Lap noda dengan kain lembab atau cuci lembut tanpa deterjen keras.",
-    categorySlug: "outerwear",
+    name: "BARBARA Waffle Knit Henley Shirt",
+    slug: "barbara-waffle-knit-henley-shirt",
+    description: "Kemeja henley dengan kancing dada tanpa kerah dari bahan kain bermotif waffle knit. Tekstur hangat dan berkarakter.",
+    price: 219000,
+    material: "Cotton Waffle Knit Fabric",
+    care: "Jangan disikat terlalu keras agar serat rajut waffle tidak merenggang.",
+    categorySlug: "tops",
     collection: Collection.NEW_ARRIVALS,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Baru",
+    colors: ["Coklat", "Beige"],
+    sizes: ["M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Windbreaker Jacket Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800", alt: "Henley Shirt Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Bomber Classic Jacket",
-    slug: "barbara-bomber-classic-jacket",
-    description: "Jaket bomber militer klasik dengan bahan nilon berkilau sedang. Menampilkan saku utilitas khas di bagian lengan kiri.",
-    price: 749000,
-    material: "Nylon Flight Satin with Polyester Padding",
-    care: "Cuci dengan dry clean profesional. Simpan di gantungan baju yang kokoh.",
-    categorySlug: "outerwear",
-    collection: Collection.BEST_SELLERS,
-    gender: ProductGender.MEN,
-    isNew: false,
-    images: [
-      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Bomber Jacket Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-  {
-    name: "BARBARA Distressed Leather Jacket",
-    slug: "barbara-distressed-leather-jacket",
-    description: "Jaket kulit asli bertekstur lecet distressed artistik. Memberikan kesan maskulin yang kuat dan abadi.",
-    price: 1899000,
-    material: "100% Genuine Lambskin Leather",
-    care: "Hanya boleh dibersihkan oleh spesialis perawatan kulit (leather care specialist).",
-    categorySlug: "outerwear",
-    collection: Collection.LIMITED_EDITION,
-    gender: ProductGender.MEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Leather Jacket Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-
-  // --- SHIRTS / TOPS (5) ---
-  {
-    name: "BARBARA Flannel Heavyweight Plaid",
-    slug: "barbara-flannel-heavyweight-plaid",
-    description: "Kemeja flannel tebal dengan motif kotak-kotak klasik. Sangat cocok dipakai sebagai luaran (outer) di atas kaos basic.",
-    price: 449000,
-    material: "100% Heavy Flannel Cotton",
-    care: "Cuci mesin dengan air dingin, jemur gantung, setrika dengan suhu hangat.",
+    name: "BARBARA Heavy Flannel Plaid Shirt",
+    slug: "barbara-heavy-flannel-plaid-shirt",
+    description: "Kemeja flannel tebal motif kotak-kotak klasik. Sangat hangat dan fleksibel dipakai sebagai kemeja maupun outer.",
+    price: 249000,
+    material: "100% Brushed Flannel Cotton",
+    care: "Cuci dengan air hangat suam-suam kuku, jemur gantung.",
     categorySlug: "tops",
     collection: Collection.BEST_SELLERS,
-    gender: ProductGender.WOMEN,
-    isNew: false,
+    gender: ProductGender.MEN,
+    condition: "Baru",
+    colors: ["Maroon", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
       { url: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=800", alt: "Flannel Shirt Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
     ]
   },
   {
-    name: "BARBARA Corduroy Oversized Shirt",
-    slug: "barbara-corduroy-oversized-shirt",
-    description: "Kemeja corduroy bertekstur garis-garis halus dengan fitting oversized. Bahan lembut namun berbobot memberikan drape baju yang mewah.",
-    price: 479000,
-    material: "Soft Corduroy Cotton Blend",
-    care: "Cuci dengan air dingin dan jangan diperas terlalu kencang untuk mempertahankan serat corduroy.",
+    name: "BARBARA Premium Oxford Cotton Shirt",
+    slug: "barbara-premium-oxford-cotton-shirt",
+    description: "Kemeja berkerah kancing (button-down) bahan kain oxford bertekstur halus. Pilihan sempurna untuk keperluan formal maupun semi-formal.",
+    price: 269000,
+    material: "100% Oxford Cotton",
+    care: "Setrika dengan pelicin pakaian untuk hasil halus sempurna.",
     categorySlug: "tops",
-    collection: Collection.OVERSIZED_COLLECTION,
-    gender: ProductGender.WOMEN,
-    isNew: true,
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Biru", "Putih"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=800", alt: "Corduroy Shirt Front", order: 0 }
-    ],
-    colors: [
-      { name: "Navy", hex: "#000080", skuCode: "NVY" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800", alt: "Oxford Shirt Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Linen Casual White Shirt",
-    slug: "barbara-linen-casual-white-shirt",
-    description: "Kemeja linen kasual berkerah mandarin (kerah koko) berwarna putih bersih. Sangat adem dan bernapas, ideal untuk iklim tropis hangat.",
-    price: 399000,
-    material: "100% Pure Linen Cotton",
-    care: "Setrika saat pakaian masih agak lembab untuk hasil rapi instan.",
+    name: "BARBARA Cuban Collar Rayon Shirt",
+    slug: "barbara-cuban-collar-rayon-shirt",
+    description: "Kemeja kerah terbuka (cuba collar) bahan sutra rayon yang halus dan dingin. Memberikan kesan santai tropis yang trendi.",
+    price: 229000,
+    material: "100% Premium Silk Rayon",
+    care: "Cuci manual dengan tangan. Hindari perasan kencang.",
+    categorySlug: "tops",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Mustard", "Kuning"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800", alt: "Cuban Shirt Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Striped Casual Tee",
+    slug: "barbara-striped-casual-tee",
+    description: "Kaos motif salur/garis-garis horizontal berdesain timeless. Memberikan siluet berkesan dinamis dan bergaya french chic.",
+    price: 119000,
+    material: "100% Fine Cotton Yarn-dyed",
+    care: "Cuci mesin dingin bersama warna senada.",
     categorySlug: "tops",
     collection: Collection.ESSENTIALS,
     gender: ProductGender.WOMEN,
-    isNew: false,
+    condition: "Baik",
+    colors: ["Navy", "Putih"],
+    sizes: ["XS", "S", "M"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800", alt: "Striped Tee Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Cropped Minimalist Tee",
+    slug: "barbara-cropped-minimalist-tee",
+    description: "Kaos model potong gantung (crop top) dengan jahitan rapi di bagian pinggang. Ringan, kasual, dan modis.",
+    price: 109000,
+    material: "95% Cotton 5% Elastane",
+    care: "Jemur datar di tempat teduh.",
+    categorySlug: "tops",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Pink", "Putih"],
+    sizes: ["XS", "S", "M"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800", alt: "Crop Tee Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Linen Relaxed Fit Shirt",
+    slug: "barbara-linen-relaxed-fit-shirt",
+    description: "Kemeja bahan serat linen alami bersirkulasi udara tinggi. Memberikan rasa dingin maksimal pada kulit di cuaca terik.",
+    price: 279000,
+    material: "100% Organic Linen",
+    care: "Setrika saat agak lembab.",
+    categorySlug: "tops",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.WOMEN,
+    condition: "Sangat Baik",
+    colors: ["Khaki", "Beige"],
+    sizes: ["S", "M", "L"],
     images: [
       { url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800", alt: "Linen Shirt Front", order: 0 }
-    ],
-    colors: [
-      { name: "White", hex: "#ffffff", skuCode: "WHT" }
     ]
   },
   {
-    name: "BARBARA Cargo Military Green Shirt",
-    slug: "barbara-cargo-military-green-shirt",
-    description: "Kemeja bergaya militer dengan dua saku cargo besar berpenutup kancing di dada depan. Terbuat dari bahan ripstop kuat.",
-    price: 459000,
-    material: "Cotton Ripstop Durable Fabric",
-    care: "Aman dicuci mesin bersama pakaian warna serupa. Jangan setrika sablon label leher.",
+    name: "BARBARA Ribbed Casual Tank Top",
+    slug: "barbara-ribbed-casual-tank-top",
+    description: "Tank top kain katun rajut elastis (ribbed) fleksibel menempel pas di badan. Pilihan ideal untuk dalaman maupun pakaian santai.",
+    price: 99000,
+    material: "Ribbed Cotton Stretch",
+    care: "Cuci dengan tangan, hindari gantung terlalu ditarik.",
     categorySlug: "tops",
-    collection: Collection.NEW_ARRIVALS,
+    collection: Collection.ESSENTIALS,
     gender: ProductGender.WOMEN,
-    isNew: true,
+    condition: "Baru",
+    colors: ["Hitam", "Cream"],
+    sizes: ["XS", "S", "M"],
     images: [
-      { url: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=800", alt: "Cargo Shirt Front", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800", alt: "Tank Top Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Cubacollar Summer Shirt",
-    slug: "barbara-cubacollar-summer-shirt",
-    description: "Kemeja kerah pendek (cuba collar) dengan bahan sutra rayon jatuh yang dingin. Memberikan nuansa liburan musim panas yang relaks.",
-    price: 379000,
-    material: "Premium Silk Rayon Blend",
-    care: "Cuci dengan tangan, jemur gantung, setrika dengan tingkat panas rendah.",
+    name: "BARBARA Embroidered Logo Tee",
+    slug: "barbara-embroidered-logo-tee",
+    description: "Kaos katun premium dengan detail bordir logo BARBARA berukuran presisi di bagian dada kiri.",
+    price: 159000,
+    material: "100% Combed Cotton 24s",
+    care: "Setrika bagian dalam saja.",
     categorySlug: "tops",
     collection: Collection.NEW_ARRIVALS,
-    gender: ProductGender.WOMEN,
-    isNew: false,
+    gender: ProductGender.MEN,
+    condition: "Baik",
+    colors: ["Ungu", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800", alt: "Cuba Collar Shirt Front", order: 0 }
-    ],
-    colors: [
-      { name: "White", hex: "#ffffff", skuCode: "WHT" },
-      { name: "Navy", hex: "#000080", skuCode: "NVY" }
+      { url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800", alt: "Logo Tee Front", order: 0 }
     ]
   },
 
-  // --- PANTS / BOTTOMS (5) ---
+  // ==================== BOTTOM (14 Products: Rp149.000 – Rp399.000) ====================
   {
-    name: "BARBARA Carpenter Canvas Double Knee",
-    slug: "barbara-carpenter-canvas-double-knee",
-    description: "Celana carpenter tangguh dengan panel double-knee di bagian lutut kaki. Dilengkapi gantungan palu khas workwear utilitas.",
-    price: 649000,
-    material: "12oz Premium Canvas Cotton",
-    care: "Balik celana saat mencuci guna melindungi panel canvas lutut agar warna merata.",
-    categorySlug: "bottoms",
-    collection: Collection.LIMITED_EDITION,
-    gender: ProductGender.MEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Carpenter Pants Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-  {
-    name: "BARBARA Wide-Leg Cargo Pants",
-    slug: "barbara-wide-leg-cargo-pants",
-    description: "Celana panjang kargo dengan fitting lebar (wide-leg) yang sedang tren. Menyediakan saku samping lapang untuk memuat barang bawaan.",
-    price: 599000,
-    material: "Cotton Twill Ripstop",
-    care: "Aman dicuci mesin, setrika dengan suhu sedang untuk merapikan lipatan celana.",
-    categorySlug: "bottoms",
+    name: "BARBARA Heavy Canvas Cargo Pants",
+    slug: "barbara-heavy-canvas-cargo-pants",
+    description: "Celana panjang kargo bahan kanvas tebal dengan 6 saku utilitas ekstra lapang. Tahan gesekan dan kokoh.",
+    price: 299000,
+    material: "100% Cotton Canvas Ripstop",
+    care: "Balik celana sebelum dicuci agar warna kanvas awet.",
+    categorySlug: "bottom",
     collection: Collection.BEST_SELLERS,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Baru",
+    colors: ["Hijau Olive", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
       { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Cargo Pants Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
     ]
   },
   {
-    name: "BARBARA Baggy Vintage Denim",
-    slug: "barbara-baggy-vintage-denim",
-    description: "Celana jeans berpotongan baggy gombrang bergaya retro vintage tahun 90-an dengan efek pencucian washed indigo lembut.",
-    price: 679000,
-    material: "100% Cotton Denim 13oz",
-    care: "Jangan terlalu sering dicuci demi ketahanan serat kain jeans vintage.",
-    categorySlug: "bottoms",
+    name: "BARBARA 90s Baggy Fit Jeans",
+    slug: "barbara-90s-baggy-fit-jeans",
+    description: "Celana jeans potongan baggy retro gaya 90-an dengan pencucian washed indigo alami.",
+    price: 349000,
+    material: "13.5oz Rigid Cotton Denim",
+    care: "Hindari terlalu sering dicuci mesin.",
+    categorySlug: "bottom",
     collection: Collection.BEST_SELLERS,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Sangat Baik",
+    colors: ["Denim", "Biru"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Vintage Denim Front", order: 0 }
-    ],
-    colors: [
-      { name: "Navy", hex: "#000080", skuCode: "NVY" }
+      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Baggy Jeans Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Minimalist Pleated Chino",
-    slug: "barbara-minimalist-pleated-chino",
-    description: "Celana chino minimalis dengan lipatan (pleats) di pinggang depan. Memberikan siluet rapi, smart-casual namun tetap santai.",
-    price: 529000,
-    material: "Premium Cotton Stretch Chino",
-    care: "Cuci dengan air dingin dan gosok rapi mengikuti arah garis lipatan depan.",
-    categorySlug: "bottoms",
+    name: "BARBARA Classic Straight Leg Jeans",
+    slug: "barbara-classic-straight-leg-jeans",
+    description: "Celana denim potongan lurus (straight leg) serbaguna yang cocok dikombinasikan dengan sepatu sneakers maupun boots.",
+    price: 329000,
+    material: "13oz Denim Cotton",
+    care: "Cuci dengan air dingin.",
+    categorySlug: "bottom",
     collection: Collection.ESSENTIALS,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Baru",
+    colors: ["Denim", "Hitam"],
+    sizes: ["M", "L", "XL", "XXL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Pleated Chino Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=800", alt: "Straight Jeans Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Tech Nylon Track Pants",
-    slug: "barbara-tech-nylon-track-pants",
-    description: "Celana olahraga technical dengan bahan nilon ringan berlapis jaring halus di bagian dalam. Menggunakan karet pinggang fleksibel.",
-    price: 499000,
-    material: "Lightweight Tech Nylon Ripstop",
-    care: "Disarankan cuci mesin dalam kantong khusus (mesh bag) agar tidak merusak bahan nilon ringan.",
-    categorySlug: "bottoms",
+    name: "BARBARA Wide Leg Pleated Trousers",
+    slug: "barbara-wide-leg-pleated-trousers",
+    description: "Celana panjang kain potongan wide-leg dengan lipatan pleated anggun di pinggang depan.",
+    price: 379000,
+    material: "Polyester Viscose Blend",
+    care: "Setrika ikuti garis celana depan.",
+    categorySlug: "bottom",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Beige", "Hitam"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=800", alt: "Wide Trousers Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Slim Fit Stretch Chino Pants",
+    slug: "barbara-slim-fit-stretch-chino-pants",
+    description: "Celana chino bahan kain katun stretch lentur yang elastis bergerak. Rapi dan fleksibel untuk kerja dan hangout.",
+    price: 249000,
+    material: "98% Cotton 2% Elastane Chino",
+    care: "Cuci putaran lembut.",
+    categorySlug: "bottom",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Khaki", "Navy"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800", alt: "Chino Pants Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Tactical Jogger Pants",
+    slug: "barbara-tactical-jogger-pants",
+    description: "Celana jogger berkerut kencang di pergelangan kaki dengan saku zipper taktis di paha samping.",
+    price: 229000,
+    material: "Cotton Twill Stretch",
+    care: "Jemur terbalik.",
+    categorySlug: "bottom",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.MEN,
+    condition: "Baik",
+    colors: ["Hitam", "Abu-Abu"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Jogger Pants Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Double Knee Carpenter Pants",
+    slug: "barbara-double-knee-carpenter-pants",
+    description: "Celana carpenter tahan benturan dengan panel kanvas ganda di lutut dan loop alat tukang.",
+    price: 399000,
+    material: "14oz Heavy Duck Canvas",
+    care: "Sikat bagian kotor jika perlu.",
+    categorySlug: "bottom",
+    collection: Collection.LIMITED_EDITION,
+    gender: ProductGender.MEN,
+    condition: "Baru",
+    colors: ["Coklat", "Hijau Army"],
+    sizes: ["M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Carpenter Pants Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Tailored Pleated Trousers",
+    slug: "barbara-tailored-pleated-trousers",
+    description: "Celana bahan jahitan penjahit profesional (tailored) dengan fiting jatuh rapi dan nyaman.",
+    price: 359000,
+    material: "Wool Blend Semi-formal Fabric",
+    care: "Dry clean direkomendasikan.",
+    categorySlug: "bottom",
+    collection: Collection.BEST_SELLERS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Abu-Abu", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=800", alt: "Tailored Trousers Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Vintage Wash Denim Shorts",
+    slug: "barbara-vintage-wash-denim-shorts",
+    description: "Celana pendek jeans denim dengan aksen raw hem (ujung tiras) kasual santai.",
+    price: 189000,
+    material: "100% Cotton Denim 12oz",
+    care: "Cuci mesin biasa.",
+    categorySlug: "bottom",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Denim", "Biru"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800", alt: "Denim Shorts Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Utility Cargo Shorts",
+    slug: "barbara-utility-cargo-shorts",
+    description: "Celana pendek cargo lutut santai dengan saku flap besar serbaguna.",
+    price: 179000,
+    material: "Cotton Twill Durable",
+    care: "Aman dicuci mesin.",
+    categorySlug: "bottom",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.MEN,
+    condition: "Baik",
+    colors: ["Khaki", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800", alt: "Cargo Shorts Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Linen Drawstring Pants",
+    slug: "barbara-linen-drawstring-pants",
+    description: "Celana santai pinggang tali kerutan dari serat linen murni yang super sejuk.",
+    price: 269000,
+    material: "100% Organic Linen",
+    care: "Setrika hangat saat lembab.",
+    categorySlug: "bottom",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.WOMEN,
+    condition: "Sangat Baik",
+    colors: ["Cream", "Putih"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=800", alt: "Linen Pants Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA High-Waist Wide Jeans",
+    slug: "barbara-high-waist-wide-jeans",
+    description: "Celana jeans pinggang tinggi (high-waist) dengan potongan kaki lebar memberi efek kaki lebih jenjang.",
+    price: 369000,
+    material: "13oz Denim Cotton Stretch",
+    care: "Balik sebelum dicuci.",
+    categorySlug: "bottom",
+    collection: Collection.BEST_SELLERS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Denim", "Navy"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800", alt: "High-Waist Jeans Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Athleisure Sweatpants",
+    slug: "barbara-athleisure-sweatpants",
+    description: "Celana training bahan fleece super empuk dengan saku samping dan karet pinggang fleksibel.",
+    price: 199000,
+    material: "Cotton Fleece 280 gsm",
+    care: "Cuci mesin dingin.",
+    categorySlug: "bottom",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baik",
+    colors: ["Abu-Abu", "Pink"],
+    sizes: ["XS", "S", "M"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Sweatpants Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Corduroy Straight Trousers",
+    slug: "barbara-corduroy-straight-trousers",
+    description: "Celana panjang corduroy tekstur salur halus bergaya vintage hangat.",
+    price: 289000,
+    material: "Fine Wale Corduroy Cotton",
+    care: "Jangan disikat kencang.",
+    categorySlug: "bottom",
     collection: Collection.NEW_ARRIVALS,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Sangat Baik",
+    colors: ["Maroon", "Coklat"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", alt: "Tech Pants Front", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" },
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=800", alt: "Corduroy Trousers Front", order: 0 }
     ]
   },
 
-  // --- FOOTWEAR / SHOES & SLIDES (6) ---
+  // ==================== OUTERWEAR (13 Products: Rp249.000 – Rp799.000) ====================
   {
-    name: "BARBARA Streetwear Slides Noir",
-    slug: "barbara-streetwear-slides-noir",
-    description: "Sandal slide kasual yang sangat nyaman dengan bahan foam empuk berdesain ergonomis. Cocok untuk penggunaan sehari-hari maupun santai.",
-    price: 189000,
-    material: "100% EVA Lightweight Foam",
-    care: "Hindari panas terik matahari langsung saat menjemur.",
-    categorySlug: "footwear",
-    collection: Collection.ESSENTIALS,
+    name: "BARBARA Heavyweight Fleece Hoodie",
+    slug: "barbara-heavyweight-fleece-hoodie",
+    description: "Hoodie bertudung tebal 380gsm dengan bahan fleece rajut tebal super lembut di bagian dalam. Fiting boxy fit.",
+    price: 499000,
+    material: "Heavyweight Cotton Fleece 380 gsm",
+    care: "Cuci putaran lembut, jangan gunakan mesin pengering bersuhu panas.",
+    categorySlug: "outerwear",
+    collection: Collection.OVERSIZED_COLLECTION,
     gender: ProductGender.MEN,
-    isNew: false,
+    condition: "Baru",
+    colors: ["Hitam", "Abu-Abu"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800", alt: "Slides Noir view", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
+      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Fleece Hoodie Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Low-Top Classic Sneakers",
-    slug: "barbara-lowtop-classic-sneakers",
-    description: "Sepatu sneakers low-top klasik berwarna putih bersih dengan bahan kulit sintetis premium dan sol karet anti slip.",
-    price: 459000,
-    material: "Premium Faux Leather with Rubber Soles",
-    care: "Lap dengan sponge basah dan cleaner sepatu khusus.",
-    categorySlug: "footwear",
-    collection: Collection.NEW_ARRIVALS,
-    gender: ProductGender.WOMEN,
-    isNew: true,
-    images: [
-      { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", alt: "Sneakers White View", order: 0 }
-    ],
-    colors: [
-      { name: "White", hex: "#ffffff", skuCode: "WHT" }
-    ]
-  },
-  {
-    name: "BARBARA Chunky Platform Slides",
-    slug: "barbara-chunky-platform-slides",
-    description: "Sandal platform tebal (chunky style) untuk kenyamanan melangkah ekstra dengan drape modern. Nyaman dan trendy.",
-    price: 299000,
-    material: "Eva Platform Rubber Foam",
-    care: "Cukup bilas air bersih mengalir jika terkena kotoran tanah.",
-    categorySlug: "footwear",
-    collection: Collection.LIMITED_EDITION,
-    gender: ProductGender.WOMEN,
-    isNew: false,
-    images: [
-      { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", alt: "Platform Slides View", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
-    ]
-  },
-  {
-    name: "BARBARA High-Top Street Sneakers",
-    slug: "barbara-hightop-street-sneakers",
-    description: "Sneakers high-top bergaya jalanan (street style) dengan detail velcro strap atas dan mesh lining bernapas di dalam.",
-    price: 799000,
-    material: "Suede Leather, Mesh & Rubber Soles",
-    care: "Gunakan sikat khusus suede (suede brush) pelan untuk merapikan bulu halus suede.",
-    categorySlug: "footwear",
+    name: "BARBARA Full-Zip Oversized Hoodie",
+    slug: "barbara-full-zip-oversized-hoodie",
+    description: "Hoodie ritsleting penuh (full-zip) dengan ritsleting logam YKK tahan lama dan saku kanguru ganda.",
+    price: 529000,
+    material: "Cotton Fleece 350 gsm",
+    care: "Tutup ritsleting saat mencuci.",
+    categorySlug: "outerwear",
     collection: Collection.BEST_SELLERS,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Sangat Baik",
+    colors: ["Navy", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", alt: "High-Top Sneakers View", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
+      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Zip Hoodie Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Retro Running Trainers",
-    slug: "barbara-retro-running-trainers",
-    description: "Sepatu olahraga running trainer bergaya retro tahun 80-an dengan cushion sol ultra empuk untuk berjalan jauh.",
-    price: 699000,
-    material: "Nylon & Suede Panel Overlays",
-    care: "Lap dengan sponge pembersih kering. Hindari mesin cuci.",
-    categorySlug: "footwear",
+    name: "BARBARA Minimalist Crewneck Sweatshirt",
+    slug: "barbara-minimalist-crewneck-sweatshirt",
+    description: "Sweater tanpa tudung (crewneck) kasual dari bahan fleece hangat bersiluet bersih.",
+    price: 399000,
+    material: "Cotton Fleece 300 gsm",
+    care: "Cuci mesin dingin.",
+    categorySlug: "outerwear",
     collection: Collection.ESSENTIALS,
-    gender: ProductGender.MEN,
-    isNew: false,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Cream", "Mustard"],
+    sizes: ["XS", "S", "M", "L"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", alt: "Retro Trainers View", order: 0 }
-    ],
-    colors: [
-      { name: "Grey", hex: "#808080", skuCode: "GRY" }
+      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Crewneck Front", order: 0 }
     ]
   },
   {
-    name: "BARBARA Minimalist Leather Loafers",
-    slug: "barbara-minimalist-leather-loafers",
-    description: "Sepatu loafers kulit minimalis slip-on yang rapi dan elegan. Sangat mewah dipakai pada acara semi-formal maupun formal.",
-    price: 849000,
-    material: "100% Genuine Calfskin Leather",
-    care: "Gunakan semir sepatu hitam (leather wax) berkualitas agar tetap mengkilap.",
-    categorySlug: "footwear",
+    name: "BARBARA Retro Varsity Bomber Jacket",
+    slug: "barbara-retro-varsity-bomber-jacket",
+    description: "Jaket varsity gaya kampus retro dengan kancing jepret dan rib bermotif garis kontras.",
+    price: 699000,
+    material: "Wool Blend Body & Synthetic Leather Sleeves",
+    care: "Dry clean saja.",
+    categorySlug: "outerwear",
     collection: Collection.LIMITED_EDITION,
     gender: ProductGender.MEN,
-    isNew: true,
+    condition: "Baru",
+    colors: ["Maroon", "Putih"],
+    sizes: ["M", "L", "XL"],
     images: [
-      { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", alt: "Leather Loafers View", order: 0 }
-    ],
-    colors: [
-      { name: "Black", hex: "#000000", skuCode: "BLK" }
+      { url: "https://images.unsplash.com/photo-1544441893-675973e31985?w=800", alt: "Varsity Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Flight Bomber Jacket",
+    slug: "barbara-flight-bomber-jacket",
+    description: "Jaket bomber militer penerbang berlapis padding hangat dan nilon mengkilap anti air.",
+    price: 649000,
+    material: "Nylon Flight Satin with Polyester Padding",
+    care: "Dry clean direkomendasikan.",
+    categorySlug: "outerwear",
+    collection: Collection.BEST_SELLERS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Hijau Army", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Bomber Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Nylon Street Coach Jacket",
+    slug: "barbara-nylon-street-coach-jacket",
+    description: "Jaket coach bahan nilon tahan angin ringan dengan kancing cetet dan tali serut di pinggang bawah.",
+    price: 449000,
+    material: "100% Taslan Nylon Water Repellent",
+    care: "Lap dengan spons lembab.",
+    categorySlug: "outerwear",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.MEN,
+    condition: "Baik",
+    colors: ["Hitam", "Navy"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Coach Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Technical Ripstop Windbreaker",
+    slug: "barbara-technical-ripstop-windbreaker",
+    description: "Jaket windbreaker ultra ringan anti air untuk perlindungan dari hujan gerimis dan angin tajam.",
+    price: 479000,
+    material: "Nylon Ripstop DWR Coated",
+    care: "Jangan disetrika.",
+    categorySlug: "outerwear",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.MEN,
+    condition: "Baru",
+    colors: ["Orange", "Hitam"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", alt: "Windbreaker Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Trucker Denim Jacket",
+    slug: "barbara-trucker-denim-jacket",
+    description: "Jaket jeans denim gaya trucker klasik dengan kancing logam kuningan tebal.",
+    price: 599000,
+    material: "14oz Indigo Denim",
+    care: "Cuci terbalik dengan air dingin.",
+    categorySlug: "outerwear",
+    collection: Collection.BEST_SELLERS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Denim", "Biru"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800", alt: "Denim Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Canvas Utility Field Jacket",
+    slug: "barbara-canvas-utility-field-jacket",
+    description: "Jaket lapangan (field jacket) bertipe workwear utilitas dengan 4 saku flap besar di depan.",
+    price: 579000,
+    material: "Heavy Cotton Canvas",
+    care: "Bersihkan noda lokal dengan kain lembab.",
+    categorySlug: "outerwear",
+    collection: Collection.LIMITED_EDITION,
+    gender: ProductGender.MEN,
+    condition: "Baru",
+    colors: ["Khaki", "Hijau Olive"],
+    sizes: ["M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800", alt: "Field Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Soft Fleece Zip Jacket",
+    slug: "barbara-soft-fleece-zip-jacket",
+    description: "Jaket luaran fleece lembut berbulu hangat cocok dipakai saat jalan-jalan santai di daerah dingin.",
+    price: 349000,
+    material: "100% Polar Fleece",
+    care: "Jangan disetrika panas.",
+    categorySlug: "outerwear",
+    collection: Collection.ESSENTIALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baik",
+    colors: ["Beige", "Pink"],
+    sizes: ["XS", "S", "M", "L"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Fleece Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Heavy Quilted Puffer Jacket",
+    slug: "barbara-heavy-quilted-puffer-jacket",
+    description: "Jaket puffer bervolume tebal berlapis kapuk sintesis ultra hangat penahan cuaca dingin ekstrem.",
+    price: 749000,
+    material: "Polyester Micro Ripstop with Synthetic Down Padding",
+    care: "Jemur cuci angin.",
+    categorySlug: "outerwear",
+    collection: Collection.LIMITED_EDITION,
+    gender: ProductGender.MEN,
+    condition: "Baru",
+    colors: ["Hitam", "Navy"],
+    sizes: ["M", "L", "XL", "XXL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1544441893-675973e31985?w=800", alt: "Puffer Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Winter Waterproof Parka",
+    slug: "barbara-winter-waterproof-parka",
+    description: "Jaket parka panjang dengan tudung bertali serut penahan angin dan hujan salju/deras.",
+    price: 799000,
+    material: "Heavy Duty Taslan Waterproof",
+    care: "Dry clean.",
+    categorySlug: "outerwear",
+    collection: Collection.BEST_SELLERS,
+    gender: ProductGender.MEN,
+    condition: "Sangat Baik",
+    colors: ["Hijau Army", "Hitam"],
+    sizes: ["M", "L", "XL"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800", alt: "Parka Jacket Front", order: 0 }
+    ]
+  },
+  {
+    name: "BARBARA Oversized Cropped Denim Jacket",
+    slug: "barbara-oversized-cropped-denim-jacket",
+    description: "Jaket denim wanita model gantung cropped fit bergaya modern street style.",
+    price: 549000,
+    material: "12oz Denim Cotton",
+    care: "Cuci terbalik.",
+    categorySlug: "outerwear",
+    collection: Collection.NEW_ARRIVALS,
+    gender: ProductGender.WOMEN,
+    condition: "Baru",
+    colors: ["Denim", "Putih"],
+    sizes: ["XS", "S", "M"],
+    images: [
+      { url: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800", alt: "Cropped Denim Jacket Front", order: 0 }
     ]
   }
 ];
 
-const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-
 async function main() {
-  console.log("=== MEMULAI PROSES SEEDING DATABASE BARBARA ===");
+  console.log("=== RESET & SEED DATABASE TEST BARBARA E-COMMERCE ===");
 
-  // 1. Seed Users (Upsert pattern to avoid duplicates)
-  console.log("Seeding users...");
+  // 1. Clean existing dependent data cleanly to prevent foreign key errors
+  console.log("Membuang data produk lama...");
+  await prisma.review.deleteMany({});
+  await prisma.cartItem.deleteMany({});
+  await prisma.orderItem.deleteMany({});
+  await prisma.wishlist.deleteMany({});
+  await prisma.productVariant.deleteMany({});
+  await prisma.productImage.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.category.deleteMany({});
+  console.log("✓ Data produk & kategori lama berhasil dibersihkan");
+
+  // 2. Seed Users
+  console.log("Menyiapkan akun pengguna...");
   const [adminPassword, customerPassword] = await Promise.all([
     bcrypt.hash("Admin123!", 10),
     bcrypt.hash("Customer123!", 10),
   ]);
 
-  // Check and create admin user
-  const admin = await prisma.user.findFirst({ where: { email: "admin@barbara.com" } });
-  if (!admin) {
-    await prisma.user.create({
-      data: {
-        name: "BARBARA Admin",
-        email: "admin@barbara.com",
-        password: adminPassword,
-        role: Role.ADMIN,
-      },
-    });
-    console.log("✓ User admin berhasil dibuat");
-  } else {
-    console.log("✓ User admin sudah terdaftar, lewati pembuatan.");
-  }
+  await prisma.user.upsert({
+    where: { email: "admin@barbara.com" },
+    update: { password: adminPassword },
+    create: {
+      name: "BARBARA Admin",
+      email: "admin@barbara.com",
+      password: adminPassword,
+      role: Role.ADMIN,
+    },
+  });
 
-  // Check and create customer user
-  const customer = await prisma.user.findFirst({ where: { email: "customer@barbara.com" } });
-  if (!customer) {
-    await prisma.user.create({
-      data: {
-        name: "BARBARA Customer",
-        email: "customer@barbara.com",
-        password: customerPassword,
-        role: Role.USER,
-      },
-    });
-    console.log("✓ User customer berhasil dibuat");
-  } else {
-    console.log("✓ User customer sudah terdaftar, lewati pembuatan.");
-  }
+  await prisma.user.upsert({
+    where: { email: "customer@barbara.com" },
+    update: { password: customerPassword },
+    create: {
+      name: "BARBARA Customer",
+      email: "customer@barbara.com",
+      password: customerPassword,
+      role: Role.USER,
+    },
+  });
+  console.log("✓ Akun admin & customer siap");
 
-  // 2. Seed Categories (Upsert)
+  // 3. Seed 3 Categories ONLY
+  console.log("Membuat 3 kategori utama (Tops, Bottom, Outerwear)...");
   const categoryMap: Record<string, string> = {};
-  console.log("Seeding categories...");
   for (const cat of categoriesData) {
-    const upsertedCat = await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: {
-        name: cat.name,
-        description: cat.description,
-      },
-      create: {
+    const createdCat = await prisma.category.create({
+      data: {
         name: cat.name,
         slug: cat.slug,
         description: cat.description,
       },
     });
-    categoryMap[cat.slug] = upsertedCat.id;
-    console.log(`✓ Kategori "${cat.name}" berhasil dibuat / diupdate`);
+    categoryMap[cat.slug] = createdCat.id;
+    console.log(`  - Kategori "${cat.name}" (${cat.slug}) dibuat.`);
   }
 
-
-
-  // 4. Seed Products (Idempotent loop with clear & rebuild of child records)
-  console.log("Seeding products & variants...");
+  // 4. Seed 42 Products & Variants
+  console.log("Membuat 42 produk baru dengan varian & gambar lengkap...");
+  let count = 0;
   for (const prod of productsData) {
+    count++;
     const categoryId = categoryMap[prod.categorySlug];
-    if (!categoryId) {
-      console.warn(`Warning: Category ID not found for slug: ${prod.categorySlug}. Skipping product ${prod.name}`);
-      continue;
-    }
 
-    // Upsert the main Product record based on unique slug
-    const upsertedProduct = await prisma.product.upsert({
-      where: { slug: prod.slug },
-      update: {
-        name: prod.name,
-        description: prod.description,
-        price: prod.price,
-        material: prod.material,
-        care: prod.care,
-        isNew: prod.isNew,
-        categoryId: categoryId,
-        collection: prod.collection,
-        gender: prod.gender,
-      },
-      create: {
+    // Format size & color strings for exact comma-padding filter search (e.g. ",S,M,L,")
+    const formattedSizeString = `,${prod.sizes.join(",")},`;
+    const formattedColorString = `,${prod.colors.join(",")},`;
+    const randomLikes = Math.floor(Math.random() * 180) + 20;
+
+    const product = await prisma.product.create({
+      data: {
         name: prod.name,
         slug: prod.slug,
         description: prod.description,
         price: prod.price,
         material: prod.material,
         care: prod.care,
-        isNew: prod.isNew,
-        categoryId: categoryId,
-        isActive: true,
         collection: prod.collection,
         gender: prod.gender,
+        condition: prod.condition,
+        brand: "BARBARA",
+        size: formattedSizeString,
+        color: formattedColorString,
+        categorySlug: prod.categorySlug,
+        categoryId: categoryId,
+        isNew: prod.condition === "Baru",
+        isActive: true,
+        likesCount: randomLikes,
+        images: {
+          create: prod.images.map((img) => ({
+            url: img.url,
+            alt: img.alt,
+            order: img.order,
+          })),
+        },
       },
     });
 
-    console.log(`✓ Produk "${prod.name}" berhasil ditambahkan / diupdate`);
+    // Create Variants (Color x Size)
+    for (const colorName of prod.colors) {
+      const colorMeta = COLOR_MAP[colorName] || { hex: "#000000", code: "CLR" };
+      for (const sizeName of prod.sizes) {
+        const sku = `BAR-${prod.categorySlug.substring(0, 3).toUpperCase()}-${String(count).padStart(3, "0")}-${colorMeta.code}-${sizeName}`;
+        const stock = Math.floor(Math.random() * 25) + 10; // random stock between 10 & 35
 
-    // Clean out old images to prevent stale media records
-    await prisma.productImage.deleteMany({ where: { productId: upsertedProduct.id } });
-
-    // Seed new Images
-    const imageData = prod.images.map((img) => ({
-      productId: upsertedProduct.id,
-      url: img.url,
-      alt: img.alt,
-      order: img.order,
-    }));
-    await prisma.productImage.createMany({ data: imageData });
-
-    // Seed/update Variants (combinatorial Size x Color) using upsert to avoid foreign key violations
-    for (const color of prod.colors) {
-      for (const size of sizes) {
-        // Generate a clean deterministic unique SKU code
-        const safeProductCode = prod.slug.substring(0, 10).toUpperCase();
-        const sku = `BBR-${safeProductCode}-${color.skuCode}-${size}`;
-        const stock = Math.floor(Math.random() * 25) + 5; // Random stock between 5 and 30
-
-        await prisma.productVariant.upsert({
-          where: { sku: sku },
-          update: {
-            stock: stock,
-          },
-          create: {
-            productId: upsertedProduct.id,
-            size: size,
-            color: color.name,
-            colorHex: color.hex,
+        await prisma.productVariant.create({
+          data: {
+            productId: product.id,
+            size: sizeName,
+            color: colorName,
+            colorHex: colorMeta.hex,
             stock: stock,
             sku: sku,
           },
         });
       }
     }
-    console.log(`✓ Varian & Gambar untuk "${prod.name}" berhasil dibuat / diperbarui`);
+
+    console.log(`  [${count}/42] ✓ "${prod.name}" (${prod.categorySlug} | ${prod.gender} | ${prod.condition} | Rp${prod.price.toLocaleString("id-ID")})`);
   }
 
-  console.log("\n=== SEEDER SELESAI DENGAN SUKSES ===");
-  console.log("Akun Uji Coba:");
-  console.log(" - Admin: admin@barbara.com / Admin123!");
-  console.log(" - Customer: customer@barbara.com / Customer123!");
+  console.log("\n=======================================================");
+  console.log("✅ SEEDING DATABASE SELESAI SUKSES!");
+  console.log("Total Produk Dibuat: 42 Produk");
+  console.log("Distribusi Kategori:");
+  console.log(" - Tops      : 15 Produk (Rp 99.000 - Rp 299.000)");
+  console.log(" - Bottom    : 14 Produk (Rp 149.000 - Rp 399.000)");
+  console.log(" - Outerwear : 13 Produk (Rp 249.000 - Rp 799.000)");
+  console.log("=======================================================");
 }
 
 main()
-  .catch((error) => {
-    console.error("Seeding failed with error:", error);
+  .catch((e) => {
+    console.error("❌ Seeding gagal:", e);
     process.exit(1);
   })
   .finally(async () => {

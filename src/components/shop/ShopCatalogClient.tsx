@@ -521,7 +521,7 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
                           </button>
 
                           {categories
-                            .filter((cat) => ["tops", "bottoms", "outerwear"].includes(cat.slug.toLowerCase()))
+                            .filter((cat) => ["tops", "bottom", "bottoms", "outerwear"].includes(cat.slug.toLowerCase()))
                             .map((cat) => {
                               const isChecked = selectedCategories.includes(cat.slug) && selectedGender === categoryGender;
                               return (
