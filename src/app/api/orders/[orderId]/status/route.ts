@@ -49,7 +49,7 @@ export async function GET(
     // ── 1. Fetch order from DB ────────────────────────────────────────────
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
-      .select("id, order_number, payment_status, status, paid_at, payment_type, midtrans_id, midtrans_transaction_id")
+      .select("id, order_number, user_id, payment_status, status, paid_at, payment_type, midtrans_id, midtrans_transaction_id")
       .eq("id", orderId)
       .eq("user_id", session.user.id)
       .maybeSingle();
@@ -155,6 +155,24 @@ export async function GET(
       }
 
       console.log(`[Status Check] ✅ DB updated for order ${order.order_number}`);
+
+      // Empty user cart in DB when payment becomes paid
+      if (isPaid && order.user_id) {
+        console.log(`[Status Check] Clearing cart in DB for user ${order.user_id}`);
+        const { data: cart } = await supabaseAdmin
+          .from("carts")
+          .select("id")
+          .eq("user_id", order.user_id)
+          .maybeSingle();
+
+        if (cart) {
+          await supabaseAdmin
+            .from("cart_items")
+            .delete()
+            .eq("cart_id", cart.id);
+          console.log(`[Status Check] Cart cleared successfully for user ${order.user_id}`);
+        }
+      }
 
       return NextResponse.json({
         orderId: order.order_number,

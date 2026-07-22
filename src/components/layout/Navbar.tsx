@@ -62,7 +62,6 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: "Pria", href: "/shop?gender=pria" },
     { name: "Wanita", href: "/shop?gender=wanita" },
-    { name: "Sale", href: "/shop?sale=true", isSale: true },
     { name: "Tentang", href: "/about" },
     { name: "Kontak", href: "/contact" },
   ];
@@ -284,16 +283,12 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Sub Navigation (Row 2 - Desktop Only) */}
-        <div className="hidden md:flex h-12 items-center justify-center gap-8 text-xs font-bold uppercase tracking-widest text-brand-black">
+        <div className="hidden md:flex h-12 items-center justify-center gap-10 lg:gap-14 text-xs font-bold uppercase tracking-widest text-brand-black">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={
-                link.isSale
-                  ? "text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em] transition-colors"
-                  : "hover:opacity-75 transition-opacity"
-              }
+              className="hover:opacity-75 transition-opacity"
             >
               {link.name}
             </Link>
@@ -340,11 +335,7 @@ export const Navbar: React.FC = () => {
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={
-                    link.isSale
-                      ? "text-red-600 hover:text-red-700 font-extrabold tracking-[0.15em]"
-                      : "hover:opacity-70 transition-opacity"
-                  }
+                  className="hover:opacity-70 transition-opacity"
                 >
                   {link.name}
                 </Link>

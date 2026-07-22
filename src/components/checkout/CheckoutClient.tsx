@@ -381,21 +381,24 @@ export const CheckoutClient: React.FC<CheckoutClientProps> = () => {
         {/* Place Order CTA Section */}
         {addresses.length > 0 && (
           <div className="pt-2">
-            <Button
+            <button
               onClick={handlePlaceOrder}
-              variant="primary"
-              className="w-full py-5 flex items-center justify-center gap-2"
               disabled={isSubmitting || !selectedAddress}
+              className={`w-full h-14 min-h-[56px] font-black uppercase tracking-[0.2em] text-xs py-4 px-6 rounded-xl border-2 border-brand-black transition-all duration-300 focus:outline-none flex items-center justify-center gap-2.5 cursor-pointer ${
+                isSubmitting || !selectedAddress
+                  ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
+                  : "bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black shadow-md"
+              }`}
             >
               {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-brand-white border-t-transparent rounded-full animate-spin" />
-                  {submitStep || "Processing..."}
-                </>
+                <span className="flex items-center justify-center gap-2.5">
+                  <span className="w-4 h-4 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="truncate">Memproses...</span>
+                </span>
               ) : (
-                "Place Order & Pay"
+                <span>Place Order & Pay</span>
               )}
-            </Button>
+            </button>
           </div>
         )}
       </div>

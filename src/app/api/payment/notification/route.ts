@@ -83,6 +83,7 @@ export async function POST(req: Request) {
       .from("orders")
       .select(`
         id,
+        user_id,
         status,
         payment_status,
         order_items (
@@ -137,6 +138,24 @@ export async function POST(req: Request) {
       throw updateErr;
     }
     console.log(`[Webhook] Database update succeeded for order ${order_id}`);
+
+    // Empty user cart in database when payment is successful
+    if (isPaid && order.user_id) {
+      console.log(`[Webhook] Clearing cart in DB for user ${order.user_id}`);
+      const { data: cart } = await supabaseAdmin
+        .from("carts")
+        .select("id")
+        .eq("user_id", order.user_id)
+        .maybeSingle();
+
+      if (cart) {
+        await supabaseAdmin
+          .from("cart_items")
+          .delete()
+          .eq("cart_id", cart.id);
+        console.log(`[Webhook] Cart cleared successfully for user ${order.user_id}`);
+      }
+    }
 
     // Restore stock only if transitioning to a terminal failure state
     // and the order was NOT already cancelled (avoid double-restore)

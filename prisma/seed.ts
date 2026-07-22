@@ -591,7 +591,7 @@ const productsData = [
     colors: ["Cream", "Mustard"],
     sizes: ["XS", "S", "M", "L"],
     images: [
-      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Crewneck Front", order: 0 }
+      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Crewneck Front", order: 0 }
     ]
   },
   {
@@ -710,7 +710,7 @@ const productsData = [
     colors: ["Beige", "Pink"],
     sizes: ["XS", "S", "M", "L"],
     images: [
-      { url: "https://images.unsplash.com/photo-1556821741-704ce4895446?w=800", alt: "Fleece Jacket Front", order: 0 }
+      { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800", alt: "Fleece Jacket Front", order: 0 }
     ]
   },
   {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { CheckCircle, AlertTriangle, XCircle, Clock, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useCartStore } from "@/stores/useCartStore";
 
 // ─── Status Configuration ────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -133,6 +134,9 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
       if (newStatus !== paymentStatus) {
         console.log(`[Polling] Status changed: ${paymentStatus} → ${newStatus}`);
         setPaymentStatus(newStatus);
+        if (newStatus === "paid") {
+          useCartStore.getState().clearCart();
+        }
       }
       
       if (data.paidAt) setPaidAt(data.paidAt);
@@ -160,6 +164,9 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
       return;
     }
 
+    // Run an instant check on mount to ensure fresh status from backend
+    pollStatus();
+
     // Poll every 5 seconds for non-terminal statuses
     pollRef.current = setInterval(pollStatus, POLL_INTERVAL_MS);
     console.log(`[Polling] Started for order ${orderId} (every ${POLL_INTERVAL_MS / 1000}s)`);
@@ -186,20 +193,23 @@ export const ConfirmationClient: React.FC<ConfirmationClientProps> = ({
 
     snapObj.pay(snapToken, {
       onSuccess: () => {
-        console.log("[Snap] onSuccess — waiting for webhook to confirm");
+        console.log("[Snap] onSuccess — polling backend for status update");
         setIsPaying(false);
-        // Don't trust frontend callback — let polling pick up the real status
+        pollStatus();
       },
       onPending: () => {
-        console.log("[Snap] onPending");
+        console.log("[Snap] onPending — polling backend");
         setIsPaying(false);
+        pollStatus();
       },
       onError: () => {
         alert("Terjadi kesalahan pembayaran. Silakan coba kembali.");
         setIsPaying(false);
+        pollStatus();
       },
       onClose: () => {
         setIsPaying(false);
+        pollStatus();
       },
     });
   };

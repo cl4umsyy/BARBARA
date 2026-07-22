@@ -49,6 +49,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
   const openModal = useAuthModalStore((s) => s.openModal);
 
+  const [imgSrc, setImgSrc] = useState(imageUrl || "/images/placeholder.jpg");
+
   const [likesCount, setLikesCount] = useState(() => {
     if (initialLikesCount !== undefined) return initialLikesCount;
     let hash = 0;
@@ -119,12 +121,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Primary Image */}
         <Image
-          src={imageUrl || "/images/placeholder.jpg"}
+          src={imgSrc}
           alt={name}
           fill
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           priority={false}
+          onError={() => setImgSrc("/images/placeholder.jpg")}
         />
 
         {/* Hover Image Swap */}

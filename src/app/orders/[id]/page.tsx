@@ -121,19 +121,93 @@ export default async function OrderDetailPage(props: {
     };
   });
 
+  let currentPaymentStatus = dbOrder.payment_status;
+  let currentOrderStatus = dbOrder.status;
+  let currentPaidAt = dbOrder.paid_at;
+  let currentPaymentType = dbOrder.payment_type;
+  let currentMidtransTransactionId = dbOrder.midtrans_transaction_id;
+
+  if (currentPaymentStatus === "PENDING") {
+    try {
+      const { getMidtransTransactionStatus } = await import("@/lib/midtrans");
+      const mtResult = await getMidtransTransactionStatus(dbOrder.id);
+      const transactionStatus = mtResult.transaction_status;
+      const fraudStatus = mtResult.fraud_status;
+
+      if (
+        transactionStatus === "settlement" ||
+        (transactionStatus === "capture" && fraudStatus === "accept")
+      ) {
+        currentPaymentStatus = "PAID";
+        currentOrderStatus = "PROCESSING";
+        currentPaidAt = mtResult.settlement_time
+          ? new Date(mtResult.settlement_time).toISOString()
+          : new Date().toISOString();
+        currentPaymentType = mtResult.payment_type || currentPaymentType;
+        currentMidtransTransactionId = mtResult.transaction_id || currentMidtransTransactionId;
+
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_status: "PAID",
+            status: "PROCESSING",
+            payment_type: currentPaymentType,
+            midtrans_transaction_id: currentMidtransTransactionId,
+            paid_at: currentPaidAt,
+          })
+          .eq("id", dbOrder.id);
+
+        const { data: cart } = await supabaseAdmin
+          .from("carts")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (cart) {
+          await supabaseAdmin
+            .from("cart_items")
+            .delete()
+            .eq("cart_id", cart.id);
+        }
+      } else if (
+        transactionStatus === "deny" ||
+        transactionStatus === "cancel" ||
+        transactionStatus === "expire"
+      ) {
+        currentPaymentStatus = transactionStatus === "expire" ? "EXPIRED" : "FAILED";
+        currentOrderStatus =
+          transactionStatus === "expire"
+            ? "EXPIRED"
+            : transactionStatus === "cancel"
+            ? "CANCELLED"
+            : "FAILED";
+
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_status: currentPaymentStatus,
+            status: currentOrderStatus,
+          })
+          .eq("id", dbOrder.id);
+      }
+    } catch (mtErr) {
+      console.warn("[OrderDetailPage SSR] Live status check error:", mtErr);
+    }
+  }
+
   const order = {
     id: dbOrder.id,
     orderNumber: dbOrder.order_number,
-    status: dbOrder.status,
+    status: currentOrderStatus,
     subtotal: Number(dbOrder.subtotal),
     shippingCost: Number(dbOrder.shipping_cost),
     total: Number(dbOrder.total),
     paymentMethod: dbOrder.payment_method,
-    paymentStatus: dbOrder.payment_status,
+    paymentStatus: currentPaymentStatus,
     midtransId: dbOrder.midtrans_id,
-    midtransTransactionId: dbOrder.midtrans_transaction_id,
-    paymentType: dbOrder.payment_type,
-    paidAt: dbOrder.paid_at,
+    midtransTransactionId: currentMidtransTransactionId,
+    paymentType: currentPaymentType,
+    paidAt: currentPaidAt,
     shippingMethod: dbOrder.shipping_method,
     trackingNumber: dbOrder.tracking_number,
     createdAt: dbOrder.created_at,

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCartStore } from "@/stores/useCartStore";
 import { useFavoriteStore } from "@/stores/useFavoriteStore";
@@ -16,6 +17,8 @@ import {
   Star,
   Truck,
   ShieldCheck,
+  ShoppingCart,
+  Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -126,6 +129,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   relatedProducts = [],
   initialFavoriteIds,
 }) => {
+  const router = useRouter();
   const { data: session } = useSession();
   const addItem = useCartStore((state) => state.addItem);
   const isFavorite = useFavoriteStore((s) => s.isFavorite(product.id));
@@ -143,6 +147,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
   // Gallery State
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [imageErrorMap, setImageErrorMap] = useState<Record<number, boolean>>({});
 
   // Case-insensitive deduplication of unique colors
   const uniqueColorsMap = new Map<string, ProductVariant>();
@@ -245,6 +250,32 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
     }, 1000);
   };
 
+  const handleBuyNow = () => {
+    if (!selectedSize) {
+      alert("Silakan pilih ukuran terlebih dahulu.");
+      return;
+    }
+
+    if (!activeVariant) return;
+
+    addItem(
+      {
+        variantId: activeVariant.id,
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        size: activeVariant.size,
+        color: activeVariant.color,
+        price: product.price,
+        imageUrl: product.images[0]?.url || "",
+        maxStock: activeVariant.stock,
+      },
+      1
+    );
+
+    router.push("/checkout");
+  };
+
   const handleToggleFavorit = async () => {
     if (!session?.user) {
       openModal("login");
@@ -277,12 +308,13 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           {/* Main Image View */}
           <div className="relative aspect-[3/4] w-full overflow-hidden bg-brand-light rounded-3xl border border-brand-light/60 shadow-sm group">
             <Image
-              src={product.images[activeImageIdx]?.url || "/images/placeholder.jpg"}
+              src={imageErrorMap[activeImageIdx] ? "/images/placeholder.jpg" : (product.images[activeImageIdx]?.url || "/images/placeholder.jpg")}
               alt={product.images[activeImageIdx]?.alt || product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 60vw"
               priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={() => setImageErrorMap((prev) => ({ ...prev, [activeImageIdx]: true }))}
             />
             {/* Badges Overlay */}
             {badges.length > 0 && (
@@ -312,11 +344,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                     }`}
                 >
                   <Image
-                    src={img.url}
+                    src={imageErrorMap[idx] ? "/images/placeholder.jpg" : img.url}
                     alt={img.alt || `Thumbnail ${idx}`}
                     fill
                     sizes="120px"
                     className="object-cover"
+                    onError={() => setImageErrorMap((prev) => ({ ...prev, [idx]: true }))}
                   />
                 </button>
               ))}
@@ -471,44 +504,75 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             </div>
           </div>
 
-          {/* 5. Actions CTA (Add to Cart & Favorite) */}
+          {/* 5. Actions CTA (Add to Cart, Buy Now & Favorite) */}
           <div className="flex flex-col gap-3 pt-2">
-            <button
-              onClick={handleAddToCart}
-              disabled={isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)}
-              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-5 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${isAdding || !selectedSize
-                  ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
-                  : isAdded
-                    ? "bg-brand-white text-green-600 border-green-600 hover:bg-brand-white"
-                    : "bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Tambah Ke Keranjang */}
+              <button
+                onClick={handleAddToCart}
+                disabled={isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)}
+                className={`w-full font-black uppercase tracking-[0.12em] text-xs py-4 px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
+                  isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)
+                    ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
+                    : isAdded
+                    ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
+                    : "bg-brand-white text-brand-black hover:bg-brand-black hover:text-brand-white shadow-sm"
                 }`}
-            >
-              {isAdding ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin" />
-                  Menambahkan...
-                </>
-              ) : isAdded ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  Berhasil Ditambahkan!
-                </>
-              ) : !selectedSize ? (
-                "Pilih Ukuran Dulu"
-              ) : activeVariant && activeVariant.stock <= 0 ? (
-                "Stok Habis / Sold Out"
-              ) : (
-                "Tambah Ke Keranjang"
-              )}
-            </button>
+              >
+                {isAdding ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin" />
+                    <span>Menambahkan...</span>
+                  </>
+                ) : isAdded ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Berhasil!</span>
+                  </>
+                ) : !selectedSize ? (
+                  "Pilih Ukuran Dulu"
+                ) : activeVariant && activeVariant.stock <= 0 ? (
+                  "Stok Habis"
+                ) : (
+                  <>
+                    <ShoppingCart className="w-4 h-4 shrink-0" />
+                    <span>+ Keranjang</span>
+                  </>
+                )}
+              </button>
 
+              {/* Beli Sekarang */}
+              <button
+                onClick={handleBuyNow}
+                disabled={!selectedSize || (activeVariant && activeVariant.stock <= 0)}
+                className={`w-full font-black uppercase tracking-[0.12em] text-xs py-4 px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
+                  !selectedSize || (activeVariant && activeVariant.stock <= 0)
+                    ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
+                    : "bg-brand-black text-brand-white hover:bg-black/85 hover:border-black/85 shadow-md scale-[1.01]"
+                }`}
+              >
+                {!selectedSize ? (
+                  "Pilih Ukuran Dulu"
+                ) : activeVariant && activeVariant.stock <= 0 ? (
+                  "Stok Habis"
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+                    <span>Beli Sekarang</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Favorite Button */}
             <button
               onClick={handleToggleFavorit}
               disabled={isTogglingFav}
-              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-4 transition-all duration-300 rounded-xl border-2 cursor-pointer flex items-center justify-center gap-2 ${isFavorite
+              className={`w-full font-black uppercase tracking-[0.15em] text-xs py-3.5 transition-all duration-300 rounded-xl border cursor-pointer flex items-center justify-center gap-2 ${
+                isFavorite
                   ? "bg-red-50 text-red-500 border-red-300 hover:bg-red-500 hover:text-white"
-                  : "bg-transparent text-brand-black border-brand-black hover:bg-brand-black hover:text-brand-white"
-                }`}
+                  : "bg-[#fbfbfb] text-brand-gray border-brand-light hover:border-brand-black hover:text-brand-black"
+              }`}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
               {isTogglingFav ? "Memproses..." : isFavorite ? "Sudah Difavoritkan" : "Tambah Ke Favorit"}

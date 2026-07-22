@@ -60,15 +60,91 @@ export default async function ConfirmationPage(props: ConfirmationPageProps) {
     ? rawShipping[0]
     : rawShipping;
 
+  let currentPaymentStatus = orderData.payment_status;
+  let currentPaidAt = orderData.paid_at;
+  let currentPaymentType = orderData.payment_type;
+  let currentMidtransTransactionId = orderData.midtrans_transaction_id;
+
+  // If DB status is still PENDING, perform a live check against Midtrans REST API BEFORE rendering
+  if (currentPaymentStatus === "PENDING") {
+    try {
+      const { getMidtransTransactionStatus } = await import("@/lib/midtrans");
+      const mtResult = await getMidtransTransactionStatus(orderData.id);
+      const transactionStatus = mtResult.transaction_status;
+      const fraudStatus = mtResult.fraud_status;
+
+      if (
+        transactionStatus === "settlement" ||
+        (transactionStatus === "capture" && fraudStatus === "accept")
+      ) {
+        currentPaymentStatus = "PAID";
+        currentPaidAt = mtResult.settlement_time
+          ? new Date(mtResult.settlement_time).toISOString()
+          : new Date().toISOString();
+        currentPaymentType = mtResult.payment_type || currentPaymentType;
+        currentMidtransTransactionId = mtResult.transaction_id || currentMidtransTransactionId;
+
+        // Update database immediately in Server Component
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_status: "PAID",
+            status: "PROCESSING",
+            payment_type: currentPaymentType,
+            midtrans_transaction_id: currentMidtransTransactionId,
+            paid_at: currentPaidAt,
+          })
+          .eq("id", orderData.id);
+
+        // Empty user cart in database
+        const { data: cart } = await supabaseAdmin
+          .from("carts")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (cart) {
+          await supabaseAdmin
+            .from("cart_items")
+            .delete()
+            .eq("cart_id", cart.id);
+        }
+      } else if (
+        transactionStatus === "deny" ||
+        transactionStatus === "cancel" ||
+        transactionStatus === "expire"
+      ) {
+        const mappedPaymentStatus = transactionStatus === "expire" ? "EXPIRED" : "FAILED";
+        const mappedOrderStatus =
+          transactionStatus === "expire"
+            ? "EXPIRED"
+            : transactionStatus === "cancel"
+            ? "CANCELLED"
+            : "FAILED";
+        currentPaymentStatus = mappedPaymentStatus;
+
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_status: mappedPaymentStatus,
+            status: mappedOrderStatus,
+          })
+          .eq("id", orderData.id);
+      }
+    } catch (mtErr) {
+      console.warn("[ConfirmationPage SSR] Live status check error:", mtErr);
+    }
+  }
+
   const order = {
     id: orderData.id,
     orderNumber: orderData.order_number,
-    paymentStatus: orderData.payment_status,
+    paymentStatus: currentPaymentStatus,
     total: orderData.total,
     midtransId: orderData.midtrans_id,
-    midtransTransactionId: orderData.midtrans_transaction_id,
-    paymentType: orderData.payment_type,
-    paidAt: orderData.paid_at,
+    midtransTransactionId: currentMidtransTransactionId,
+    paymentType: currentPaymentType,
+    paidAt: currentPaidAt,
     shippingAddress: shippingAddress
       ? {
           recipientName: shippingAddress.recipient_name,
