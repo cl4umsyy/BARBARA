@@ -220,7 +220,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               {/* Existing Images */}
               {existingImages.map((url, idx) => (
                 <div key={`exist-${idx}`} className="relative w-16 h-16 rounded-xl overflow-hidden border border-brand-light bg-brand-light">
-                  <Image src={url} alt="Review Image" fill className="object-cover" />
+                  <Image src={url} alt="Review Image" fill sizes="64px" className="object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveExistingImage(idx)}
@@ -234,7 +234,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               {/* New Previews */}
               {imagePreviews.map((preview, idx) => (
                 <div key={`new-${idx}`} className="relative w-16 h-16 rounded-xl overflow-hidden border border-brand-light bg-brand-light">
-                  <Image src={preview} alt="Preview Image" fill className="object-cover" />
+                  <Image src={preview} alt="Preview Image" fill sizes="64px" className="object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveNewImage(idx)}

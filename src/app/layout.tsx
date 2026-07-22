@@ -28,7 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-brand-white text-brand-gray antialiased" suppressHydrationWarning>
         <Script
           id="bypass-brave"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

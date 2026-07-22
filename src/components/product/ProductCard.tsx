@@ -84,7 +84,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:shadow-md transition-shadow duration-300 rounded-xl">
+    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:shadow-md transition-shadow duration-300 rounded-xl" suppressHydrationWarning>
       {/* Image Wrapper with 3:4 aspect ratio */}
       <Link
         href={`/shop/${slug}`}
@@ -111,9 +111,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           aria-label="Favorit"
         >
           <Heart
-            className={`w-3.5 h-3.5 transition-colors duration-300 ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-brand-black"
-            }`}
+            className={`w-3.5 h-3.5 transition-colors duration-300 ${isFavorite ? "fill-red-500 text-red-500" : "text-brand-black"
+              }`}
           />
           <span className="text-[10px] font-black text-brand-black">{likesCount}</span>
         </button>
@@ -146,15 +145,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </Link>
 
       {/* Product Information */}
-      <div className="flex flex-col pt-3 font-sans" suppressHydrationWarning>
-        
+      <div className="flex flex-col pt-3 font-sans">
+
         {/* Brand */}
-        <div className="text-[11px] font-bold text-brand-gray-light uppercase tracking-wider mb-0.5" suppressHydrationWarning>
+        <div className="text-[11px] font-bold text-brand-gray-light uppercase tracking-wider mb-0.5">
           {brand}
         </div>
-        
+
         {/* Size + Condition */}
-        <div className="text-xs text-brand-gray-light mb-1.5 font-medium" suppressHydrationWarning>
+        <div className="text-xs text-brand-gray-light mb-1.5 font-medium">
           {sizes && sizes.length > 0 ? sizes.join(", ") : "M"} · {condition}
         </div>
 
@@ -173,11 +172,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.round(rating)
+                  className={`w-3 h-3 ${i < Math.round(rating)
                       ? "fill-amber-400 text-amber-400"
                       : "text-brand-light fill-brand-light/30"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -187,7 +185,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Pricing */}
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-2" suppressHydrationWarning>
           <div className="flex flex-wrap items-baseline gap-1.5">
             <span className="text-xs md:text-sm font-black text-brand-black">
               {formatPrice(price)}

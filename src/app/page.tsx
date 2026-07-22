@@ -139,6 +139,7 @@ export default async function Home() {
           src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600"
           alt="barbara Streetwear Hero"
           fill
+          sizes="100vw"
           priority
           className="object-cover opacity-50 filter grayscale contrast-125 select-none"
         />
@@ -252,6 +253,7 @@ export default async function Home() {
                       src={look.image}
                       alt={look.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale"
                     />
                     <div className="absolute bottom-3 left-3 bg-brand-black text-brand-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1">

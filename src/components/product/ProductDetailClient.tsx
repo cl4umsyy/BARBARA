@@ -271,7 +271,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
     <div className="flex flex-col gap-16 md:gap-24 w-full">
       {/* ── MAIN PRODUCT GRID ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-        
+
         {/* LEFT COLUMN: IMAGE GALLERY (7 Columns) */}
         <div className="lg:col-span-7 flex flex-col gap-4 sticky top-24">
           {/* Main Image View */}
@@ -280,7 +280,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               src={product.images[activeImageIdx]?.url || "/images/placeholder.jpg"}
               alt={product.images[activeImageIdx]?.alt || product.name}
               fill
-              sizes="(max-width: 1024px) 100vw, 58vw"
+              sizes="(max-width: 1024px) 100vw, 60vw"
               priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
@@ -306,17 +306,16 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                 <button
                   key={img.id}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`relative aspect-[3/4] w-full overflow-hidden bg-brand-light cursor-pointer border rounded-2xl transition-all duration-200 ${
-                    activeImageIdx === idx
+                  className={`relative aspect-[3/4] w-full overflow-hidden bg-brand-light cursor-pointer border rounded-2xl transition-all duration-200 ${activeImageIdx === idx
                       ? "border-brand-black ring-2 ring-brand-black scale-95"
                       : "border-transparent opacity-65 hover:opacity-100"
-                  }`}
+                    }`}
                 >
                   <Image
                     src={img.url}
                     alt={img.alt || `Thumbnail ${idx}`}
                     fill
-                    sizes="(max-width: 640px) 25vw, 15vw"
+                    sizes="120px"
                     className="object-cover"
                   />
                 </button>
@@ -327,7 +326,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
         {/* RIGHT COLUMN: PRODUCT INFO & PURCHASE OPTIONS (5 Columns) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
-          
+
           {/* 1. Badges & Rating Header */}
           <div className="flex flex-col gap-3 border-b border-brand-light pb-6">
             <div className="flex flex-wrap items-center gap-2">
@@ -350,11 +349,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.round(product.averageRating || 0)
+                      className={`w-4 h-4 ${i < Math.round(product.averageRating || 0)
                           ? "fill-amber-400 text-amber-400"
                           : "text-brand-light fill-brand-light/30"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -415,11 +413,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   <button
                     key={v.color}
                     onClick={() => handleColorChange(v.color)}
-                    className={`w-9 h-9 rounded-full border cursor-pointer flex items-center justify-center transition-all ${
-                      selectedColor.toLowerCase().trim() === v.color.toLowerCase().trim()
+                    className={`w-9 h-9 rounded-full border cursor-pointer flex items-center justify-center transition-all ${selectedColor.toLowerCase().trim() === v.color.toLowerCase().trim()
                         ? "border-brand-black ring-2 ring-brand-black scale-105"
                         : "border-brand-light hover:border-brand-gray-light"
-                    }`}
+                      }`}
                     title={v.color}
                   >
                     <span
@@ -457,13 +454,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                     key={sz}
                     onClick={() => isAvailable && setSelectedSize(sz)}
                     disabled={!isAvailable}
-                    className={`py-3.5 border font-bold text-xs flex flex-col items-center justify-center transition-all rounded-xl cursor-pointer ${
-                      !isAvailable
+                    className={`py-3.5 border font-bold text-xs flex flex-col items-center justify-center transition-all rounded-xl cursor-pointer ${!isAvailable
                         ? "border-brand-light/60 bg-[#f7f7f7] text-brand-gray-light cursor-not-allowed opacity-50 line-through"
                         : selectedSize === sz
-                        ? "bg-brand-black text-brand-white border-brand-black shadow-md scale-105"
-                        : "border-brand-light/80 bg-brand-white hover:border-brand-black text-brand-black"
-                    }`}
+                          ? "bg-brand-black text-brand-white border-brand-black shadow-md scale-105"
+                          : "border-brand-light/80 bg-brand-white hover:border-brand-black text-brand-black"
+                      }`}
                   >
                     <span>{sz}</span>
                     <span className="text-[8px] mt-0.5 font-bold uppercase tracking-tight opacity-75">
@@ -480,13 +476,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             <button
               onClick={handleAddToCart}
               disabled={isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)}
-              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-5 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
-                isAdding || !selectedSize
+              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-5 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${isAdding || !selectedSize
                   ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
                   : isAdded
-                  ? "bg-brand-white text-green-600 border-green-600 hover:bg-brand-white"
-                  : "bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black"
-              }`}
+                    ? "bg-brand-white text-green-600 border-green-600 hover:bg-brand-white"
+                    : "bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black"
+                }`}
             >
               {isAdding ? (
                 <>
@@ -510,11 +505,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             <button
               onClick={handleToggleFavorit}
               disabled={isTogglingFav}
-              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-4 transition-all duration-300 rounded-xl border-2 cursor-pointer flex items-center justify-center gap-2 ${
-                isFavorite
+              className={`w-full font-black uppercase tracking-[0.2em] text-xs py-4 transition-all duration-300 rounded-xl border-2 cursor-pointer flex items-center justify-center gap-2 ${isFavorite
                   ? "bg-red-50 text-red-500 border-red-300 hover:bg-red-500 hover:text-white"
                   : "bg-transparent text-brand-black border-brand-black hover:bg-brand-black hover:text-brand-white"
-              }`}
+                }`}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
               {isTogglingFav ? "Memproses..." : isFavorite ? "Sudah Difavoritkan" : "Tambah Ke Favorit"}
@@ -549,36 +543,33 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
       {/* ── DETAILED TABS: INFORMASI, DESKRIPSI & SPESIFIKASI ─────────── */}
       <div className="border-t border-brand-light pt-12 flex flex-col gap-8">
-        
+
         {/* Tab Headers */}
         <div className="flex border-b border-brand-light overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab("info")}
-            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-              activeTab === "info"
+            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${activeTab === "info"
                 ? "border-brand-black text-brand-black"
                 : "border-transparent text-brand-gray-light hover:text-brand-black"
-            }`}
+              }`}
           >
             Informasi Produk
           </button>
           <button
             onClick={() => setActiveTab("desc")}
-            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-              activeTab === "desc"
+            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${activeTab === "desc"
                 ? "border-brand-black text-brand-black"
                 : "border-transparent text-brand-gray-light hover:text-brand-black"
-            }`}
+              }`}
           >
             Deskripsi Produk
           </button>
           <button
             onClick={() => setActiveTab("specs")}
-            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${
-              activeTab === "specs"
+            className={`pb-4 px-6 text-xs font-black uppercase tracking-widest border-b-2 cursor-pointer transition-colors whitespace-nowrap ${activeTab === "specs"
                 ? "border-brand-black text-brand-black"
                 : "border-transparent text-brand-gray-light hover:text-brand-black"
-            }`}
+              }`}
           >
             Spesifikasi Produk
           </button>
@@ -863,11 +854,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.round(product.averageRating || 0)
+                      className={`w-5 h-5 ${i < Math.round(product.averageRating || 0)
                           ? "fill-amber-400 text-amber-400"
                           : "text-brand-light fill-brand-light/30"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -886,8 +876,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                       <span className="w-3 font-bold text-brand-black">{starVal}</span>
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 flex-shrink-0" />
                       <div className="flex-1 h-2 bg-brand-light rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-brand-black rounded-full" 
+                        <div
+                          className="h-full bg-brand-black rounded-full"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -900,8 +890,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
             <div className="lg:col-span-8 flex flex-col gap-8">
               {product.reviews.map((rev) => (
-                <div 
-                  key={rev.id} 
+                <div
+                  key={rev.id}
                   className="pb-8 border-b border-brand-light last:pb-0 last:border-b-0 flex flex-col gap-4"
                 >
                   <div className="flex justify-between items-start gap-4">
@@ -929,9 +919,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-3.5 h-3.5 ${
-                                i < rev.rating ? "fill-amber-400 text-amber-400" : "text-brand-light fill-brand-light/30"
-                              }`}
+                              className={`w-3.5 h-3.5 ${i < rev.rating ? "fill-amber-400 text-amber-400" : "text-brand-light fill-brand-light/30"
+                                }`}
                             />
                           ))}
                         </div>
@@ -950,7 +939,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   {rev.reviewImages && rev.reviewImages.length > 0 && (
                     <div className="flex flex-wrap gap-2 pl-[52px] mt-1">
                       {rev.reviewImages.map((img, i) => (
-                        <div 
+                        <div
                           key={i}
                           onClick={() => setActiveZoomImage(img)}
                           className="relative w-16 h-16 rounded-xl overflow-hidden bg-brand-light border border-brand-light cursor-pointer hover:opacity-80 transition-opacity"
@@ -1039,7 +1028,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
       {/* Review Image Zoom Lightbox */}
       {activeZoomImage && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-brand-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
           onClick={() => setActiveZoomImage(null)}
         >

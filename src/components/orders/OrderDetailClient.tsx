@@ -320,6 +320,7 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ userId, or
                           src={item.imageUrl}
                           alt={item.productName}
                           fill
+                          sizes="80px"
                           className="object-cover"
                         />
                       ) : (

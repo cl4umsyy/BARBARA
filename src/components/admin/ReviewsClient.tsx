@@ -371,6 +371,7 @@ export const ReviewsClient: React.FC<ReviewsClientProps> = ({ initialReviews }) 
                             src={r.product.image}
                             alt={r.product.name}
                             fill
+                            sizes="40px"
                             className="object-cover"
                           />
                         ) : (
@@ -520,6 +521,7 @@ export const ReviewsClient: React.FC<ReviewsClientProps> = ({ initialReviews }) 
                     src={selectedReview.product.image}
                     alt={selectedReview.product.name}
                     fill
+                    sizes="64px"
                     className="object-cover"
                   />
                 )}
@@ -572,6 +574,7 @@ export const ReviewsClient: React.FC<ReviewsClientProps> = ({ initialReviews }) 
                         src={img}
                         alt={`Foto ulasan pembeli ${i + 1}`}
                         fill
+                        sizes="64px"
                         className="object-cover"
                       />
                     </div>

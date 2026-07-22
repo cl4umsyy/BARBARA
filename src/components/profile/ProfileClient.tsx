@@ -701,6 +701,7 @@ export default function ProfileClient({
                         src={userProfile.avatarUrl} 
                         alt={userProfile.name} 
                         fill 
+                        sizes="96px"
                         className="object-cover"
                       />
                     ) : (

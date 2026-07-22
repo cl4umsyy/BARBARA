@@ -114,6 +114,7 @@ export function CategoryCarousel({ dbCategories }: Props) {
                 src={cat.image || FALLBACK_IMAGES[0]}
                 alt={`${cat.name} Collection`}
                 fill
+                sizes="(max-width: 768px) 33vw, 300px"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               {/* Subtle hover overlay */}

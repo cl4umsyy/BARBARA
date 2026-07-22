@@ -188,6 +188,7 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ userId, orders, init
                             src={item.imageUrl}
                             alt={item.productName}
                             fill
+                            sizes="80px"
                             className="object-cover"
                           />
                         ) : (

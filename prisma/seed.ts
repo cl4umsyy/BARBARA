@@ -513,7 +513,7 @@ const productsData = [
     gender: ProductGender.MEN,
     isNew: false,
     images: [
-      { url: "https://images.unsplash.com/photo-1576871337622-98d48d4aa53e?w=800", alt: "Slides Noir view", order: 0 }
+      { url: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800", alt: "Slides Noir view", order: 0 }
     ],
     colors: [
       { name: "Black", hex: "#000000", skuCode: "BLK" }

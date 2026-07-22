@@ -414,6 +414,7 @@ export const CheckoutClient: React.FC<CheckoutClientProps> = () => {
                   src={item.imageUrl}
                   alt={item.name}
                   fill
+                  sizes="56px"
                   className="object-cover"
                 />
               </div>
