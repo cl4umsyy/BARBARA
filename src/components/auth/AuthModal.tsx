@@ -88,42 +88,44 @@ export function AuthModal() {
               style={{ maxHeight: "90vh" }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
-              <button
-                type="button"
-                id="auth-modal-close"
-                onClick={closeModal}
-                className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-brand-gray hover:text-brand-black hover:bg-brand-light transition-all cursor-pointer"
-                aria-label="Tutup modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {/* Modal Header Bar with Tabs and Close Button */}
+              <div className="relative flex items-center justify-between border-b border-brand-light pr-12 pl-2 bg-white">
+                <div className="flex flex-1">
+                  <button
+                    type="button"
+                    id="auth-tab-login"
+                    onClick={() => setActiveTab("login")}
+                    className={`flex-1 py-4 text-xs font-black uppercase tracking-[0.12em] text-center transition-all cursor-pointer ${
+                      activeTab === "login"
+                        ? "text-brand-black border-b-2 border-brand-black -mb-px"
+                        : "text-brand-gray-light hover:text-brand-black"
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    id="auth-tab-register"
+                    onClick={() => setActiveTab("register")}
+                    className={`flex-1 py-4 text-xs font-black uppercase tracking-[0.12em] text-center transition-all cursor-pointer ${
+                      activeTab === "register"
+                        ? "text-brand-black border-b-2 border-brand-black -mb-px"
+                        : "text-brand-gray-light hover:text-brand-black"
+                    }`}
+                  >
+                    I&apos;m New Here
+                  </button>
+                </div>
 
-              {/* Tab Headers */}
-              <div className="flex border-b border-brand-light">
+                {/* Close Button */}
                 <button
                   type="button"
-                  id="auth-tab-login"
-                  onClick={() => setActiveTab("login")}
-                  className={`flex-1 py-4 text-xs font-black uppercase tracking-[0.15em] transition-all cursor-pointer ${
-                    activeTab === "login"
-                      ? "text-brand-black border-b-2 border-brand-black -mb-px"
-                      : "text-brand-gray-light hover:text-brand-black"
-                  }`}
+                  id="auth-modal-close"
+                  onClick={closeModal}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-brand-gray hover:text-brand-black hover:bg-brand-light transition-all cursor-pointer"
+                  aria-label="Tutup modal"
                 >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  id="auth-tab-register"
-                  onClick={() => setActiveTab("register")}
-                  className={`flex-1 py-4 text-xs font-black uppercase tracking-[0.15em] transition-all cursor-pointer ${
-                    activeTab === "register"
-                      ? "text-brand-black border-b-2 border-brand-black -mb-px"
-                      : "text-brand-gray-light hover:text-brand-black"
-                  }`}
-                >
-                  I&apos;m New Here
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -34,6 +35,38 @@ export const Navbar: React.FC = () => {
       fetchFavorites();
     }
   }, [session?.user, isFavLoaded, fetchFavorites]);
+
+  // Prevent background scroll ONLY when mobile menu is active and mounted
+  useEffect(() => {
+    if (isMobileMenuOpen && hasMounted) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen, hasMounted]);
+
+  // Close mobile menu on pathname change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isMobileMenuOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMobileMenuOpen]);
 
   console.log(
     `[Navbar Render] path: ${pathname}, status: ${status}, hasMounted: ${hasMounted}, hasUser: ${!!session?.user}, email: ${session?.user?.email ?? "none"}`
@@ -149,10 +182,10 @@ export const Navbar: React.FC = () => {
               </Link>
             )}
 
-            {/* Profile Dropdown / Login & Register buttons */}
+            {/* Profile Dropdown / Desktop Auth Buttons (Desktop Only) */}
             {hasMounted && (
               session?.user ? (
-                <div className="relative">
+                <div className="hidden md:block relative">
                   <button
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     className="p-1 text-brand-black hover:opacity-75 transition-opacity cursor-pointer flex items-center gap-2"
@@ -245,37 +278,24 @@ export const Navbar: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <>
-                  {/* Desktop Auth Buttons */}
-                  <div className="hidden md:flex items-center gap-2">
-                    <button
-                      type="button"
-                      id="navbar-signin-btn"
-                      onClick={() => openModal("login")}
-                      className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-3 py-2 cursor-pointer"
-                    >
-                      Login
-                    </button>
-                    <button
-                      type="button"
-                      id="navbar-register-btn"
-                      onClick={() => openModal("register")}
-                      className="text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-4 py-2.5 rounded-xl cursor-pointer"
-                    >
-                      Daftar
-                    </button>
-                  </div>
-                  {/* Mobile Auth Button (Icon Only) */}
+                <div className="hidden md:flex items-center gap-2">
                   <button
                     type="button"
-                    id="navbar-signin-btn-mobile"
+                    id="navbar-signin-btn"
                     onClick={() => openModal("login")}
-                    className="md:hidden p-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer"
-                    aria-label="Login"
+                    className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity px-3 py-2 cursor-pointer"
                   >
-                    <User className="w-5 h-5" />
+                    Login
                   </button>
-                </>
+                  <button
+                    type="button"
+                    id="navbar-register-btn"
+                    onClick={() => openModal("register")}
+                    className="text-xs font-black uppercase tracking-wider bg-brand-black text-brand-white hover:bg-brand-white hover:text-brand-black border border-brand-black transition-all px-4 py-2.5 rounded-xl cursor-pointer"
+                  >
+                    Daftar
+                  </button>
+                </div>
               )
             )}
 
@@ -296,58 +316,73 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer Navigation */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          {/* Backdrop overlay */}
-          <div
-            className="fixed inset-0 bg-brand-black/40 backdrop-blur-sm"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          {/* Menu Drawer Content */}
-          <div className="relative w-4/5 max-w-sm bg-brand-white h-full p-6 shadow-2xl flex flex-col gap-6">
-            <div className="flex justify-between items-center border-b border-brand-light pb-4">
-              <span className="text-lg font-black uppercase tracking-wider">Menu</span>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1 text-brand-black hover:opacity-70"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      {/* Mobile Full Screen Solid Menu Container & Overlay (Portal) */}
+      {hasMounted && isMobileMenuOpen && createPortal(
+        <div 
+          className="fixed inset-0 top-0 left-0 w-full h-full h-[100dvh] z-[9999] md:hidden bg-brand-white text-brand-black flex flex-col overflow-y-auto"
+          style={{ backgroundColor: "var(--color-brand-white, #ffffff)" }}
+        >
+          {/* Menu Top Header Bar */}
+          <div 
+            className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 border-b border-brand-light bg-brand-white"
+            style={{ backgroundColor: "var(--color-brand-white, #ffffff)" }}
+          >
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-xl font-black uppercase tracking-wider text-brand-black"
+            >
+              barbara
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 -mr-2 text-brand-black hover:opacity-75 transition-opacity cursor-pointer rounded-full"
+              aria-label="Close Mobile Menu"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
 
-            {/* Mobile Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#F5F5F5] rounded-xl px-4 py-2 w-full">
-              <Search className="w-4 h-4 text-brand-gray mr-2 flex-shrink-0" />
+          {/* Menu Main Content */}
+          <div className="flex-1 p-6 flex flex-col gap-6">
+            {/* Search Input */}
+            <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#F5F5F5] rounded-xl px-4 py-3 w-full border border-transparent focus-within:border-brand-black transition-colors">
+              <Search className="w-4 h-4 text-brand-gray mr-3 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Cari produk..."
+                placeholder="Cari produk barbara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-xs font-medium outline-none text-brand-black placeholder-brand-gray-light w-full"
+                className="bg-transparent text-sm font-medium tracking-wide outline-none text-brand-black placeholder-brand-gray-light w-full"
               />
             </form>
 
-            {/* Mobile Navigation Links */}
-            <nav className="flex flex-col gap-5 text-sm font-bold uppercase tracking-widest text-brand-black mt-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="hover:opacity-70 transition-opacity"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
+            {/* Navigation Links */}
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-gray-light mb-1 px-1">
+                Navigasi
+              </span>
+              <nav className="flex flex-col gap-1">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-widest text-brand-black hover:bg-[#F5F5F5] transition-colors flex items-center justify-between"
+                  >
+                    <span>{link.name}</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-            {/* Mobile Auth Actions */}
-            <div className="mt-auto border-t border-brand-light pt-6 flex flex-col gap-4">
+            {/* Auth / Account Section at Bottom */}
+            <div className="mt-auto pt-6 border-t border-brand-light flex flex-col gap-4">
               {hasMounted && (
                 session?.user ? (
-                  <div className="flex flex-col gap-3">
-                    <div className="px-2 flex items-center gap-3 pb-3 border-b border-brand-light/50 mb-1">
+                  <div className="flex flex-col gap-3 bg-[#F9F9F9] p-4 rounded-2xl border border-brand-light">
+                    <div className="flex items-center gap-3 pb-3 border-b border-brand-light/60">
                       {session.user.image ? (
                         <img
                           src={session.user.image}
@@ -368,63 +403,66 @@ export const Navbar: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    {session.user.role === "ADMIN" && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
-                      >
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    <Link
-                      href="/profile?tab=profile"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
-                    >
-                      Profil Saya
-                    </Link>
-                    {session.user.role !== "ADMIN" && (
-                      <Link
-                        href="/profile?tab=orders"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1"
-                      >
-                        Pesanan Saya
-                      </Link>
-                    )}
-                    {session.user.role !== "ADMIN" && (
-                      <Link
-                        href="/favorit"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-xs font-bold uppercase tracking-wider text-brand-black hover:opacity-70 transition-opacity px-2 py-1 flex items-center gap-2"
-                      >
-                        <Heart className="w-3.5 h-3.5" />
-                        Favorit
-                      </Link>
-                    )}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        signOut({ callbackUrl: window.location.origin });
-                      }}
-                      className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 hover:opacity-70 transition-opacity px-2 py-1 text-left cursor-pointer"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
-                    </button>
+                    <div className="flex flex-col gap-1">
+                      {session.user.role === "ADMIN" && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="py-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light rounded-lg transition-colors"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <Link
+                        href="/profile?tab=profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="py-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light rounded-lg transition-colors"
+                      >
+                        Profil Saya
+                      </Link>
+                      {session.user.role !== "ADMIN" && (
+                        <Link
+                          href="/profile?tab=orders"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="py-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light rounded-lg transition-colors"
+                        >
+                          Pesanan Saya
+                        </Link>
+                      )}
+                      {session.user.role !== "ADMIN" && (
+                        <Link
+                          href="/favorit"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="py-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-black hover:bg-brand-light rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Heart className="w-3.5 h-3.5" />
+                          Favorit
+                        </Link>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          signOut({ callbackUrl: window.location.origin });
+                        }}
+                        className="flex items-center gap-2 py-2 px-3 text-xs font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full text-left cursor-pointer mt-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-3">
                     <button
                       type="button"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         openModal("login");
                       }}
-                      className="w-full text-center font-bold uppercase tracking-[0.15em] text-xs py-3 border border-brand-black text-brand-black rounded-xl hover:bg-brand-light transition-all cursor-pointer"
+                      className="w-full text-center font-bold uppercase tracking-[0.15em] text-xs py-3.5 border border-brand-black text-brand-black rounded-xl hover:bg-brand-light transition-all cursor-pointer"
                     >
                       Login
                     </button>
@@ -434,7 +472,7 @@ export const Navbar: React.FC = () => {
                         setIsMobileMenuOpen(false);
                         openModal("register");
                       }}
-                      className="w-full text-center font-black uppercase tracking-[0.15em] text-xs py-3 bg-brand-black text-brand-white rounded-xl hover:opacity-90 transition-all cursor-pointer"
+                      className="w-full text-center font-black uppercase tracking-[0.15em] text-xs py-3.5 bg-brand-black text-brand-white rounded-xl hover:opacity-90 transition-all cursor-pointer shadow-md"
                     >
                       Daftar
                     </button>
@@ -443,7 +481,8 @@ export const Navbar: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
