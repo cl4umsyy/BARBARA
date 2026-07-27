@@ -178,6 +178,18 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const [isTogglingFav, setIsTogglingFav] = useState(false);
   const [activeZoomImage, setActiveZoomImage] = useState<string | null>(null);
 
+  // Lock scroll when image zoom lightbox is open
+  useEffect(() => {
+    if (activeZoomImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [activeZoomImage]);
+
   // Switch image and color
   const handleColorChange = (colorName: string) => {
     setSelectedColor(colorName);
@@ -299,14 +311,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const badges = getBadges();
 
   return (
-    <div className="flex flex-col gap-16 md:gap-24 w-full">
+    <div className="flex flex-col gap-10 md:gap-20 w-full">
       {/* ── MAIN PRODUCT GRID ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start relative">
 
         {/* LEFT COLUMN: IMAGE GALLERY (7 Columns) */}
-        <div className="lg:col-span-7 flex flex-col gap-4 sticky top-24">
+        <div className="lg:col-span-7 flex flex-col gap-3 sm:gap-4 lg:sticky lg:top-24">
           {/* Main Image View */}
-          <div className="relative aspect-[3/4] w-full overflow-hidden bg-brand-light rounded-3xl border border-brand-light/60 shadow-sm group">
+          <div className="relative w-full h-[42vh] max-h-[380px] sm:h-[48vh] sm:max-h-none lg:h-auto lg:max-h-none lg:aspect-[3/4] overflow-hidden bg-brand-light rounded-2xl md:rounded-3xl border border-brand-light/60 shadow-sm group">
             <Image
               src={imageErrorMap[activeImageIdx] ? "/images/placeholder.jpg" : (product.images[activeImageIdx]?.url || "/images/placeholder.jpg")}
               alt={product.images[activeImageIdx]?.alt || product.name}
@@ -318,11 +330,11 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             />
             {/* Badges Overlay */}
             {badges.length > 0 && (
-              <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
                 {badges.map((b) => (
                   <span
                     key={b.label}
-                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm ${b.bg}`}
+                    className={`px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm ${b.bg}`}
                   >
                     {b.label}
                   </span>
@@ -333,12 +345,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
           {/* Thumbnails */}
           {product.images.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-2 sm:gap-3">
               {product.images.map((img, idx) => (
                 <button
                   key={img.id}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`relative aspect-[3/4] w-full overflow-hidden bg-brand-light cursor-pointer border rounded-2xl transition-all duration-200 ${activeImageIdx === idx
+                  className={`relative aspect-[3/4] w-full overflow-hidden bg-brand-light cursor-pointer border rounded-xl sm:rounded-2xl transition-all duration-200 ${activeImageIdx === idx
                       ? "border-brand-black ring-2 ring-brand-black scale-95"
                       : "border-transparent opacity-65 hover:opacity-100"
                     }`}
@@ -358,10 +370,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
         </div>
 
         {/* RIGHT COLUMN: PRODUCT INFO & PURCHASE OPTIONS (5 Columns) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
+        <div className="lg:col-span-5 flex flex-col gap-5 md:gap-6">
 
           {/* 1. Badges & Rating Header */}
-          <div className="flex flex-col gap-3 border-b border-brand-light pb-6">
+          <div className="flex flex-col gap-2.5 border-b border-brand-light pb-4 md:pb-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-widest bg-brand-light px-3 py-1 rounded-full text-brand-black">
                 {product.categoryName || "Clothing"}
@@ -371,18 +383,18 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-black uppercase tracking-wider text-brand-black leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-4xl font-black uppercase tracking-wider text-brand-black leading-tight">
               {product.name}
             </h1>
 
             {/* Rating Stars */}
             {product.averageRating !== undefined && product.averageRating > 0 && (
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-0.5">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < Math.round(product.averageRating || 0)
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < Math.round(product.averageRating || 0)
                           ? "fill-amber-400 text-amber-400"
                           : "text-brand-light fill-brand-light/30"
                         }`}
@@ -395,44 +407,44 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             )}
 
             {/* Price */}
-            <p className="text-2xl md:text-3xl font-black text-brand-black mt-2">
+            <p className="text-xl sm:text-2xl md:text-3xl font-black text-brand-black mt-1">
               {formatPrice(product.price)}
             </p>
           </div>
 
           {/* 2. Product Meta Highlights (Quick Attributes) */}
-          <div className="grid grid-cols-2 gap-3 bg-[#fbfbfb] p-4 rounded-2xl border border-brand-light/70 text-xs">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 bg-[#fbfbfb] p-3.5 sm:p-4 rounded-2xl border border-brand-light/70 text-xs">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Kategori</span>
-              <span className="font-bold text-brand-black">{product.categoryName || "Tops"}</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Kategori</span>
+              <span className="font-bold text-brand-black text-xs">{product.categoryName || "Tops"}</span>
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Untuk</span>
-              <span className="font-bold text-brand-black">{product.gender || "Pria / Wanita"}</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Untuk</span>
+              <span className="font-bold text-brand-black text-xs">{product.gender || "Pria / Wanita"}</span>
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Warna Terpilih</span>
-              <span className="font-bold text-brand-black">{selectedColor || "-"}</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Warna Terpilih</span>
+              <span className="font-bold text-brand-black text-xs">{selectedColor || "-"}</span>
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Ukuran Terpilih</span>
-              <span className="font-bold text-brand-black">{selectedSize || "Belum Dipilih"}</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Ukuran Terpilih</span>
+              <span className="font-bold text-brand-black text-xs">{selectedSize || "Belum Dipilih"}</span>
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Stok Tersedia</span>
-              <span className={`font-bold ${activeVariant ? (activeVariant.stock > 0 ? "text-green-600" : "text-red-500") : "text-brand-black"}`}>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">Stok Tersedia</span>
+              <span className={`font-bold text-xs ${activeVariant ? (activeVariant.stock > 0 ? "text-green-600" : "text-red-500") : "text-brand-black"}`}>
                 {activeVariant ? (activeVariant.stock > 0 ? `${activeVariant.stock} Pcs` : "Stok Habis") : "Pilih Ukuran"}
               </span>
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">SKU Produk</span>
-              <span className="font-bold text-brand-black font-mono text-[11px]">{activeVariant?.sku || "-"}</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-brand-gray-light block">SKU Produk</span>
+              <span className="font-bold text-brand-black font-mono text-[10px] sm:text-[11px] truncate block">{activeVariant?.sku || "-"}</span>
             </div>
           </div>
 
           {/* 3. Color Selection */}
           {uniqueColors.length > 0 && (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-widest text-brand-black">
                   Warna: <span className="font-bold text-brand-gray">{selectedColor}</span>
@@ -441,7 +453,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                   {uniqueColors.length} Pilihan Warna
                 </span>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {uniqueColors.map((v) => (
                   <button
                     key={v.color}
@@ -463,7 +475,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           )}
 
           {/* 4. Size Selection */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             <div className="flex justify-between items-center">
               <span className="text-xs font-black uppercase tracking-widest text-brand-black">
                 Ukuran
@@ -477,7 +489,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {sizes.map((sz) => {
                 const matchedVar = colorVariants.find((v) => v.size === sz);
                 const isAvailable = matchedVar && matchedVar.stock > 0;
@@ -487,7 +499,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                     key={sz}
                     onClick={() => isAvailable && setSelectedSize(sz)}
                     disabled={!isAvailable}
-                    className={`py-3.5 border font-bold text-xs flex flex-col items-center justify-center transition-all rounded-xl cursor-pointer ${!isAvailable
+                    className={`py-2.5 sm:py-3.5 border font-bold text-xs flex flex-col items-center justify-center transition-all rounded-xl cursor-pointer ${!isAvailable
                         ? "border-brand-light/60 bg-[#f7f7f7] text-brand-gray-light cursor-not-allowed opacity-50 line-through"
                         : selectedSize === sz
                           ? "bg-brand-black text-brand-white border-brand-black shadow-md scale-105"
@@ -505,13 +517,13 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
           </div>
 
           {/* 5. Actions CTA (Add to Cart, Buy Now & Favorite) */}
-          <div className="flex flex-col gap-3 pt-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col gap-2.5 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {/* Tambah Ke Keranjang */}
               <button
                 onClick={handleAddToCart}
                 disabled={isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)}
-                className={`w-full font-black uppercase tracking-[0.12em] text-xs py-4 px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
+                className={`w-full font-black uppercase tracking-[0.1em] text-[11px] sm:text-xs py-3.5 sm:py-4 px-2 sm:px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-1.5 ${
                   isAdding || !selectedSize || (activeVariant && activeVariant.stock <= 0)
                     ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
                     : isAdded
@@ -521,7 +533,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               >
                 {isAdding ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-brand-gray-light border-t-transparent rounded-full animate-spin" />
                     <span>Menambahkan...</span>
                   </>
                 ) : isAdded ? (
@@ -545,7 +557,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               <button
                 onClick={handleBuyNow}
                 disabled={!selectedSize || (activeVariant && activeVariant.stock <= 0)}
-                className={`w-full font-black uppercase tracking-[0.12em] text-xs py-4 px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-2 ${
+                className={`w-full font-black uppercase tracking-[0.1em] text-[11px] sm:text-xs py-3.5 sm:py-4 px-2 sm:px-3 transition-all duration-300 rounded-xl border-2 border-brand-black focus:outline-none cursor-pointer flex items-center justify-center gap-1.5 ${
                   !selectedSize || (activeVariant && activeVariant.stock <= 0)
                     ? "bg-brand-light text-brand-gray-light border-brand-light cursor-not-allowed"
                     : "bg-brand-black text-brand-white hover:bg-black/85 hover:border-black/85 shadow-md scale-[1.01]"
@@ -568,7 +580,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             <button
               onClick={handleToggleFavorit}
               disabled={isTogglingFav}
-              className={`w-full font-black uppercase tracking-[0.15em] text-xs py-3.5 transition-all duration-300 rounded-xl border cursor-pointer flex items-center justify-center gap-2 ${
+              className={`w-full font-black uppercase tracking-[0.12em] text-xs py-3 sm:py-3.5 transition-all duration-300 rounded-xl border cursor-pointer flex items-center justify-center gap-2 ${
                 isFavorite
                   ? "bg-red-50 text-red-500 border-red-300 hover:bg-red-500 hover:text-white"
                   : "bg-[#fbfbfb] text-brand-gray border-brand-light hover:border-brand-black hover:text-brand-black"

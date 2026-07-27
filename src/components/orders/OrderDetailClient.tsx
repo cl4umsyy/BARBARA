@@ -332,16 +332,16 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ userId, or
                     
                     <div className="flex-1 min-w-0">
                       <Link href={`/shop/${item.productSlug || item.productId}`} className="hover:opacity-75">
-                        <h4 className="font-bold text-brand-black text-sm leading-snug">
+                        <h4 className="font-bold text-brand-black text-sm leading-snug break-words">
                           {item.productName}
                         </h4>
                       </Link>
-                      <p className="text-xs text-brand-gray mt-1 font-medium">
-                        Ukuran: <span className="font-bold text-brand-black uppercase">{item.size}</span>
-                        <span className="mx-2">|</span>
-                        Warna: <span className="font-bold text-brand-black capitalize">{item.color}</span>
+                      <p className="text-xs text-brand-gray mt-1 font-medium flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span>Ukuran: <span className="font-bold text-brand-black uppercase">{item.size}</span></span>
+                        <span className="text-brand-gray-light">|</span>
+                        <span>Warna: <span className="font-bold text-brand-black capitalize">{item.color}</span></span>
                       </p>
-                      <p className="text-xs text-brand-gray mt-1">
+                      <p className="text-xs text-brand-gray mt-1 font-medium">
                         {item.quantity} x {formatPrice(item.price)}
                       </p>
 
@@ -377,7 +377,7 @@ export const OrderDetailClient: React.FC<OrderDetailClientProps> = ({ userId, or
                     </div>
 
                     <div className="flex flex-col items-end gap-3 flex-shrink-0">
-                      <p className="font-bold text-brand-black text-sm tracking-wide">
+                      <p className="font-bold text-brand-black text-sm tracking-wide hidden md:block">
                         {formatPrice(item.price * item.quantity)}
                       </p>
                       {isSelesai && (

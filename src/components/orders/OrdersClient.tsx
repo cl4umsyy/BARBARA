@@ -145,7 +145,7 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ userId, orders, init
             className="bg-brand-white border border-brand-light rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300"
           >
             {/* Order Card Header */}
-            <div className="flex flex-wrap justify-between items-center bg-[#fbfbfb] px-6 py-4 border-b border-brand-light gap-4">
+            <div className="flex flex-wrap justify-between items-center bg-[#fbfbfb] px-4 sm:px-6 py-3.5 sm:py-4 border-b border-brand-light gap-3 sm:gap-4">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-xs">
                 <div>
                   <p className="text-[9px] uppercase tracking-wider text-brand-gray-light font-bold">
@@ -173,7 +173,7 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ userId, orders, init
             </div>
 
             {/* Order Card Content (Lists each product separately) */}
-            <div className="p-6 flex flex-col gap-6">
+            <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
               {order.orderItems.map((item, idx) => {
                 // Find review for this product
                 const review = reviews.find((r) => r.orderId === order.id && r.productId === item.productId);
@@ -201,14 +201,14 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ userId, orders, init
                       {/* Item Details */}
                       <div className="flex-1 min-w-0">
                         <Link href={`/shop/${item.productSlug || item.productId}`} className="hover:opacity-75">
-                          <h4 className="font-bold text-brand-black text-sm truncate leading-snug">
+                          <h4 className="font-bold text-brand-black text-sm leading-snug break-words">
                             {item.productName}
                           </h4>
                         </Link>
-                        <p className="text-[11px] text-brand-gray mt-1 font-medium">
-                          Ukuran: <span className="font-bold text-brand-black uppercase">{item.size || "-"}</span>
-                          <span className="mx-2">|</span>
-                          Warna: <span className="font-bold text-brand-black capitalize">{item.color || "-"}</span>
+                        <p className="text-[11px] text-brand-gray mt-1 font-medium flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          <span>Ukuran: <span className="font-bold text-brand-black uppercase">{item.size || "-"}</span></span>
+                          <span className="text-brand-gray-light">|</span>
+                          <span>Warna: <span className="font-bold text-brand-black capitalize">{item.color || "-"}</span></span>
                         </p>
                         <p className="text-[11px] text-brand-gray mt-1 font-medium">
                           {item.quantity} barang x {formatPrice(item.price)}
@@ -272,16 +272,16 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ userId, orders, init
             </div>
 
             {/* Card Footer: Financial overview */}
-            <div className="bg-[#fbfbfb] px-6 py-4 border-t border-brand-light flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-brand-gray-light uppercase">Total Belanja:</span>
-                <span className="font-black text-brand-black text-sm tracking-wide">{formatPrice(order.total)}</span>
+            <div className="bg-[#fbfbfb] px-4 sm:px-6 py-3.5 sm:py-4 border-t border-brand-light flex flex-wrap justify-between items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold text-brand-gray-light uppercase whitespace-nowrap">Total Belanja:</span>
+                <span className="font-black text-brand-black text-sm sm:text-base tracking-wide whitespace-nowrap">{formatPrice(order.total)}</span>
               </div>
               
-              <Link href={`/orders/${order.id}`} className="flex-shrink-0">
-                <button className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-brand-gray hover:text-brand-black transition-colors cursor-pointer">
-                  Detail Pesanan
-                  <ArrowRight className="w-3 h-3" />
+              <Link href={`/orders/${order.id}`} className="flex-shrink-0 ml-auto sm:ml-0">
+                <button className="flex items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wider text-brand-black hover:opacity-75 transition-opacity cursor-pointer bg-brand-white border border-brand-light/80 hover:border-brand-black px-3 py-1.5 sm:px-0 sm:py-0 sm:bg-transparent sm:border-0 rounded-lg">
+                  <span>Detail Pesanan</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
             </div>
