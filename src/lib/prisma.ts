@@ -33,7 +33,7 @@ const getPrismaClient = () => {
     return prismaClientSingleton();
   }
   
-  if (!globalThis.prismaGlobal || !("review" in globalThis.prismaGlobal)) {
+  if (!globalThis.prismaGlobal || !("testimonial" in globalThis.prismaGlobal)) {
     console.log("[Prisma] Initializing or re-creating PrismaClient singleton with updated models...");
     globalThis.prismaGlobal = prismaClientSingleton();
   }

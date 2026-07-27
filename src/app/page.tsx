@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabase";
+import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/Button";
 import { CategoryCarousel } from "@/components/home/CategoryCarousel";
@@ -9,8 +10,8 @@ import { ArrowRight, Star, Heart } from "lucide-react";
 export const revalidate = 0; // Disable caching to always show fresh database products
 
 export default async function Home() {
-  // Fetch real data from Supabase
-  const [productsRes, categoriesRes] = await Promise.all([
+  // Fetch real data from Supabase and Prisma
+  const [productsRes, categoriesRes, dbTestimonials] = await Promise.all([
     supabaseAdmin
       .from("products")
       .select(`
@@ -43,7 +44,13 @@ export default async function Home() {
       .limit(8),
     supabaseAdmin
       .from("categories")
-      .select("*")
+      .select("*"),
+    prisma.testimonial
+      ? prisma.testimonial.findMany({
+          where: { isActive: true },
+          orderBy: { createdAt: "desc" },
+        }).catch(() => [])
+      : Promise.resolve([]),
   ]);
 
   const categories = categoriesRes.data || [];
@@ -106,30 +113,40 @@ export default async function Home() {
     },
   ];
 
-  // Reviews feed (Aman dan Terlindungi)
-  const reviews = [
+  // Reviews feed from Database (Aman dan Terlindungi)
+  const defaultFallbackReviews = [
     {
-      id: 1,
+      id: "fb1",
       name: "Rian H.",
       review: "Kualitas kaosnya tebal banget, bener-bener heavyweight 24s. Pas dipake fitting-nya oversized premium.",
       rating: 5,
       product: "Oversized Noir Tee",
     },
     {
-      id: 2,
+      id: "fb2",
       name: "Siti M.",
       review: "Checkout cepet banget pake VA Midtrans. Admin panel tracking resi langsung masuk email. Trusted!",
       rating: 5,
       product: "Heavy Cargo Pants",
     },
     {
-      id: 3,
+      id: "fb3",
       name: "Dika A.",
       review: "Bahannya adem walaupun tebal. Monochrome cutting-nya keren buat streetwear style sehari-hari.",
       rating: 5,
       product: "Cyberpunk Hood",
     },
   ];
+
+  const reviews = dbTestimonials && dbTestimonials.length > 0
+    ? dbTestimonials.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        review: t.review,
+        rating: t.rating,
+        product: t.productName,
+      }))
+    : defaultFallbackReviews;
 
   return (
     <div className="flex flex-col w-full bg-brand-white" suppressHydrationWarning>
@@ -293,30 +310,38 @@ export default async function Home() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {reviews.map((rev) => (
-                <div key={rev.id} className="bg-[#1A1A1A] border border-brand-gray/30 p-6 flex flex-col justify-between gap-6 hover:border-brand-light/50 transition-colors duration-300">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex text-amber-500">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
-                      ))}
+            {reviews.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-brand-gray/30">
+                <p className="text-xs text-brand-gray-light uppercase font-bold tracking-widest">
+                  Belum ada ulasan komunitas yang ditampilkan.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {reviews.map((rev) => (
+                  <div key={rev.id} className="bg-[#1A1A1A] border border-brand-gray/30 p-6 flex flex-col justify-between gap-6 hover:border-brand-light/50 transition-colors duration-300">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex text-amber-500">
+                        {[...Array(rev.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-brand-light leading-relaxed italic">
+                        &ldquo;{rev.review}&rdquo;
+                      </p>
                     </div>
-                    <p className="text-xs text-brand-light leading-relaxed italic">
-                      &ldquo;{rev.review}&rdquo;
-                    </p>
+                    <div className="flex justify-between items-center border-t border-brand-gray/30 pt-4">
+                      <span className="text-xs font-black uppercase tracking-wider text-brand-white">
+                        {rev.name}
+                      </span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-brand-gray-light bg-brand-black px-2 py-0.5 border border-brand-gray/30">
+                        {rev.product}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center border-t border-brand-gray/30 pt-4">
-                    <span className="text-xs font-black uppercase tracking-wider text-brand-white">
-                      {rev.name}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-brand-gray-light bg-brand-black px-2 py-0.5 border border-brand-gray/30">
-                      {rev.product}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSafeSession } from "@/lib/useSafeSession";
 import { Badge } from "@/components/ui/Badge";
 import { useFavoriteStore } from "@/stores/useFavoriteStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
@@ -44,7 +44,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   rating,
   reviewCount,
 }) => {
-  const { data: session } = useSession();
+  const { data: session } = useSafeSession();
   const isFavorite = useFavoriteStore((s) => (id ? s.isFavorite(id) : false));
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
   const openModal = useAuthModalStore((s) => s.openModal);

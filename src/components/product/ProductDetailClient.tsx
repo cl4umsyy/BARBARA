@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSafeSession } from "@/lib/useSafeSession";
 import { useCartStore } from "@/stores/useCartStore";
 import { useFavoriteStore } from "@/stores/useFavoriteStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
@@ -130,7 +130,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   initialFavoriteIds,
 }) => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session } = useSafeSession();
   const addItem = useCartStore((state) => state.addItem);
   const isFavorite = useFavoriteStore((s) => s.isFavorite(product.id));
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);

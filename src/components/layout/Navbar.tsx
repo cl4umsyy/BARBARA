@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { useSafeSession } from "@/lib/useSafeSession";
 import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useFavoriteStore } from "@/stores/useFavoriteStore";
@@ -13,7 +14,7 @@ import { Search, ShoppingBag, User, X, LogOut, Menu, Heart } from "lucide-react"
 export const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSafeSession();
   const cartCount = useCartStore((state) => state.getCartCount());
   const openModal = useAuthModalStore((s) => s.openModal);
   const favoriteCount = useFavoriteStore((s) => s.count);

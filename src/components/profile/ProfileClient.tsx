@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { useSafeSession } from "@/lib/useSafeSession";
 import { 
   User as UserIcon, 
   Mail, 
@@ -109,7 +110,7 @@ export default function ProfileClient({
   initialTab 
 }: ProfileClientProps) {
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const { data: session, update } = useSafeSession();
   
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "orders" | "favorites" | "security">(initialTab || "profile");

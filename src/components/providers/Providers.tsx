@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { SessionProvider, useSession, signOut } from "next-auth/react";
+import { SessionProvider, signOut } from "next-auth/react";
+import { useSafeSession } from "@/lib/useSafeSession";
 import { useCartStore, CartItem } from "@/stores/useCartStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { AuthModalListener } from "@/components/auth/AuthModalListener";
 
 function CartSync() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSafeSession();
   const { items, setItems } = useCartStore();
   const [isInitialSynced, setIsInitialSynced] = React.useState(false);
   const initialSyncPromiseRef = React.useRef<Promise<void> | null>(null);

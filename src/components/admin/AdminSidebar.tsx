@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  Quote,
   Tags,
 } from "lucide-react";
 
@@ -52,6 +53,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
       name: "Reviews",
       href: "/admin/reviews",
       icon: MessageSquare,
+    },
+    {
+      name: "Testimoni",
+      href: "/admin/testimonials",
+      icon: Quote,
     },
     {
       name: "Customers",

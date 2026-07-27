@@ -312,3 +312,17 @@ model Review {
   @@index([orderId])
   @@map("reviews")
 }
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  rating      Int      @default(5)
+  review      String
+  productName String   @map("product_name")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("testimonials")
+}
+
