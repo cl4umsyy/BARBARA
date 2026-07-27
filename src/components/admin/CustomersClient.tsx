@@ -783,21 +783,21 @@ export const CustomersClient: React.FC<CustomersClientProps> = ({
 
         {/* Pagination Section */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-brand-light mt-8 pt-6">
+          <div className="flex items-center justify-between border-t border-brand-light dark:border-brand-gray/40 mt-8 pt-6">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-brand-light hover:border-brand-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:hover:border-brand-light"
+              className="px-4 py-2 border border-brand-light dark:border-brand-gray/60 hover:border-brand-black dark:hover:border-white bg-brand-white dark:bg-brand-dark text-brand-black dark:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:hover:border-brand-light focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white"
             >
               Previous
             </button>
-            <span className="text-xs font-bold text-brand-gray-light uppercase tracking-wider">
+            <span className="text-xs font-black px-3.5 py-1.5 rounded-lg bg-brand-black text-brand-white border-2 border-brand-black ring-2 ring-brand-black/20 dark:bg-white dark:text-black dark:border-2 dark:border-white dark:ring-2 dark:ring-white/60 dark:shadow-[0_0_10px_rgba(255,255,255,0.3)] uppercase tracking-wider">
               Halaman {currentPage} dari {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-brand-light hover:border-brand-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:hover:border-brand-light"
+              className="px-4 py-2 border border-brand-light dark:border-brand-gray/60 hover:border-brand-black dark:hover:border-white bg-brand-white dark:bg-brand-dark text-brand-black dark:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:hover:border-brand-light focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white"
             >
               Next
             </button>

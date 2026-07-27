@@ -391,7 +391,7 @@ export function AdminOrdersClient() {
 
         {/* Pagination */}
         {data && data.totalPages > 1 && (
-          <div className="px-4 py-4 border-t border-brand-light flex items-center justify-between">
+          <div className="px-4 py-4 border-t border-brand-light dark:border-brand-gray/40 flex items-center justify-between">
             <p className="text-[10px] text-brand-gray-light uppercase tracking-wider">
               Menampilkan {((page - 1) * 20) + 1}–{Math.min(page * 20, data.total)} dari {data.total} order
             </p>
@@ -400,18 +400,18 @@ export function AdminOrdersClient() {
                 id="admin-orders-prev-page"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1.5 border border-brand-light hover:border-brand-black transition-colors disabled:opacity-40 rounded cursor-pointer"
+                className="p-1.5 border border-brand-light dark:border-brand-gray/60 hover:border-brand-black dark:hover:border-white bg-brand-white dark:bg-brand-dark text-brand-black dark:text-white transition-colors disabled:opacity-40 rounded-lg cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <span className="text-xs font-bold text-brand-black">
+              <span className="text-xs font-black px-3 py-1 rounded-lg bg-brand-black text-brand-white border-2 border-brand-black ring-2 ring-brand-black/20 dark:bg-white dark:text-black dark:border-2 dark:border-white dark:ring-2 dark:ring-white/60 dark:shadow-[0_0_10px_rgba(255,255,255,0.3)] tracking-wider">
                 {page} / {data.totalPages}
               </span>
               <button
                 id="admin-orders-next-page"
                 onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
                 disabled={page === data.totalPages}
-                className="p-1.5 border border-brand-light hover:border-brand-black transition-colors disabled:opacity-40 rounded cursor-pointer"
+                className="p-1.5 border border-brand-light dark:border-brand-gray/60 hover:border-brand-black dark:hover:border-white bg-brand-white dark:bg-brand-dark text-brand-black dark:text-white transition-colors disabled:opacity-40 rounded-lg cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
