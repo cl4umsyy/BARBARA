@@ -5,13 +5,14 @@ import prisma from "@/lib/prisma";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/Button";
 import { CategoryCarousel } from "@/components/home/CategoryCarousel";
-import { ArrowRight, Star, Heart } from "lucide-react";
+import { HeroBannerCarousel } from "@/components/home/HeroBannerCarousel";
+import { ArrowRight, Star } from "lucide-react";
 
 export const revalidate = 0; // Disable caching to always show fresh database products
 
 export default async function Home() {
   // Fetch real data from Supabase and Prisma
-  const [productsRes, categoriesRes, dbReviews] = await Promise.all([
+  const [productsRes, categoriesRes, dbReviews, dbHeroBanners] = await Promise.all([
     supabaseAdmin
       .from("products")
       .select(`
@@ -61,6 +62,12 @@ export default async function Home() {
           }
         }).catch(() => [])
       : Promise.resolve([]),
+    prisma.heroBanner
+      ? prisma.heroBanner.findMany({
+          where: { isActive: true },
+          orderBy: { order: "asc" },
+        }).catch(() => [])
+      : Promise.resolve([]),
   ]);
 
   const categories = categoriesRes.data || [];
@@ -98,30 +105,16 @@ export default async function Home() {
     };
   });
 
-  // Lookbook curators/combos (mimicking recommended sellers)
-  const lookbooks = [
-    {
-      id: "look1",
-      title: "Oversized Streetwear Core",
-      curator: "barbara Styling Lab",
-      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800",
-      items: "Noir Tee + Heavy Cargo + Accessories",
-    },
-    {
-      id: "look2",
-      title: "Minimalist Monochrome",
-      curator: "Edgy Minimalist",
-      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
-      items: "Loose Hoodies + Utility Shorts",
-    },
-    {
-      id: "look3",
-      title: "Cyberpunk Techwear",
-      curator: "Neo Streetwear",
-      image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800",
-      items: "Neo Streetwear Jacket + Cyber Pants",
-    },
-  ];
+  const heroBanners = (dbHeroBanners || []).map((b: any) => ({
+    id: b.id,
+    title: b.title,
+    description: b.description,
+    imageUrl: b.imageUrl,
+    buttonText: b.buttonText,
+    buttonLink: b.buttonLink,
+    categorySlug: b.categorySlug,
+    order: b.order,
+  }));
 
   // Authentic customer reviews feed from database
   const reviews = dbReviews.map((r: any) => ({
@@ -230,51 +223,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 4. Curated Lookbooks Carousel (Ganti Rekomendasi Seller) */}
-      <section className="bg-brand-light py-20 border-y border-brand-light">
-        <div className="mx-auto w-full max-w-7xl px-4 md:px-8 lg:px-16">
-          <div className="flex flex-col gap-10">
-            <div className="text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-gray-light">
-                Curator Styling Combos
-              </p>
-              <h2 className="text-2xl md:text-4xl font-black tracking-wider text-brand-black mt-1 uppercase">
-                Lookbook Kurasi barbara
-              </h2>
-              <p className="text-xs text-brand-gray mt-2 uppercase tracking-wide">
-                Gaya rekomendasi streetwear kurasi tim stylist barbara
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {lookbooks.map((look) => (
-                <div key={look.id} className="bg-brand-white border border-brand-light/60 p-4 flex flex-col gap-4 group hover:shadow-lg transition-shadow duration-300">
-                  <div className="relative h-80 w-full overflow-hidden bg-brand-light">
-                    <Image
-                      src={look.image}
-                      alt={look.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale"
-                    />
-                    <div className="absolute bottom-3 left-3 bg-brand-black text-brand-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1">
-                      {look.curator}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-sm font-black uppercase tracking-wider text-brand-black group-hover:opacity-75 transition-opacity">
-                      {look.title}
-                    </h3>
-                    <p className="text-[11px] text-brand-gray font-medium uppercase tracking-wide">
-                      {look.items}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 4. Premium Hero Banner Carousel (Menggantikan Lookbook) */}
+      {heroBanners.length > 0 && (
+        <HeroBannerCarousel banners={heroBanners} />
+      )}
 
       {/* 5. Featured Collections — Scrollable Carousel */}
       <section className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 lg:px-16">

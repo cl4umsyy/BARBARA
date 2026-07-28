@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Quote,
   Tags,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -48,6 +49,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
       name: "Orders",
       href: "/admin/orders",
       icon: ClipboardList,
+    },
+    {
+      name: "Hero Banner",
+      href: "/admin/hero-banners",
+      icon: ImageIcon,
     },
     {
       name: "Reviews",

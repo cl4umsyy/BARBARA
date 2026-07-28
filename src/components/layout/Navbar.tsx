@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -25,9 +25,34 @@ export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     setHasMounted(true);
+  }, []);
+
+  // Smart sticky header scroll listener (hide on scroll down, show on scroll up)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Always show header near top of page
+      if (currentScrollY <= 20) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current + 3) {
+        // Scrolling down -> hide header
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current - 3) {
+        // Scrolling up -> show header
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Fetch favorites when user logs in
@@ -101,7 +126,11 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-brand-light bg-brand-white/90 backdrop-blur-md">
+    <header
+      className={`sticky top-0 z-40 w-full border-b border-brand-light bg-brand-white/90 backdrop-blur-md transition-transform duration-300 ease-in-out ${
+        isVisible || isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 md:px-8 lg:px-16">
         {/* Main Header (Row 1) */}
         <div className="flex h-20 items-center justify-between gap-4 border-b border-brand-light/30">
