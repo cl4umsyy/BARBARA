@@ -3,10 +3,7 @@
 import React, { useState, useMemo } from "react";
 import {
   Star,
-  Plus,
   Search,
-  Edit2,
-  Trash2,
   Eye,
   EyeOff,
   X,
@@ -16,7 +13,6 @@ import {
   ChevronRight,
   Quote,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 export interface TestimonialItem {
   id: string;
@@ -25,6 +21,7 @@ export interface TestimonialItem {
   review: string;
   productName: string;
   isActive: boolean;
+  orderNumber?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,25 +40,6 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<TestimonialItem | null>(null);
-
-  // Form states
-  const [formData, setFormData] = useState({
-    name: "",
-    rating: 5,
-    productName: "",
-    review: "",
-    isActive: true,
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Delete modal state
-  const [deleteTarget, setDeleteTarget] = useState<TestimonialItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -102,106 +80,7 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
     return filteredTestimonials.slice(start, start + itemsPerPage);
   }, [filteredTestimonials, currentPage, itemsPerPage]);
 
-  // Handle open add modal
-  const handleOpenAddModal = () => {
-    setEditingItem(null);
-    setFormData({
-      name: "",
-      rating: 5,
-      productName: "",
-      review: "",
-      isActive: true,
-    });
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Handle open edit modal
-  const handleOpenEditModal = (item: TestimonialItem) => {
-    setEditingItem(item);
-    setFormData({
-      name: item.name,
-      rating: item.rating,
-      productName: item.productName,
-      review: item.review,
-      isActive: item.isActive,
-    });
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Form Validation
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-    if (!formData.name.trim()) {
-      errors.name = "Nama pelanggan wajib diisi.";
-    }
-    if (!formData.productName.trim()) {
-      errors.productName = "Nama produk yang dibeli wajib diisi.";
-    }
-    if (!formData.review.trim()) {
-      errors.review = "Isi ulasan wajib diisi.";
-    }
-    if (formData.rating < 1 || formData.rating > 5) {
-      errors.rating = "Rating harus antara 1 sampai 5 bintang.";
-    }
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Submit Add / Edit Form
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-
-    try {
-      if (editingItem) {
-        // Edit existing
-        const res = await fetch(`/api/admin/testimonials/${editingItem.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          if (data.errors) setFormErrors(data.errors);
-          throw new Error(data.error || "Gagal memperbarui testimoni.");
-        }
-
-        setTestimonials((prev) =>
-          prev.map((t) => (t.id === editingItem.id ? data : t))
-        );
-        showNotification("success", "Testimoni berhasil diperbarui.");
-      } else {
-        // Add new
-        const res = await fetch("/api/admin/testimonials", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          if (data.errors) setFormErrors(data.errors);
-          throw new Error(data.error || "Gagal menambahkan testimoni.");
-        }
-
-        setTestimonials((prev) => [data, ...prev]);
-        showNotification("success", "Testimoni baru berhasil ditambahkan.");
-      }
-
-      setIsModalOpen(false);
-    } catch (err: any) {
-      showNotification("error", err.message || "Terjadi kesalahan.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Toggle active status
+  // Toggle active status (Status Tampil)
   const handleToggleStatus = async (item: TestimonialItem) => {
     try {
       const res = await fetch(`/api/admin/testimonials/${item.id}`, {
@@ -220,37 +99,12 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
       );
       showNotification(
         "success",
-        `Status testimoni ${item.name} berhasil diubah menjadi ${
-          data.isActive ? "Aktif" : "Nonaktif"
+        `Status testimoni dari ${item.name} berhasil diubah menjadi ${
+          data.isActive ? "Aktif (Tampil di Home)" : "Nonaktif (Disembunyikan)"
         }.`
       );
     } catch (err: any) {
       showNotification("error", err.message || "Terjadi kesalahan.");
-    }
-  };
-
-  // Delete item
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-
-    setIsDeleting(true);
-    try {
-      const res = await fetch(`/api/admin/testimonials/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Gagal menghapus testimoni.");
-      }
-
-      setTestimonials((prev) => prev.filter((t) => t.id !== deleteTarget.id));
-      showNotification("success", `Testimoni dari ${deleteTarget.name} berhasil dihapus.`);
-      setDeleteTarget(null);
-    } catch (err: any) {
-      showNotification("error", err.message || "Terjadi kesalahan saat menghapus.");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -295,24 +149,16 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
             </h1>
           </div>
           <p className="text-xs text-brand-gray mt-1 uppercase tracking-wide">
-            Atur ulasan & testimoni pelanggan yang tampil di bagian &ldquo;Apa Kata Komunitas Kami&rdquo; di Halaman Home.
+            Atur ulasan pelanggan dari pesanan selesai yang tampil di bagian &ldquo;Apa Kata Komunitas Kami&rdquo; di Halaman Home.
           </p>
         </div>
-
-        <Button
-          onClick={handleOpenAddModal}
-          className="!bg-brand-black !text-brand-white hover:!bg-brand-dark flex items-center justify-center gap-2 !py-3 !px-6"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Testimoni</span>
-        </Button>
       </div>
 
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-brand-light p-4 border border-brand-light/80 flex flex-col gap-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-brand-gray-light">
-            Total Testimoni
+            Total Review Selesai
           </span>
           <span className="text-2xl font-black text-brand-black">
             {testimonials.length}
@@ -349,7 +195,7 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full bg-brand-white border border-brand-light pl-10 pr-4 py-2 text-xs text-brand-black placeholder:text-brand-gray-light focus:outline-none focus:border-brand-black uppercase font-medium"
+            className="w-full bg-brand-white border border-brand-light pl-10 pr-4 py-2 text-xs text-brand-black placeholder:text-brand-gray-light focus:outline-none focus:border-brand-black font-medium"
           />
           {searchTerm && (
             <button
@@ -423,7 +269,7 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
               {paginatedTestimonials.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-brand-gray-light uppercase font-bold tracking-widest">
-                    Tidak ada testimoni yang ditemukan.
+                    Tidak ada ulasan pembeli yang ditemukan.
                   </td>
                 </tr>
               ) : (
@@ -431,7 +277,14 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
                   <tr key={item.id} className="hover:bg-brand-light/40 transition-colors">
                     {/* Name */}
                     <td className="py-4 px-4 font-black uppercase text-brand-black whitespace-nowrap">
-                      {item.name}
+                      <div>
+                        {item.name}
+                        {item.orderNumber && (
+                          <div className="text-[9px] font-mono font-normal text-brand-gray-light mt-0.5">
+                            {item.orderNumber}
+                          </div>
+                        )}
+                      </div>
                     </td>
 
                     {/* Rating */}
@@ -467,49 +320,42 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
                       </p>
                     </td>
 
-                    {/* Status Toggle */}
+                    {/* Status Toggle Badge */}
                     <td className="py-4 px-4 text-center whitespace-nowrap">
-                      <button
-                        onClick={() => handleToggleStatus(item)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                           item.isActive
-                            ? "bg-green-100 text-green-800 border-green-300 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
+                            ? "bg-green-100 text-green-800 border border-green-300"
+                            : "bg-gray-100 text-gray-600 border border-gray-300"
                         }`}
-                        title="Klik untuk mengubah status tampil di Home"
                       >
-                        {item.isActive ? (
-                          <>
-                            <Eye className="w-3 h-3 text-green-600" />
-                            <span>Aktif</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="w-3 h-3 text-gray-500" />
-                            <span>Nonaktif</span>
-                          </>
-                        )}
-                      </button>
+                        {item.isActive ? "Aktif" : "Nonaktif"}
+                      </span>
                     </td>
 
                     {/* Actions */}
                     <td className="py-4 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenEditModal(item)}
-                          className="p-1.5 text-brand-black hover:bg-brand-light border border-transparent hover:border-brand-light transition-colors"
-                          title="Edit Testimoni"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(item)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors"
-                          title="Hapus Testimoni"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleToggleStatus(item)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                          item.isActive
+                            ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100"
+                            : "bg-green-50 text-green-800 border-green-300 hover:bg-green-100"
+                        }`}
+                        title={item.isActive ? "Sembunyikan dari Home" : "Tampilkan di Home"}
+                      >
+                        {item.isActive ? (
+                          <>
+                            <EyeOff className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Sembunyikan</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-3.5 h-3.5 text-green-600" />
+                            <span>Tampilkan</span>
+                          </>
+                        )}
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -550,228 +396,6 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
           </div>
         )}
       </div>
-
-      {/* Add / Edit Testimonial Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-brand-white border border-brand-black w-full max-w-lg shadow-2xl p-6 md:p-8 flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-brand-light pb-4">
-              <h2 className="text-lg font-black uppercase tracking-wider text-brand-black">
-                {editingItem ? "Edit Testimoni" : "Tambah Testimoni Baru"}
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-brand-gray hover:text-brand-black"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              {/* Nama Pelanggan */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black">
-                  Nama Pelanggan <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Rian H."
-                  value={formData.name}
-                  onChange={(e) => {
-                    setFormData({ ...formData, name: e.target.value });
-                    if (formErrors.name) setFormErrors({ ...formErrors, name: "" });
-                  }}
-                  className={`w-full border p-2.5 text-xs text-brand-black focus:outline-none uppercase ${
-                    formErrors.name
-                      ? "border-red-500 bg-red-50/30"
-                      : "border-brand-light focus:border-brand-black"
-                  }`}
-                />
-                {formErrors.name && (
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
-                    {formErrors.name}
-                  </span>
-                )}
-              </div>
-
-              {/* Nama Produk */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black">
-                  Nama Produk yang Dibeli <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Oversized Noir Tee"
-                  value={formData.productName}
-                  onChange={(e) => {
-                    setFormData({ ...formData, productName: e.target.value });
-                    if (formErrors.productName)
-                      setFormErrors({ ...formErrors, productName: "" });
-                  }}
-                  className={`w-full border p-2.5 text-xs text-brand-black focus:outline-none uppercase ${
-                    formErrors.productName
-                      ? "border-red-500 bg-red-50/30"
-                      : "border-brand-light focus:border-brand-black"
-                  }`}
-                />
-                {formErrors.productName && (
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
-                    {formErrors.productName}
-                  </span>
-                )}
-              </div>
-
-              {/* Rating Bintang */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black">
-                  Rating Bintang (1 - 5) <span className="text-red-500">*</span>
-                </label>
-                <div className="flex items-center gap-2 py-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      type="button"
-                      key={star}
-                      onClick={() => setFormData({ ...formData, rating: star })}
-                      className="p-1 hover:scale-110 transition-transform"
-                    >
-                      <Star
-                        className={`w-6 h-6 ${
-                          star <= formData.rating
-                            ? "fill-amber-500 text-amber-500"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                  <span className="ml-2 text-xs font-bold text-brand-black">
-                    {formData.rating} / 5 Bintang
-                  </span>
-                </div>
-                {formErrors.rating && (
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
-                    {formErrors.rating}
-                  </span>
-                )}
-              </div>
-
-              {/* Isi Ulasan */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black">
-                  Isi Ulasan <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Tuliskan teks testimoni pelanggan..."
-                  value={formData.review}
-                  onChange={(e) => {
-                    setFormData({ ...formData, review: e.target.value });
-                    if (formErrors.review) setFormErrors({ ...formErrors, review: "" });
-                  }}
-                  className={`w-full border p-2.5 text-xs text-brand-black focus:outline-none ${
-                    formErrors.review
-                      ? "border-red-500 bg-red-50/30"
-                      : "border-brand-light focus:border-brand-black"
-                  }`}
-                />
-                {formErrors.review && (
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
-                    {formErrors.review}
-                  </span>
-                )}
-              </div>
-
-              {/* Status Tampil Toggle */}
-              <div className="flex items-center justify-between border-t border-b border-brand-light py-3 my-2">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-black">
-                    Tampilkan di Halaman Home
-                  </span>
-                  <span className="text-[10px] text-brand-gray uppercase">
-                    Status Aktif akan membuat ulasan ini muncul di section &ldquo;Apa Kata Komunitas Kami&rdquo;
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
-                  }
-                  className="w-5 h-5 accent-brand-black cursor-pointer"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isSubmitting}
-                  className="!py-2.5 !px-5"
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="!bg-brand-black !text-brand-white hover:!bg-brand-dark !py-2.5 !px-6"
-                >
-                  {isSubmitting
-                    ? "Menyimpan..."
-                    : editingItem
-                    ? "Simpan Perubahan"
-                    : "Tambah Testimoni"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-brand-white border border-red-600 w-full max-w-md shadow-2xl p-6 flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-red-100 border border-red-200 text-red-600 shrink-0">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <h3 className="text-base font-black uppercase tracking-wider text-brand-black">
-                  Konfirmasi Hapus Testimoni
-                </h3>
-                <p className="text-xs text-brand-gray leading-relaxed">
-                  Apakah Anda yakin ingin menghapus testimoni dari{" "}
-                  <strong className="text-brand-black uppercase">{deleteTarget.name}</strong>? Tindakan ini tidak dapat dibatalkan.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-brand-light p-3 border border-brand-light text-xs text-brand-dark italic">
-              &ldquo;{deleteTarget.review}&rdquo;
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-brand-light">
-              <Button
-                variant="secondary"
-                onClick={() => setDeleteTarget(null)}
-                disabled={isDeleting}
-                className="!py-2.5 !px-5"
-              >
-                Batal
-              </Button>
-              <Button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="!bg-red-600 !text-white hover:!bg-red-700 !py-2.5 !px-6 border border-red-700"
-              >
-                {isDeleting ? "Menghapus..." : "Ya, Hapus"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

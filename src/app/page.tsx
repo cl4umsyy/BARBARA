@@ -11,7 +11,7 @@ export const revalidate = 0; // Disable caching to always show fresh database pr
 
 export default async function Home() {
   // Fetch real data from Supabase and Prisma
-  const [productsRes, categoriesRes, dbTestimonials] = await Promise.all([
+  const [productsRes, categoriesRes, dbReviews] = await Promise.all([
     supabaseAdmin
       .from("products")
       .select(`
@@ -45,10 +45,20 @@ export default async function Home() {
     supabaseAdmin
       .from("categories")
       .select("*"),
-    prisma.testimonial
-      ? prisma.testimonial.findMany({
-          where: { isActive: true },
+    prisma.review
+      ? prisma.review.findMany({
+          where: {
+            isShown: true,
+            order: {
+              status: { in: ["COMPLETED", "DELIVERED"] }
+            }
+          },
           orderBy: { createdAt: "desc" },
+          take: 3,
+          include: {
+            user: { select: { name: true } },
+            product: { select: { name: true } }
+          }
         }).catch(() => [])
       : Promise.resolve([]),
   ]);
@@ -113,40 +123,14 @@ export default async function Home() {
     },
   ];
 
-  // Reviews feed from Database (Aman dan Terlindungi)
-  const defaultFallbackReviews = [
-    {
-      id: "fb1",
-      name: "Rian H.",
-      review: "Kualitas kaosnya tebal banget, bener-bener heavyweight 24s. Pas dipake fitting-nya oversized premium.",
-      rating: 5,
-      product: "Oversized Noir Tee",
-    },
-    {
-      id: "fb2",
-      name: "Siti M.",
-      review: "Checkout cepet banget pake VA Midtrans. Admin panel tracking resi langsung masuk email. Trusted!",
-      rating: 5,
-      product: "Heavy Cargo Pants",
-    },
-    {
-      id: "fb3",
-      name: "Dika A.",
-      review: "Bahannya adem walaupun tebal. Monochrome cutting-nya keren buat streetwear style sehari-hari.",
-      rating: 5,
-      product: "Cyberpunk Hood",
-    },
-  ];
-
-  const reviews = dbTestimonials && dbTestimonials.length > 0
-    ? dbTestimonials.map((t: any) => ({
-        id: t.id,
-        name: t.name,
-        review: t.review,
-        rating: t.rating,
-        product: t.productName,
-      }))
-    : defaultFallbackReviews;
+  // Authentic customer reviews feed from database
+  const reviews = dbReviews.map((r: any) => ({
+    id: r.id,
+    name: r.user?.name || "Pelanggan",
+    review: r.review,
+    rating: r.rating,
+    product: r.product?.name || "-",
+  }));
 
   return (
     <div className="flex flex-col w-full bg-brand-white" suppressHydrationWarning>

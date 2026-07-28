@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const revalidate = 0;
 
@@ -8,70 +9,15 @@ interface Params {
   params: Promise<{ id: string }>;
 }
 
-// PUT /api/admin/testimonials/[id] - Update testimonial
-export async function PUT(req: NextRequest, { params }: Params) {
-  try {
-    const session = await auth();
-    if (!session?.user || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const body = await req.json();
-    const { name, rating, review, productName, isActive } = body;
-
-    // Check if testimonial exists
-    const existing = await prisma.testimonial.findUnique({ where: { id } });
-    if (!existing) {
-      return NextResponse.json({ error: "Testimoni tidak ditemukan" }, { status: 404 });
-    }
-
-    // Validation
-    const errors: Record<string, string> = {};
-
-    if (!name || typeof name !== "string" || !name.trim()) {
-      errors.name = "Nama pelanggan wajib diisi.";
-    }
-
-    const numericRating = Number(rating);
-    if (isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
-      errors.rating = "Rating harus berupa angka antara 1 sampai 5.";
-    }
-
-    if (!review || typeof review !== "string" || !review.trim()) {
-      errors.review = "Isi ulasan wajib diisi.";
-    }
-
-    if (!productName || typeof productName !== "string" || !productName.trim()) {
-      errors.productName = "Nama produk yang dibeli wajib diisi.";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      return NextResponse.json({ error: "Validasi gagal", errors }, { status: 400 });
-    }
-
-    const updated = await prisma.testimonial.update({
-      where: { id },
-      data: {
-        name: name.trim(),
-        rating: Math.round(numericRating),
-        review: review.trim(),
-        productName: productName.trim(),
-        isActive: typeof isActive === "boolean" ? isActive : existing.isActive,
-      },
-    });
-
-    return NextResponse.json(updated);
-  } catch (error: any) {
-    console.error("[API Admin Testimonials PUT Error]:", error);
-    return NextResponse.json(
-      { error: "Gagal memperbarui testimoni", details: error.message },
-      { status: 500 }
-    );
-  }
+// PUT /api/admin/testimonials/[id] - Disabled for content editing
+export async function PUT() {
+  return NextResponse.json(
+    { error: "Isi ulasan pelanggan, nama, rating, dan produk tidak dapat diubah oleh admin." },
+    { status: 405 }
+  );
 }
 
-// PATCH /api/admin/testimonials/[id] - Toggle isActive status
+// PATCH /api/admin/testimonials/[id] - Toggle isShown (active status) for customer review
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -82,19 +28,45 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const { id } = await params;
     const body = await req.json();
 
-    const existing = await prisma.testimonial.findUnique({ where: { id } });
-    if (!existing) {
-      return NextResponse.json({ error: "Testimoni tidak ditemukan" }, { status: 404 });
-    }
-
-    const newIsActive = typeof body.isActive === "boolean" ? body.isActive : !existing.isActive;
-
-    const updated = await prisma.testimonial.update({
+    const existing = await prisma.review.findUnique({
       where: { id },
-      data: { isActive: newIsActive },
+      include: {
+        user: { select: { name: true } },
+        product: { select: { name: true } }
+      }
     });
 
-    return NextResponse.json(updated);
+    if (!existing) {
+      return NextResponse.json({ error: "Ulasan pelanggan tidak ditemukan" }, { status: 404 });
+    }
+
+    const newIsActive = typeof body.isActive === "boolean" ? body.isActive : !existing.isShown;
+
+    // Update in remote Supabase database
+    await supabaseAdmin
+      .from("reviews")
+      .update({ is_shown: newIsActive, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    // Update in local Prisma database
+    const updated = await prisma.review.update({
+      where: { id },
+      data: { isShown: newIsActive },
+      include: {
+        user: { select: { name: true } },
+        product: { select: { name: true } }
+      }
+    });
+
+    return NextResponse.json({
+      id: updated.id,
+      name: updated.user?.name || "Pelanggan",
+      rating: updated.rating,
+      review: updated.review,
+      productName: updated.product?.name || "-",
+      isActive: updated.isShown,
+      updatedAt: updated.updatedAt.toISOString(),
+    });
   } catch (error: any) {
     console.error("[API Admin Testimonials PATCH Error]:", error);
     return NextResponse.json(
@@ -104,7 +76,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 }
 
-// DELETE /api/admin/testimonials/[id] - Delete testimonial
+// DELETE /api/admin/testimonials/[id] - Optional delete handler
 export async function DELETE(req: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -114,19 +86,21 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
     const { id } = await params;
 
-    const existing = await prisma.testimonial.findUnique({ where: { id } });
+    const existing = await prisma.review.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ error: "Testimoni tidak ditemukan" }, { status: 404 });
+      return NextResponse.json({ error: "Ulasan tidak ditemukan" }, { status: 404 });
     }
 
-    await prisma.testimonial.delete({ where: { id } });
+    await supabaseAdmin.from("reviews").delete().eq("id", id);
+    await prisma.review.delete({ where: { id } });
 
-    return NextResponse.json({ message: "Testimoni berhasil dihapus" });
+    return NextResponse.json({ message: "Ulasan berhasil dihapus" });
   } catch (error: any) {
     console.error("[API Admin Testimonials DELETE Error]:", error);
     return NextResponse.json(
-      { error: "Gagal menghapus testimoni", details: error.message },
+      { error: "Gagal menghapus ulasan", details: error.message },
       { status: 500 }
     );
   }
 }
+

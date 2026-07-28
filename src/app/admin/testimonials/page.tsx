@@ -7,51 +7,42 @@ import { ShopErrorFallback } from "@/components/shop/ShopErrorFallback";
 
 export const revalidate = 0; // Always fetch fresh testimonials
 
-const INITIAL_TESTIMONIALS = [
-  {
-    name: "Rian H.",
-    review: "Kualitas kaosnya tebal banget, bener-bener heavyweight 24s. Pas dipake fitting-nya oversized premium.",
-    rating: 5,
-    productName: "Oversized Noir Tee",
-    isActive: true,
-  },
-  {
-    name: "Siti M.",
-    review: "Checkout cepet banget pake VA Midtrans. Admin panel tracking resi langsung masuk email. Trusted!",
-    rating: 5,
-    productName: "Heavy Cargo Pants",
-    isActive: true,
-  },
-  {
-    name: "Dika A.",
-    review: "Bahannya adem walaupun tebal. Monochrome cutting-nya keren buat streetwear style sehari-hari.",
-    rating: 5,
-    productName: "Cyberpunk Hood",
-    isActive: true,
-  },
-];
-
 export default async function AdminTestimonialsPage() {
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     redirect("/auth/login?callbackUrl=/admin/testimonials");
   }
 
-  let testimonials: any[] = [];
+  let reviews: any[] = [];
   let dbError: any = null;
 
   try {
-    const count = await prisma.testimonial.count();
-    
-    // Auto-seed default testimonials if table is empty
-    if (count === 0) {
-      await prisma.testimonial.createMany({
-        data: INITIAL_TESTIMONIALS,
-      });
-    }
-
-    testimonials = await prisma.testimonial.findMany({
+    reviews = await prisma.review.findMany({
+      where: {
+        order: {
+          status: { in: ["COMPLETED", "DELIVERED"] }
+        }
+      },
       orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          }
+        },
+        product: {
+          select: {
+            name: true,
+          }
+        },
+        order: {
+          select: {
+            orderNumber: true,
+            status: true,
+          }
+        }
+      }
     });
   } catch (err: any) {
     console.error("[AdminTestimonialsPage Server] Database connection error:", err);
@@ -65,28 +56,29 @@ export default async function AdminTestimonialsPage() {
           error={dbError.message || String(dbError)}
           code="ADMIN_TESTIMONIALS_DB_ERROR"
           title="Dashboard Testimoni Terganggu"
-          message="Gagal memuat daftar testimoni dari database karena kesalahan koneksi berikut:"
+          message="Gagal memuat ulasan pelanggan dari database karena kesalahan koneksi berikut:"
         />
       </div>
     );
   }
 
-  const formattedTestimonials = testimonials.map((t) => ({
-    id: t.id,
-    name: t.name,
-    rating: t.rating,
-    review: t.review,
-    productName: t.productName,
-    isActive: t.isActive,
-    createdAt: t.createdAt.toISOString(),
-    updatedAt: t.updatedAt.toISOString(),
+  const formattedTestimonials = reviews.map((r) => ({
+    id: r.id,
+    name: r.user?.name || "Pelanggan",
+    rating: r.rating,
+    review: r.review,
+    productName: r.product?.name || "-",
+    isActive: r.isShown,
+    orderNumber: r.order?.orderNumber || "-",
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
   }));
 
   return (
     <React.Suspense
       fallback={
         <div className="py-20 text-center text-xs font-bold uppercase tracking-widest text-brand-gray-light font-sans bg-brand-white border border-brand-light">
-          Memuat Halaman Testimoni...
+          Memuat Kelola Testimoni Komunitas...
         </div>
       }
     >
@@ -94,3 +86,4 @@ export default async function AdminTestimonialsPage() {
     </React.Suspense>
   );
 }
+
