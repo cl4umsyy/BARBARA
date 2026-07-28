@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export const Footer: React.FC = () => {
@@ -18,9 +19,18 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-sm font-black uppercase tracking-widest text-brand-black">
-              barbara
-            </h4>
+            <Link href="/" className="flex items-center gap-3 w-max hover:opacity-80 transition-opacity">
+              <Image
+                src="/images/logo-black.png"
+                alt="BARBARA Logo"
+                width={44}
+                height={44}
+                className="h-9 md:h-10 w-auto object-contain shrink-0"
+              />
+              <span className="text-base font-black uppercase tracking-widest text-brand-black">
+                barbara
+              </span>
+            </Link>
             <p className="text-xs text-brand-gray leading-relaxed max-w-xs">
               Contemporary unisex fashion. Bold, edgy, and pure monochrome.
               Redefining streetwear standards.

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useSafeSession } from "@/lib/useSafeSession";
@@ -144,12 +145,22 @@ export const Navbar: React.FC = () => {
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Logo */}
+          {/* Logo & Brand Identity */}
           <Link
             href="/"
-            className="text-2xl font-black uppercase tracking-wider text-brand-black transition-opacity hover:opacity-80 flex-shrink-0"
+            className="flex items-center gap-2.5 md:gap-3 transition-opacity hover:opacity-80 flex-shrink-0 group"
           >
-            barbara
+            <Image
+              src="/images/logo-black.png"
+              alt="BARBARA Logo"
+              width={36}
+              height={36}
+              className="h-7 w-auto md:h-8 object-contain shrink-0"
+              priority
+            />
+            <span className="text-2xl font-black uppercase tracking-wider text-brand-black">
+              barbara
+            </span>
           </Link>
 
           {/* Centered Search Bar (Desktop) */}
@@ -360,9 +371,16 @@ export const Navbar: React.FC = () => {
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-xl font-black uppercase tracking-wider text-brand-black"
+              className="flex items-center gap-2 text-xl font-black uppercase tracking-wider text-brand-black"
             >
-              barbara
+              <Image
+                src="/images/logo-black.png"
+                alt="BARBARA Logo"
+                width={28}
+                height={28}
+                className="h-6 w-auto object-contain shrink-0"
+              />
+              <span>barbara</span>
             </Link>
             <button
               type="button"
