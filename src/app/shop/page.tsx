@@ -2,6 +2,7 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { ShopCatalogClient } from "@/components/shop/ShopCatalogClient";
 import { ShopErrorFallback } from "@/components/shop/ShopErrorFallback";
+import { normalizeCollectionParam } from "@/constants/collections";
 
 export const revalidate = 0; // Disable dynamic caching for search queries to reflect real-time filter changes
 
@@ -46,7 +47,7 @@ export default async function ShopPage(props: ShopPageProps) {
 
   // Collection
   if (collectionParam) {
-    const collections = collectionParam.split(",").map(c => c.trim().toUpperCase()).filter(Boolean);
+    const collections = normalizeCollectionParam(collectionParam);
     if (collections.length > 0) {
       where.collection = { in: collections };
     }

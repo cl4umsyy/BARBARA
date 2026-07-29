@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { normalizeCollectionParam } from "@/constants/collections";
 
 export const revalidate = 0; // Disable server caching for this API endpoint to ensure real-time query results
 
@@ -38,9 +39,9 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Collection filter: support multi-value (comma-separated, e.g. "NEW_ARRIVALS")
+    // Collection filter: support multi-value (comma-separated, e.g. "NEW_ARRIVALS" or "new-arrivals")
     if (collectionParam) {
-      const collections = collectionParam.split(",").map(c => c.trim().toUpperCase()).filter(Boolean);
+      const collections = normalizeCollectionParam(collectionParam);
       if (collections.length > 0) {
         where.collection = {
           in: collections,

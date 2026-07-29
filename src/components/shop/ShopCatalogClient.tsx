@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductSkeleton } from "./ProductSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
+import { getCollectionByIdOrSlug } from "@/constants/collections";
 
 interface Category {
   id: string;
@@ -964,7 +965,8 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
 
             {/* Collection Chips */}
             {selectedCollections.map((colValue) => {
-              const label = colValue.replace(/_/g, " ");
+              const matchedCollection = getCollectionByIdOrSlug(colValue);
+              const label = matchedCollection ? matchedCollection.name : colValue.replace(/_/g, " ");
               return (
                 <span key={colValue} className="flex items-center gap-1 py-1 px-3 bg-brand-light text-brand-black text-[10px] font-black uppercase tracking-wider rounded-full border border-brand-light/60">
                   Koleksi: {label}
@@ -1063,7 +1065,9 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
             // Empty State
             <div className="flex flex-col items-center justify-center py-32 border border-dashed border-brand-light/45 rounded-3xl text-center px-4">
               <p className="text-sm font-black uppercase tracking-widest text-brand-gray-light">
-                Tidak ada produk ditemukan
+                {selectedCollections.length > 0
+                  ? "Belum ada produk pada koleksi ini"
+                  : "Tidak ada produk ditemukan"}
               </p>
               <p className="text-xs text-brand-gray-light/80 mt-2 max-w-sm">
                 Coba sesuaikan filter pencarian Anda atau reset kembali semua filter.

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
+import { COLLECTIONS_LIST, CollectionItem } from "@/constants/collections";
 
 interface Category {
   id: string;
@@ -11,45 +12,6 @@ interface Category {
   slug: string;
   image?: string | null;
 }
-
-const STATIC_CATEGORIES = [
-  {
-    id: "NEW_ARRIVALS",
-    name: "New Arrivals",
-    slug: "new-arrivals",
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800",
-  },
-  {
-    id: "BEST_SELLERS",
-    name: "Best Sellers",
-    slug: "best-sellers",
-    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
-  },
-  {
-    id: "GRAPHIC_TEES",
-    name: "Graphic Tees",
-    slug: "graphic-tees",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800",
-  },
-  {
-    id: "OVERSIZED_COLLECTION",
-    name: "Oversized Collection",
-    slug: "oversized-collection",
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
-  },
-  {
-    id: "ESSENTIALS",
-    name: "Essentials",
-    slug: "essentials",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800",
-  },
-  {
-    id: "LIMITED_EDITION",
-    name: "Limited Edition",
-    slug: "limited-edition",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800",
-  },
-];
 
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800",
@@ -64,15 +26,15 @@ interface Props {
 }
 
 export function CategoryCarousel({ dbCategories }: Props) {
-  // Merge DB categories with static ones
-  const merged = STATIC_CATEGORIES.map((sc) => {
-    const db = dbCategories?.find((d) => d.slug === sc.slug);
+  // Merge DB categories or custom DB data with central COLLECTIONS_LIST
+  const merged: (CollectionItem | Category)[] = COLLECTIONS_LIST.map((sc) => {
+    const db = dbCategories?.find((d) => d.slug === sc.slug || d.id === sc.id);
     return db ? { ...sc, name: db.name, image: db.image || sc.image } : sc;
   });
 
-  // Add any extra DB categories not in static list
+  // Add any extra DB categories not in static collection list
   dbCategories?.forEach((db) => {
-    if (!merged.find((m) => m.slug === db.slug)) {
+    if (!merged.find((m) => m.slug === db.slug || m.id === db.id)) {
       merged.push({
         id: db.id,
         name: db.name,
@@ -105,7 +67,7 @@ export function CategoryCarousel({ dbCategories }: Props) {
         {displayedCategories.map((cat) => (
           <Link
             key={cat.id}
-            href={`/shop?category=${cat.slug}`}
+            href={`/shop?collection=${cat.slug}`}
             className="group flex flex-col gap-2"
           >
             {/* Image card */}

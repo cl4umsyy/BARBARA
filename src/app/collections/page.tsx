@@ -3,6 +3,7 @@ import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
+import { COLLECTIONS_LIST } from "@/constants/collections";
 
 export const metadata: Metadata = {
   title: "Semua Koleksi — BARBARA",
@@ -11,45 +12,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 0; // Fresh dynamically on load
-
-const COLLECTIONS_LIST = [
-  {
-    id: "NEW_ARRIVALS",
-    name: "New Arrivals",
-    description: "Produk terbaru yang baru dirilis di BARBARA.",
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800",
-  },
-  {
-    id: "BEST_SELLERS",
-    name: "Best Sellers",
-    description: "Produk yang paling banyak dibeli oleh pelanggan.",
-    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800",
-  },
-  {
-    id: "GRAPHIC_TEES",
-    name: "Graphic Tees",
-    description: "Koleksi kaos dengan desain grafis dan artwork eksklusif.",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800",
-  },
-  {
-    id: "OVERSIZED_COLLECTION",
-    name: "Oversized Collection",
-    description: "Koleksi kaos dan hoodie oversized dengan fit longgar dan nyaman.",
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
-  },
-  {
-    id: "ESSENTIALS",
-    name: "Essentials",
-    description: "Koleksi pakaian basic dan minimalis untuk dipakai setiap hari.",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800",
-  },
-  {
-    id: "LIMITED_EDITION",
-    name: "Limited Edition",
-    description: "Produk edisi terbatas dengan stok yang sangat sedikit.",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800",
-  },
-];
 
 export default async function CollectionsPage() {
   // Fetch only active products to aggregate counts dynamically on backend/DB representation
@@ -96,7 +58,7 @@ export default async function CollectionsPage() {
             return (
               <Link
                 key={col.id}
-                href={`/shop?collection=${col.id}`}
+                href={`/shop?collection=${col.slug}`}
                 className="group flex flex-col gap-3 border border-brand-light/40 rounded-2xl p-4 bg-brand-white hover:shadow-md transition-all duration-300"
               >
                 {/* Image */}
