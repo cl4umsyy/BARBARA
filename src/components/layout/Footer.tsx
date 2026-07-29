@@ -19,15 +19,15 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-3 w-max hover:opacity-80 transition-opacity">
+            <Link href="/" className="flex items-center gap-2.5 md:gap-3 w-max hover:opacity-80 transition-opacity group">
               <Image
                 src="/images/logo-black.png"
                 alt="BARBARA Logo"
-                width={44}
-                height={44}
-                className="h-9 md:h-10 w-auto object-contain shrink-0"
+                width={32}
+                height={32}
+                className="h-7 md:h-8 w-auto object-contain shrink-0"
               />
-              <span className="text-base font-black uppercase tracking-widest text-brand-black">
+              <span className="text-xl md:text-2xl font-extrabold uppercase tracking-wider text-brand-black">
                 barbara
               </span>
             </Link>

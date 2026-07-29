@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Quote,
 } from "lucide-react";
+import { Pagination } from "@/components/ui/Pagination";
 
 export interface TestimonialItem {
   id: string;
@@ -365,34 +366,18 @@ export const TestimonialsClient: React.FC<TestimonialsClientProps> = ({
         </div>
 
         {/* Pagination Footer */}
-        {filteredTestimonials.length > 0 && (
+        {filteredTestimonials.length > 0 && totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-brand-light bg-brand-light/30">
             <span className="text-[10px] font-bold uppercase tracking-widest text-brand-gray">
               Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, filteredTestimonials.length)} -{" "}
               {Math.min(currentPage * itemsPerPage, filteredTestimonials.length)} dari {filteredTestimonials.length} Testimoni
             </span>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 border border-brand-light bg-brand-white text-brand-black hover:bg-brand-light disabled:opacity-40 disabled:hover:bg-brand-white transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-
-              <span className="text-xs font-bold uppercase tracking-wider px-3">
-                Halaman {currentPage} dari {totalPages}
-              </span>
-
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="p-2 border border-brand-light bg-brand-white text-brand-black hover:bg-brand-light disabled:opacity-40 disabled:hover:bg-brand-white transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
       </div>

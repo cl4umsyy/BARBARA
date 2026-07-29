@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, ChevronLeft, X, RotateCcw, Heart } from "luc
 import { AnimatePresence, motion } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductSkeleton } from "./ProductSkeleton";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface Category {
   id: string;
@@ -1108,42 +1109,13 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-16 pt-6 border-t border-brand-light/35 dark:border-brand-gray/30">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1 || loading}
-              className="px-4 py-2 border border-brand-light dark:border-brand-gray/60 rounded-xl text-xs font-black uppercase tracking-wider bg-brand-white dark:bg-brand-dark text-brand-black dark:text-brand-white hover:border-brand-black dark:hover:border-white hover:bg-brand-light/40 dark:hover:bg-brand-gray/40 disabled:opacity-40 disabled:hover:border-brand-light dark:disabled:hover:border-brand-gray/60 disabled:hover:bg-transparent cursor-pointer transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white focus-visible:ring-offset-2"
-            >
-              Prev
-            </button>
-            
-            {Array.from({ length: totalPages }).map((_, idx) => {
-              const pageNum = idx + 1;
-              const isActive = currentPage === pageNum;
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => handlePageChange(pageNum)}
-                  disabled={loading}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`w-9 h-9 border rounded-xl text-xs font-black cursor-pointer transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white focus-visible:ring-offset-2 ${
-                    isActive
-                      ? "bg-brand-black text-brand-white border-2 border-brand-black ring-2 ring-brand-black/20 shadow-md scale-105 dark:bg-white dark:text-black dark:border-2 dark:border-white dark:ring-2 dark:ring-white/60 dark:shadow-[0_0_12px_rgba(255,255,255,0.4)]"
-                      : "border-brand-light dark:border-brand-gray/60 bg-brand-white dark:bg-brand-dark text-brand-black dark:text-brand-white hover:border-brand-black dark:hover:border-white hover:bg-brand-light/40 dark:hover:bg-brand-gray/40"
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages || loading}
-              className="px-4 py-2 border border-brand-light dark:border-brand-gray/60 rounded-xl text-xs font-black uppercase tracking-wider bg-brand-white dark:bg-brand-dark text-brand-black dark:text-brand-white hover:border-brand-black dark:hover:border-white hover:bg-brand-light/40 dark:hover:bg-brand-gray/40 disabled:opacity-40 disabled:hover:border-brand-light dark:disabled:hover:border-brand-gray/60 disabled:hover:bg-transparent cursor-pointer transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-black dark:focus-visible:ring-white focus-visible:ring-offset-2"
-            >
-              Next
-            </button>
+          <div className="mt-16 pt-6 border-t border-brand-light/35 dark:border-brand-gray/30">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              disabled={loading}
+            />
           </div>
         )}
 
