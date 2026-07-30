@@ -28,11 +28,11 @@ const containerVariants = (
 
 export const StaggerContainer: React.FC<StaggerContainerProps> = ({
   children,
-  staggerDelay = 0.22,
+  staggerDelay = 0.08,
   delayChildren = 0,
   once = true,
   className = "",
-  amount = 0.25,
+  amount = 0.15,
 }) => {
   return (
     <motion.div
@@ -56,12 +56,12 @@ interface StaggerItemProps {
 
 const itemVariants: Record<string, Variants> = {
   "fade-up": {
-    hidden: { opacity: 0, y: 25 },
+    hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 1.2,
+        duration: 0.7,
         ease: [0.22, 1, 0.36, 1],
       },
     },
@@ -71,18 +71,17 @@ const itemVariants: Record<string, Variants> = {
     visible: {
       opacity: 1,
       transition: {
-        duration: 1.1,
+        duration: 0.7,
         ease: [0.22, 1, 0.36, 1],
       },
     },
   },
   "zoom-in": {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      scale: 1,
       transition: {
-        duration: 1.2,
+        duration: 0.7,
         ease: [0.22, 1, 0.36, 1],
       },
     },

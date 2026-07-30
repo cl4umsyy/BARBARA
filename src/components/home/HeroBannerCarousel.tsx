@@ -94,7 +94,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({ banners 
     >
       {/* Banner Slides Container */}
       <div
-        className="w-full h-full flex transition-transform duration-700 ease-out"
+        className="w-full h-full flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners.map((banner, index) => {

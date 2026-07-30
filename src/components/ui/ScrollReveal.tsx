@@ -38,20 +38,20 @@ const getVariantDefinitions = (distance: number): Record<AnimationVariant, Varia
       visible: { opacity: 1, y: 0 },
     },
     "fade-left": {
-      hidden: { opacity: 0, x: distance },
-      visible: { opacity: 1, x: 0 },
+      hidden: { opacity: 0, y: distance },
+      visible: { opacity: 1, y: 0 },
     },
     "fade-right": {
-      hidden: { opacity: 0, x: -distance },
-      visible: { opacity: 1, x: 0 },
+      hidden: { opacity: 0, y: distance },
+      visible: { opacity: 1, y: 0 },
     },
     "zoom-in": {
-      hidden: { opacity: 0, scale: 0.95 },
-      visible: { opacity: 1, scale: 1 },
+      hidden: { opacity: 0 },
+      visible: { opacity: 1 },
     },
     "slide-in": {
-      hidden: { opacity: 0, x: -distance * 1.5 },
-      visible: { opacity: 1, x: 0 },
+      hidden: { opacity: 0, y: distance },
+      visible: { opacity: 1, y: 0 },
     },
   };
 };
@@ -59,12 +59,12 @@ const getVariantDefinitions = (distance: number): Record<AnimationVariant, Varia
 export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   variant = "fade-up",
-  duration = 1.2,
+  duration = 0.7,
   delay = 0,
-  distance = 25,
+  distance = 10,
   once = true,
   className = "",
-  amount = 0.25,
+  amount = 0.15,
 }) => {
   const variants = getVariantDefinitions(distance);
 
@@ -77,7 +77,7 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
       transition={{
         duration,
         delay,
-        ease: [0.22, 1, 0.36, 1], // Ultra-smooth luxury fashion cubic-bezier curve
+        ease: [0.22, 1, 0.36, 1], // Soft, natural cubic-bezier curve
       }}
       className={className}
     >

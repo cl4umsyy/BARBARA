@@ -137,25 +137,25 @@ export default async function Home() {
           fill
           sizes="100vw"
           priority
-          className="object-cover opacity-50 filter grayscale contrast-125 select-none transform-gpu transition-transform duration-700 ease-out hover:scale-105"
+          className="object-cover opacity-50 filter grayscale contrast-125 select-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-transparent to-brand-black/50" />
         
         <div className="relative z-10 flex flex-col items-center text-center gap-4 px-4 max-w-4xl">
-          <ScrollReveal variant="fade-up" duration={1.3}>
+          <ScrollReveal variant="fade-up" duration={0.7}>
             <h1 className="text-3xl font-black tracking-[0.15em] md:text-5xl lg:text-6xl text-brand-white leading-none uppercase select-none">
               Jual-Beli Streetwear <br className="hidden md:inline" /> Premium barbara
             </h1>
           </ScrollReveal>
           
-          <ScrollReveal variant="fade-in" delay={0.25} duration={1.3}>
+          <ScrollReveal variant="fade-in" delay={0.15} duration={0.7}>
             <p className="text-[10px] md:text-xs tracking-widest text-brand-light font-medium uppercase max-w-2xl leading-relaxed">
               Contemporary unisex streetwear. Bold cuts, raw textures, pure monochrome. 
               Contemporary aesthetics with brand-new premium quality standards.
             </p>
           </ScrollReveal>
 
-          <ScrollReveal variant="zoom-in" delay={0.5} duration={1.2}>
+          <ScrollReveal variant="fade-in" delay={0.3} duration={0.7}>
             <div className="mt-2 flex flex-wrap justify-center gap-3">
               <Link href="/shop">
                 <Button variant="primary" className="!bg-brand-white !text-brand-black hover:!bg-brand-black hover:!text-brand-white hover:!border-brand-white border border-brand-white !py-3.5 !px-8">
