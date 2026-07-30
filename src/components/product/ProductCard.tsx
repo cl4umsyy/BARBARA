@@ -86,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-400 ease-out rounded-xl transform-gpu" suppressHydrationWarning>
+    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-700 ease-out rounded-xl transform-gpu" suppressHydrationWarning>
       {/* Image Wrapper with 3:4 aspect ratio */}
       <Link
         href={`/shop/${slug}`}

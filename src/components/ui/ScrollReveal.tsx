@@ -59,12 +59,12 @@ const getVariantDefinitions = (distance: number): Record<AnimationVariant, Varia
 export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   variant = "fade-up",
-  duration = 0.45,
+  duration = 1.2,
   delay = 0,
-  distance = 24,
+  distance = 25,
   once = true,
   className = "",
-  amount = 0.15,
+  amount = 0.25,
 }) => {
   const variants = getVariantDefinitions(distance);
 
@@ -77,7 +77,7 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
       transition={{
         duration,
         delay,
-        ease: [0.16, 1, 0.3, 1], // Natural cubic-bezier curve
+        ease: [0.22, 1, 0.36, 1], // Ultra-smooth luxury fashion cubic-bezier curve
       }}
       className={className}
     >
