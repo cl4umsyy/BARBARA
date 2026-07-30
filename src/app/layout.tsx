@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransition } from "@/components/layout/PageTransition";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -86,9 +87,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-brand-white text-brand-gray antialiased" suppressHydrationWarning>
         <Providers>
           <Navbar />
-          <div className="flex flex-col flex-1">
+          <PageTransition>
             {children}
-          </div>
+          </PageTransition>
           <Footer />
         </Providers>
         <Script

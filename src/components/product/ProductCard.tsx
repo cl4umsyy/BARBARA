@@ -86,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:shadow-md transition-shadow duration-300 rounded-xl" suppressHydrationWarning>
+    <div className="group relative flex flex-col bg-brand-white border border-brand-light/35 p-3 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-400 ease-out rounded-xl transform-gpu" suppressHydrationWarning>
       {/* Image Wrapper with 3:4 aspect ratio */}
       <Link
         href={`/shop/${slug}`}
@@ -109,7 +109,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Heart/Like Button at bottom right */}
         <button
           onClick={handleLikeClick}
-          className="absolute bottom-3 right-3 z-10 py-1 px-2.5 bg-brand-white/90 backdrop-blur-sm hover:bg-brand-white rounded-full text-brand-black shadow-md border border-brand-light/35 flex items-center gap-1 transition-all duration-300 cursor-pointer"
+          className="absolute bottom-3 right-3 z-10 py-1 px-2.5 bg-brand-white/90 backdrop-blur-sm hover:bg-brand-white rounded-full text-brand-black shadow-md border border-brand-light/35 flex items-center gap-1 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
           aria-label="Favorit"
         >
           <Heart

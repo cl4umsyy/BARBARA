@@ -12,6 +12,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   h1,
   h2,
   h3,
@@ -25,4 +29,22 @@
 .input-minimalist {
   @apply w-full bg-brand-light border border-transparent py-3 px-4 outline-none rounded-xl text-brand-black placeholder-brand-gray-light focus:border-brand-black focus:bg-brand-white transition-all duration-200;
 }
+
+/* Performance & Accessibility Optimizations */
+.gpu-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 

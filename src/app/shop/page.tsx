@@ -25,23 +25,24 @@ export default async function ShopPage(props: ShopPageProps) {
   const genderParam = typeof searchParams.gender === "string" ? searchParams.gender : undefined;
   const minPriceParam = typeof searchParams.minPrice === "string" ? searchParams.minPrice : undefined;
   const maxPriceParam = typeof searchParams.maxPrice === "string" ? searchParams.maxPrice : undefined;
+  const searchParam = typeof searchParams.search === "string" ? searchParams.search : (typeof searchParams.q === "string" ? searchParams.q : undefined);
   const sort = typeof searchParams.sort === "string" ? searchParams.sort : "latest";
   const page = typeof searchParams.page === "string" ? parseInt(searchParams.page, 10) : 1;
   const limit = typeof searchParams.limit === "string" ? parseInt(searchParams.limit, 10) : 12;
 
-  const where: any = {
-    isActive: true, // Only show active products
-  };
+  const andConditions: any[] = [
+    { isActive: true },
+  ];
 
   // Gender filter: pria -> MEN, wanita -> WOMEN
   if (genderParam) {
     const g = genderParam.trim().toLowerCase();
     if (g === "pria") {
-      where.gender = "MEN";
+      andConditions.push({ gender: "MEN" });
     } else if (g === "wanita") {
-      where.gender = "WOMEN";
+      andConditions.push({ gender: "WOMEN" });
     } else if (g.toUpperCase() === "MEN" || g.toUpperCase() === "WOMEN") {
-      where.gender = g.toUpperCase() as any;
+      andConditions.push({ gender: g.toUpperCase() as any });
     }
   }
 
@@ -49,7 +50,7 @@ export default async function ShopPage(props: ShopPageProps) {
   if (collectionParam) {
     const collections = normalizeCollectionParam(collectionParam);
     if (collections.length > 0) {
-      where.collection = { in: collections };
+      andConditions.push({ collection: { in: collections } });
     }
   }
 
@@ -57,10 +58,13 @@ export default async function ShopPage(props: ShopPageProps) {
   if (categoryParam) {
     const categories = categoryParam.split(",").map(c => c.trim().toLowerCase()).filter(Boolean);
     if (categories.length > 0) {
-      where.OR = [
-        { categorySlug: { in: categories } },
-        { category: { slug: { in: categories } } }
-      ];
+      andConditions.push({
+        OR: [
+          { categorySlug: { in: categories } },
+          { category: { slug: { in: categories } } },
+          { category: { name: { in: categories, mode: "insensitive" } } },
+        ],
+      });
     }
   }
 
@@ -68,7 +72,7 @@ export default async function ShopPage(props: ShopPageProps) {
   if (brandParam) {
     const brands = brandParam.split(",").map(b => b.trim()).filter(Boolean);
     if (brands.length > 0) {
-      where.brand = { in: brands };
+      andConditions.push({ brand: { in: brands } });
     }
   }
 
@@ -76,7 +80,7 @@ export default async function ShopPage(props: ShopPageProps) {
   if (conditionParam) {
     const conditions = conditionParam.split(",").map(c => c.trim()).filter(Boolean);
     if (conditions.length > 0) {
-      where.condition = { in: conditions };
+      andConditions.push({ condition: { in: conditions } });
     }
   }
 
@@ -84,22 +88,25 @@ export default async function ShopPage(props: ShopPageProps) {
   const minPrice = minPriceParam ? parseFloat(minPriceParam) : undefined;
   const maxPrice = maxPriceParam ? parseFloat(maxPriceParam) : undefined;
   if (minPrice !== undefined || maxPrice !== undefined) {
-    where.price = {};
+    const priceObj: any = {};
     if (minPrice !== undefined && !isNaN(minPrice)) {
-      where.price.gte = minPrice;
+      priceObj.gte = minPrice;
     }
     if (maxPrice !== undefined && !isNaN(maxPrice)) {
-      where.price.lte = maxPrice;
+      priceObj.lte = maxPrice;
     }
+    andConditions.push({ price: priceObj });
   }
 
   // Sizes (contains ,M,)
   if (sizeParam) {
     const sizes = sizeParam.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
     if (sizes.length > 0) {
-      where.OR = sizes.map(sz => ({
-        size: { contains: `,${sz},` }
-      }));
+      andConditions.push({
+        OR: sizes.map(sz => ({
+          size: { contains: `,${sz},` },
+        })),
+      });
     }
   }
 
@@ -107,22 +114,31 @@ export default async function ShopPage(props: ShopPageProps) {
   if (colorParam) {
     const colors = colorParam.split(",").map(c => c.trim()).filter(Boolean);
     if (colors.length > 0) {
-      const colorConditions = colors.map(cl => ({
-        color: { contains: `,${cl},` }
-      }));
-
-      if (where.OR) {
-        const sizeOR = where.OR;
-        delete where.OR;
-        where.AND = [
-          { OR: sizeOR },
-          { OR: colorConditions }
-        ];
-      } else {
-        where.OR = colorConditions;
-      }
+      andConditions.push({
+        OR: colors.map(cl => ({
+          color: { contains: `,${cl},` },
+        })),
+      });
     }
   }
+
+  // Real-time & case-insensitive Search filter across name, description, brand, and category
+  if (searchParam) {
+    const q = searchParam.trim();
+    if (q) {
+      andConditions.push({
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { brand: { contains: q, mode: "insensitive" } },
+          { category: { name: { contains: q, mode: "insensitive" } } },
+          { category: { slug: { contains: q, mode: "insensitive" } } },
+        ],
+      });
+    }
+  }
+
+  const where: any = { AND: andConditions };
 
   const skip = (page - 1) * limit;
 

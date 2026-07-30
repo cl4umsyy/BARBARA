@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronRight, ChevronLeft, X, RotateCcw, Heart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
+import { StaggerContainer, StaggerItem } from "@/components/ui/StaggerContainer";
 import { ProductSkeleton } from "./ProductSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { getCollectionByIdOrSlug } from "@/constants/collections";
@@ -1081,33 +1082,34 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
             </div>
           ) : (
             // Products Grid
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            <StaggerContainer key={currentPage} staggerDelay={0.05} className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
               {products.map((product) => {
                 const primaryImage = product.images[0]?.url || "";
                 const hoverImage = product.images[1]?.url || product.images[0]?.url || "";
                 const totalStock = product.variants.reduce((acc, v) => acc + v.stock, 0);
 
                 return (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    slug={product.slug}
-                    name={product.name}
-                    price={product.price}
-                    imageUrl={primaryImage}
-                    hoverImageUrl={hoverImage !== primaryImage ? hoverImage : undefined}
-                    isNew={product.isNew}
-                    isOutOfStock={totalStock === 0}
-                    sizes={product.sizes}
-                    brand={product.brand}
-                    condition={product.condition}
-                    likesCount={product.likesCount}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                  />
+                  <StaggerItem key={product.id} variant="fade-up">
+                    <ProductCard
+                      id={product.id}
+                      slug={product.slug}
+                      name={product.name}
+                      price={product.price}
+                      imageUrl={primaryImage}
+                      hoverImageUrl={hoverImage !== primaryImage ? hoverImage : undefined}
+                      isNew={product.isNew}
+                      isOutOfStock={totalStock === 0}
+                      sizes={product.sizes}
+                      brand={product.brand}
+                      condition={product.condition}
+                      likesCount={product.likesCount}
+                      rating={product.rating}
+                      reviewCount={product.reviewCount}
+                    />
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerContainer>
           )}
         </div>
 

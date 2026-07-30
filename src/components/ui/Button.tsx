@@ -12,7 +12,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-block text-center font-bold uppercase tracking-[0.2em] text-sm py-4 px-10 transition-all duration-300 ease-out rounded-xl border-2 border-black focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-block text-center font-bold uppercase tracking-[0.2em] text-sm py-4 px-10 transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] rounded-xl border-2 border-black focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transform-gpu";
 
   const variants = {
     primary:

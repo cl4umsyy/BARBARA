@@ -68,7 +68,7 @@ export function CategoryCarousel({ dbCategories }: Props) {
           <Link
             key={cat.id}
             href={`/shop?collection=${cat.slug}`}
-            className="group flex flex-col gap-2"
+            className="group flex flex-col gap-2 hover:-translate-y-1 transition-transform duration-300 transform-gpu"
           >
             {/* Image card */}
             <div className="relative w-full overflow-hidden rounded-2xl bg-brand-light" style={{ aspectRatio: "4/3" }}>

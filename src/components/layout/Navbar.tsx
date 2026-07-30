@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useFavoriteStore } from "@/stores/useFavoriteStore";
 import { Search, ShoppingBag, User, X, LogOut, Menu, Heart } from "lucide-react";
+import { ProductSearchInput } from "@/components/layout/ProductSearchInput";
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
@@ -23,7 +24,6 @@ export const Navbar: React.FC = () => {
   const isFavLoaded = useFavoriteStore((s) => s.isLoaded);
 
   const [hasMounted, setHasMounted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -95,29 +95,10 @@ export const Navbar: React.FC = () => {
     };
   }, [isMobileMenuOpen]);
 
-  console.log(
-    `[Navbar Render] path: ${pathname}, status: ${status}, hasMounted: ${hasMounted}, hasUser: ${!!session?.user}, email: ${session?.user?.email ?? "none"}`
-  );
-
-  useEffect(() => {
-    if (session?.user) {
-      console.log("[DEBUG][Navbar] User logged in. Avatar URL from session:", session.user.image);
-    }
-  }, [session]);
-
   // Hide Navbar for admin routes
   if (pathname?.startsWith("/admin")) {
     return null;
   }
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-      setIsMobileMenuOpen(false);
-    }
-  };
 
   const navLinks = [
     { name: "Pria", href: "/shop?gender=pria" },
@@ -164,19 +145,9 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Centered Search Bar (Desktop) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex items-center bg-[#F5F5F5] rounded-xl px-4 py-2 w-80 lg:w-[450px] border border-transparent focus-within:border-brand-black transition-colors"
-          >
-            <Search className="w-4 h-4 text-brand-gray mr-2 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Cari produk barbara..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent text-xs font-medium tracking-wide outline-none text-brand-black placeholder-brand-gray-light w-full"
-            />
-          </form>
+          <div className="hidden md:block w-80 lg:w-[450px]">
+            <ProductSearchInput />
+          </div>
 
           {/* Action Icons (Right) */}
           <div className="flex items-center gap-4">
@@ -395,16 +366,11 @@ export const Navbar: React.FC = () => {
           {/* Menu Main Content */}
           <div className="flex-1 p-6 flex flex-col gap-6">
             {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#F5F5F5] rounded-xl px-4 py-3 w-full border border-transparent focus-within:border-brand-black transition-colors">
-              <Search className="w-4 h-4 text-brand-gray mr-3 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Cari produk barbara..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-sm font-medium tracking-wide outline-none text-brand-black placeholder-brand-gray-light w-full"
+            <div>
+              <ProductSearchInput
+                onResultClick={() => setIsMobileMenuOpen(false)}
               />
-            </form>
+            </div>
 
             {/* Navigation Links */}
             <div className="flex flex-col gap-2">
