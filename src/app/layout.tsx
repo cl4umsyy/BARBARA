@@ -14,9 +14,12 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "barbara",
+  title: {
+    default: "BARBARA | Home",
+    template: "BARBARA | %s",
+  },
   description:
-    "barbara — contemporary unisex fashion. Bold, edgy, monochrome.",
+    "BARBARA — contemporary unisex fashion. Bold, edgy, monochrome.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

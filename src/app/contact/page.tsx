@@ -2,6 +2,13 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { ContactClient } from "@/components/contact/ContactClient";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kontak",
+  description: "Hubungi tim BARBARA untuk pertanyaan, panduan belanja, dan dukungan pelanggan.",
+};
+
 export const revalidate = 0; // Ensure info updates instantly on sitemap/contact updates
 
 export default async function ContactPage() {

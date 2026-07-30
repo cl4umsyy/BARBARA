@@ -12,9 +12,10 @@ export default function CartPage() {
   const { items, removeItem, getCartTotal, getCartCount } = useCartStore();
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Eliminate hydration mismatch warnings
+  // Eliminate hydration mismatch warnings & set document title
   useEffect(() => {
     setIsHydrated(true);
+    document.title = "BARBARA | Keranjang";
   }, []);
 
   // Stage 4 Logging: Displaying cart items

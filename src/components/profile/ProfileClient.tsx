@@ -121,6 +121,20 @@ export default function ProfileClient({
     }
   }, [initialTab]);
 
+  useEffect(() => {
+    if (activeTab === "orders") {
+      document.title = "BARBARA | Pesanan Saya";
+    } else if (activeTab === "addresses") {
+      document.title = "BARBARA | Alamat Pengiriman";
+    } else if (activeTab === "favorites") {
+      document.title = "BARBARA | Wishlist";
+    } else if (activeTab === "security") {
+      document.title = "BARBARA | Keamanan Akun";
+    } else {
+      document.title = "BARBARA | Profil Saya";
+    }
+  }, [activeTab]);
+
   const orders = initialOrders;
   const reviews = initialReviews;
 

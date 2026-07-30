@@ -40,11 +40,19 @@ export function AuthModal() {
     [closeModal]
   );
 
-  // Lock body scroll & listen for Escape
+  // Lock body scroll, set dynamic tab title & listen for Escape
   useEffect(() => {
+    let prevTitle = "";
     if (isOpen) {
+      prevTitle = document.title;
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
+
+      if (activeTab === "login") {
+        document.title = "BARBARA | Masuk";
+      } else if (activeTab === "register") {
+        document.title = "BARBARA | Daftar";
+      }
     } else {
       document.body.style.overflow = "";
     }
@@ -52,8 +60,11 @@ export function AuthModal() {
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
+      if (isOpen && prevTitle) {
+        document.title = prevTitle;
+      }
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen, activeTab, handleKeyDown]);
 
   return (
     <AnimatePresence>

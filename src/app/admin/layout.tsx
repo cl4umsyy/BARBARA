@@ -1,6 +1,12 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard Admin",
+  description: "Panel Kontrol Admin BARBARA E-Commerce",
+};
 
 export default async function AdminLayout({
   children,

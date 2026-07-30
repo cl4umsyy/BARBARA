@@ -4,6 +4,13 @@ import { auth } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { CheckoutClient } from "@/components/checkout/CheckoutClient";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Checkout",
+  description: "Selesaikan pesanan dan pembayaran belanjaan Anda secara aman di BARBARA.",
+};
+
 export const revalidate = 0; // Disable dynamic caching for checkout pages
 
 export default async function CheckoutPage() {

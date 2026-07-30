@@ -166,7 +166,27 @@ export const ShopCatalogClient: React.FC<ShopCatalogClientProps> = ({
     } else {
       setSelectedPriceRanges([]);
     }
+
+    // Update document title dynamically based on active gender filter
+    const g = (searchParams.get("gender") || "").toLowerCase();
+    if (g === "pria") {
+      document.title = "BARBARA | Pria";
+    } else if (g === "wanita") {
+      document.title = "BARBARA | Wanita";
+    } else {
+      document.title = "BARBARA | Katalog Produk";
+    }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (selectedGender === "pria") {
+      document.title = "BARBARA | Pria";
+    } else if (selectedGender === "wanita") {
+      document.title = "BARBARA | Wanita";
+    } else {
+      document.title = "BARBARA | Katalog Produk";
+    }
+  }, [selectedGender]);
 
   // Click outside to close dropdowns
   useEffect(() => {

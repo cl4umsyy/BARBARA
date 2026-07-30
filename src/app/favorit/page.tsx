@@ -7,8 +7,8 @@ import FavoritClient from "@/components/favorit/FavoritClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Favorit Saya — barbara",
-  description: "Lihat dan kelola produk favorit Anda di barbara.",
+  title: "Wishlist",
+  description: "Lihat dan kelola produk favorit Anda di BARBARA.",
 };
 
 export default async function FavoritPage() {

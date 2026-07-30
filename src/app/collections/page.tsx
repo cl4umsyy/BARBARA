@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerContainer, StaggerItem } from "@/components/ui/StaggerContainer";
 
 export const metadata: Metadata = {
-  title: "Semua Koleksi — BARBARA",
+  title: "Semua Koleksi",
   description:
     "Jelajahi semua koleksi BARBARA: New Arrivals, Best Sellers, Graphic Tees, Oversized Collection, Essentials, dan Limited Edition.",
 };

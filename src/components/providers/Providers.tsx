@@ -156,9 +156,12 @@ function CartSync() {
   return null;
 }
 
+import { PageTitleSync } from "@/components/layout/PageTitleSync";
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
+      <PageTitleSync />
       <CartSync />
       <AuthModalListener />
       <AuthModal />

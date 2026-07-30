@@ -10,6 +10,13 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { StaggerContainer, StaggerItem } from "@/components/ui/StaggerContainer";
 import { ArrowRight, Star } from "lucide-react";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description: "BARBARA — contemporary unisex fashion. Bold, edgy, monochrome streetwear.",
+};
+
 export const revalidate = 0; // Disable caching to always show fresh database products
 
 export default async function Home() {

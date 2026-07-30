@@ -40,11 +40,11 @@ export async function generateMetadata(
 
     if (!product) {
       return {
-        title: "Product Not Found | barbara",
+        title: "Produk Tidak Ditemukan",
       };
     }
 
-    const title = `${product.name} | barbara`;
+    const title = product.name;
     const description = product.description;
     const imageUrl = product.images[0]?.url || "";
 

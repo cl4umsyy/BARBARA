@@ -4,12 +4,27 @@ import { ShopCatalogClient } from "@/components/shop/ShopCatalogClient";
 import { ShopErrorFallback } from "@/components/shop/ShopErrorFallback";
 import { normalizeCollectionParam } from "@/constants/collections";
 
+import type { Metadata } from "next";
+
 export const revalidate = 0; // Disable dynamic caching for search queries to reflect real-time filter changes
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 interface ShopPageProps {
   searchParams: SearchParams;
+}
+
+export async function generateMetadata(props: ShopPageProps): Promise<Metadata> {
+  const searchParams = await props.searchParams;
+  const genderParam = typeof searchParams.gender === "string" ? searchParams.gender.trim().toLowerCase() : undefined;
+
+  if (genderParam === "pria") {
+    return { title: "Pria" };
+  }
+  if (genderParam === "wanita") {
+    return { title: "Wanita" };
+  }
+  return { title: "Katalog Produk" };
 }
 
 export default async function ShopPage(props: ShopPageProps) {

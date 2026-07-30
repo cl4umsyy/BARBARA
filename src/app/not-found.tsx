@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Halaman Tidak Ditemukan — BARBARA",
+  title: "Halaman Tidak Ditemukan",
   description: "Maaf, halaman yang Anda cari tidak ditemukan. Kembali ke Beranda untuk melanjutkan berbelanja.",
 };
 

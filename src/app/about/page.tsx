@@ -7,7 +7,7 @@ import { StaggerContainer, StaggerItem } from "@/components/ui/StaggerContainer"
 import { CheckCircle2, ShieldCheck, Truck, Users, Star, ArrowRight, Heart, Award } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Tentang Kami - BARBARA",
+  title: "Tentang",
   description: "Mengenal brand fashion contemporary unisex BARBARA. Visi, misi, cerita kami, dan tim di balik produk streetwear premium.",
 };
 

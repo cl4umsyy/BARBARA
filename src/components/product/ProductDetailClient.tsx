@@ -138,6 +138,13 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const isFavLoaded = useFavoriteStore((s) => s.isLoaded);
   const openModal = useAuthModalStore((s) => s.openModal);
 
+  // Set document title on client load
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `BARBARA | ${product.name}`;
+    }
+  }, [product]);
+
   // Seed store with SSR-fetched IDs
   useEffect(() => {
     if (!isFavLoaded && initialFavoriteIds) {

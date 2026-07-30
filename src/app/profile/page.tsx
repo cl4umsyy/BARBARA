@@ -7,10 +7,17 @@ import { Metadata } from "next";
 
 export const revalidate = 0; // Disable cache to fetch live data
 
-export const metadata: Metadata = {
-  title: "Profil Saya - barbara",
-  description: "Kelola informasi profil, alamat pengiriman, dan keamanan akun Anda di barbara.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}): Promise<Metadata> {
+  const { tab } = await searchParams;
+  if (tab === "orders") {
+    return { title: "Pesanan Saya" };
+  }
+  return { title: "Profil Saya" };
+}
 
 export default async function ProfilePage({
   searchParams,
