@@ -82,10 +82,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
   };
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col justify-between bg-brand-black text-brand-white p-6 font-sans">
-      <div>
+    <div className="flex flex-col h-full min-h-[100vh] md:min-h-full overflow-y-auto bg-brand-black text-brand-white px-6 pt-6 pb-8 font-sans">
+      {/* Container Menu Utama */}
+      <div className="flex-1 shrink-0 mb-6">
         {/* Brand/Logo */}
-        <div className="mb-10 px-2 flex items-center justify-between">
+        <div className="mb-8 px-2 flex items-center justify-between">
           <Link
             href="/admin"
             className="text-2xl font-black uppercase tracking-wider text-brand-white"
@@ -127,11 +128,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
         </nav>
       </div>
 
-      {/* User Info & Footer Actions */}
-      <div className="border-t border-brand-dark pt-6 space-y-4">
+      {/* Container Menu Bawah & Profil Admin */}
+      <div className="mt-auto pt-6 border-t border-brand-dark space-y-4 shrink-0">
         {/* User Profile */}
         <div className="px-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-brand-white text-brand-black flex items-center justify-center font-black text-xs">
+          <div className="w-8 h-8 rounded-xl bg-brand-white text-brand-black flex items-center justify-center font-black text-xs shrink-0">
             {session.user.name?.charAt(0).toUpperCase() ?? "A"}
           </div>
           <div className="min-w-0 flex-1">
@@ -144,20 +145,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
           </div>
         </div>
 
-        {/* Global Links */}
+        {/* Global Links (Storefront & Sign Out) */}
         <div className="space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-4 py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-brand-gray-light hover:text-brand-white transition-colors"
+            className="flex items-center gap-4 py-2.5 px-4 text-[10px] font-bold uppercase tracking-widest text-brand-gray-light hover:text-brand-white transition-colors"
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-3.5 h-3.5 shrink-0" />
             <span>Storefront</span>
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-4 py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-brand-gray-light hover:text-brand-white transition-colors text-left cursor-pointer"
+            className="w-full flex items-center gap-4 py-2.5 px-4 text-[10px] font-bold uppercase tracking-widest text-brand-gray-light hover:text-brand-white transition-colors text-left cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span>Sign Out</span>
           </button>
         </div>
@@ -204,7 +205,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ session }) => {
           />
 
           {/* Drawer container */}
-          <div className="relative w-64 max-w-xs flex-1 flex flex-col bg-brand-black transition-transform duration-300">
+          <div className="relative w-64 max-w-xs flex-1 flex flex-col h-full bg-brand-black transition-transform duration-300">
             <SidebarContent />
           </div>
         </div>

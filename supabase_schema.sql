@@ -27,46 +27,18 @@ END$$;
 CREATE TABLE IF NOT EXISTS "users" (
   "id" TEXT PRIMARY KEY,
   "name" TEXT NOT NULL,
-  "email" TEXT UNIQUE NOT NULL,
-  "password" TEXT NOT NULL,
-  "role" "Role" NOT NULL DEFAULT 'CUSTOMER',
-  "phone" TEXT,
-  "avatar_url" TEXT,
-  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
+Tolong benarkan tampilan sidebar Admin Dashboard pada versi mobile, khususnya bagian bawah sidebar. Saat ini bagian profil admin, tombol Storefront, dan Sign Out terlalu menempel ke bawah sehingga terlihat sempit dan kurang rapi.
 
--- Addresses Table (Billing/Shipping templates saved by User)
-CREATE TABLE IF NOT EXISTS "addresses" (
-  "id" TEXT PRIMARY KEY,
-  "user_id" TEXT NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
-  "label" TEXT NOT NULL,
-  "recipient_name" TEXT NOT NULL,
-  "phone" TEXT NOT NULL,
-  "street" TEXT NOT NULL,
-  "city" TEXT NOT NULL,
-  "province" TEXT NOT NULL,
-  "district" TEXT,
-  "postal_code" TEXT NOT NULL,
-  "address_detail" TEXT,
-  "is_default" BOOLEAN NOT NULL DEFAULT FALSE,
-  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
+Atur ulang layout sidebar dengan ketentuan berikut.
 
--- Categories Table
-CREATE TABLE IF NOT EXISTS "categories" (
-  "id" TEXT PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "slug" TEXT UNIQUE NOT NULL,
-  "image" TEXT,
-  "description" TEXT
-);
-
--- Products Table
-CREATE TABLE IF NOT EXISTS "products" (
-  "id" TEXT PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "slug" TEXT UNIQUE NOT NULL,
-  "description" TEXT NOT NULL,
+* Buat sidebar menggunakan layout flex dengan `display: flex`, `flex-direction: column`, dan `height: 100vh`.
+* Bungkus menu utama di satu container, lalu letakkan profil admin dan menu bawah (Storefront serta Sign Out) di container terpisah.
+* Gunakan `margin-top: auto` pada container bagian bawah agar selalu menempel di bawah secara rapi tanpa berhimpitan.
+* Tambahkan `padding-bottom` sekitar `24px` sampai `32px` agar ada jarak dari tepi bawah layar.
+* Beri jarak vertikal yang nyaman antara profil admin, Storefront, dan Sign Out sekitar `12px` sampai `16px`.
+* Pastikan tidak ada elemen yang terpotong atau keluar dari viewport pada semua ukuran layar mobile.
+* Jika tinggi layar terlalu kecil, aktifkan `overflow-y: auto` pada sidebar sehingga seluruh menu tetap bisa diakses.
+* Pertahankan desain, warna, ikon, dan ukuran font yang sudah ada. Hanya rapikan posisi dan spacing agar terlihat lebih profesional dan tidak terlalu mepet ke bawah.
   "price" DECIMAL(12, 2) NOT NULL,
   "material" TEXT,
   "care" TEXT,
